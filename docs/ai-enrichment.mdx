@@ -1,0 +1,436 @@
+---
+title: "AI-Enriched Findings"
+description: "How the AI enrichment pipeline transforms raw scanner output into prioritized, actionable security intelligence — with attack chains, risk scores, and remediation guidance."
+---
+
+## Overview
+
+When you submit scanner findings to `/api/enrich`, they pass through a four-stage AI pipeline that adds context a raw scan cannot provide: deduplication across scanners, risk scoring, compliance mapping, exploitability analysis, attack chain discovery, and an executive brief.
+
+The output is stored per-job and retrieved via `/api/enrich/status`. Findings are returned sorted by **composite priority** — the most urgent issue is always first.
+
+```
+Raw findings  →  Dedup  →  Enrich  →  Correlate  →  Prioritize  →  Enriched output
+```
+
+---
+
+## Job lifecycle
+
+Poll `/api/enrich/status` with the `job_id` returned from the submission call. The `status` field progresses through these states:
+
+| Status | Meaning |
+|---|---|
+| `processing` | Job accepted, queued |
+| `deduplicating` | Merging duplicate findings across scanners |
+| `enriching` | Adding risk scores, impact, remediation |
+| `correlating` | Building attack chains, classifying findings |
+| `prioritizing` | Generating priority notes and executive brief |
+| `completed` | Results ready — `result` field is populated |
+| `failed` | Pipeline error — `error` field explains why |
+
+<Info>
+Results are deleted from storage once retrieved. Fetch them once and store locally.
+</Info>
+
+---
+
+## Raw finding vs enriched finding
+
+A **raw finding** is what a scanner emits. An **enriched finding** is that same object with AI-generated fields merged in, plus metadata from dedup and correlation.
+
+### Raw finding (scanner output)
+
+```json
+{
+  "name": "Hardcoded AWS Access Key",
+  "severity": 4,
+  "threat": "HIGH",
+  "scanner": "gitleaks",
+  "description": "AWS access key found in source file.",
+  "category": "secret",
+  "cwe": "CWE-798",
+  "cvss": 9.1,
+  "refs": ["https://cwe.mitre.org/data/definitions/798.html"],
+  "locations": [
+    {
+      "file": "config/deploy.rb",
+      "startLine": 42,
+      "code": "access_key = 'AKIA...'"
+    }
+  ]
+}
+```
+
+### Enriched finding (after pipeline)
+
+The same object now carries every AI-generated field, dedup metadata, chain membership, and a priority rank:
+
+```json
+{
+  "name": "Hardcoded AWS Access Key",
+  "severity": 4,
+  "threat": "HIGH",
+  "scanner": "gitleaks",
+  "description": "AWS access key found in source file.",
+  "category": "secret",
+  "cwe": "CWE-798",
+  "cvss": 9.1,
+  "refs": ["https://cwe.mitre.org/data/definitions/798.html"],
+  "locations": [
+    {
+      "file": "config/deploy.rb",
+      "startLine": 42,
+      "code": "access_key = 'AKIA...'"
+    }
+  ],
+
+  "findingId": "FINDING-0001",
+  "priorityRank": 1,
+  "compositePriority": 98,
+
+  "aiRiskScore": 95,
+  "aiRiskRating": "CRITICAL",
+
+  "impact": {
+    "confidentiality": "HIGH",
+    "integrity": "HIGH",
+    "availability": "MEDIUM",
+    "scope": "Changed",
+    "description": "Attacker gains full AWS account access; can exfiltrate data, spin up resources, or pivot to other services."
+  },
+
+  "compliance": [
+    {
+      "framework": "PCI-DSS",
+      "controls": ["Requirement 6.3.2", "Requirement 8.6"],
+      "requirement": "Hardcoded credentials violate PCI-DSS secret management requirements."
+    },
+    {
+      "framework": "SOC2",
+      "controls": ["CC6.1"],
+      "requirement": "Access credentials must not be stored in source code."
+    }
+  ],
+
+  "remediation": {
+    "priority": "IMMEDIATE",
+    "steps": [
+      "Rotate the AWS key immediately via the IAM console — assume it is compromised.",
+      "Remove the hardcoded value from config/deploy.rb.",
+      "Inject the credential via an environment variable or secrets manager (AWS Secrets Manager, Vault).",
+      "Audit CloudTrail for any usage of this key in the last 90 days."
+    ],
+    "automatable": true,
+    "effortEstimate": "LOW",
+    "codefix": "access_key = ENV['AWS_ACCESS_KEY_ID']"
+  },
+
+  "exploitability": {
+    "isExploitable": true,
+    "exploitComplexity": "LOW",
+    "requiresAuth": false,
+    "requiresUserInteraction": false,
+    "knownExploits": true,
+    "attackVector": "NETWORK",
+    "epssScore": 0.94
+  },
+
+  "contextAnalysis": {
+    "isTestCode": false,
+    "isSampleConfig": false,
+    "isProduction": true,
+    "falsePositiveLikelihood": "LOW",
+    "reasoning": "File is in an active deployment config path with a real-looking key prefix (AKIA), not a test fixture."
+  },
+
+  "exploitClass": "EXPOSED_SECRETS",
+  "exploitClassReason": "Live AWS key in a production deploy config; directly usable without additional steps.",
+
+  "priorityNote": "Fix immediately — this key is in a production deploy config, anchors an attack chain, and has an EPSS score of 0.94.",
+
+  "attackChains": [
+    {
+      "chainId": "chain-1",
+      "chainName": "AWS Key → S3 Exfiltration → Ransomware",
+      "chainSeverity": "CRITICAL",
+      "role": "initial_access"
+    }
+  ],
+
+  "mergedFrom": ["gitleaks", "opengrep"],
+  "dedupReason": "Same AWS key detected by both gitleaks and opengrep in the same file.",
+  "mergedCount": 2
+}
+```
+
+---
+
+## Enriched fields reference
+
+### Identity and ranking
+
+| Field | Type | Description |
+|---|---|---|
+| `findingId` | string | Stable ID for this finding within the job, e.g. `FINDING-0001` |
+| `priorityRank` | number | 1-based rank after sorting by composite priority (1 = most urgent) |
+| `compositePriority` | number (0–100) | Computed score combining AI risk, exploit class, chain membership, and production context |
+
+### AI risk assessment
+
+| Field | Type | Description |
+|---|---|---|
+| `aiRiskScore` | number (1–100) | Composite risk considering CVSS, exploitability, data sensitivity, and test/production context |
+| `aiRiskRating` | string | `CRITICAL` (90–100) · `HIGH` (70–89) · `MEDIUM` (40–69) · `LOW` (20–39) · `INFO` (1–19) |
+
+### Impact
+
+```json
+"impact": {
+  "confidentiality": "HIGH | MEDIUM | LOW | NONE",
+  "integrity": "HIGH | MEDIUM | LOW | NONE",
+  "availability": "HIGH | MEDIUM | LOW | NONE",
+  "scope": "Changed | Unchanged",
+  "description": "Plain-language description of what an attacker achieves."
+}
+```
+
+### Compliance
+
+An array of frameworks this finding violates:
+
+```json
+"compliance": [
+  {
+    "framework": "SOC2 | PCI-DSS | HIPAA | GDPR | NIST-800-53 | CIS | ISO-27001 | MITRE-ATT&CK",
+    "controls": ["CC6.1"],
+    "requirement": "Brief description of the violated requirement."
+  }
+]
+```
+
+### Remediation
+
+```json
+"remediation": {
+  "priority": "IMMEDIATE | SHORT_TERM | MEDIUM_TERM | LONG_TERM",
+  "steps": ["Actionable step 1", "Step 2"],
+  "automatable": true,
+  "effortEstimate": "LOW | MEDIUM | HIGH",
+  "codefix": "Replacement code snippet, or null"
+}
+```
+
+### Exploitability
+
+```json
+"exploitability": {
+  "isExploitable": true,
+  "exploitComplexity": "LOW | MEDIUM | HIGH",
+  "requiresAuth": false,
+  "requiresUserInteraction": false,
+  "knownExploits": true,
+  "attackVector": "NETWORK | ADJACENT | LOCAL | PHYSICAL",
+  "epssScore": 0.94
+}
+```
+
+`epssScore` is the estimated probability of exploitation in the wild (0–1). It is populated when a CVE is known; otherwise `null`.
+
+### Context analysis
+
+The AI judges whether the finding is in production, test, or sample code — directly affecting its priority score.
+
+```json
+"contextAnalysis": {
+  "isTestCode": false,
+  "isSampleConfig": false,
+  "isProduction": true,
+  "falsePositiveLikelihood": "HIGH | MEDIUM | LOW",
+  "reasoning": "Why the AI made this assessment."
+}
+```
+
+<Note>
+`isTestCode: true` reduces `compositePriority` by 15 points. `isProduction: true` adds 10 points. These adjustments surface real production risk above test-file noise.
+</Note>
+
+### Exploit classification
+
+Each finding is classified into one of four buckets:
+
+| `exploitClass` | Meaning |
+|---|---|
+| `IMMEDIATELY_EXPLOITABLE` | Can be abused right now, no prerequisites (+20 priority) |
+| `EXPOSED_SECRETS` | Live credential or key in reachable code (+15 priority) |
+| `REACHABLE_VULNS` | Exploitable under common conditions (no adjustment) |
+| `LIKELY_FALSE_POSITIVE` | High confidence this is not a real issue (−30 priority) |
+
+`exploitClassReason` is a one-sentence explanation for the classification.
+
+### Dedup metadata
+
+When multiple scanners detect the same issue, they are merged into one finding:
+
+| Field | Type | Description |
+|---|---|---|
+| `mergedFrom` | string[] | Scanner names that contributed to this finding |
+| `dedupReason` | string | Why these findings were merged |
+| `mergedCount` | number | How many raw findings collapsed into this one |
+
+### Priority note
+
+`priorityNote` is a one-sentence human-readable explanation of why this specific finding ranks where it does — written relative to the other top findings in the job. Only the top 15 findings receive this field.
+
+---
+
+## Attack chains
+
+Attack chains appear in two places in the response: the top-level `attackChains` array and the `attackChains` array on each finding that participates.
+
+### Top-level `attackChains` array
+
+```json
+{
+  "attackChains": [
+    {
+      "id": "chain-1",
+      "name": "AWS Key → S3 Exfiltration → Ransomware",
+      "severity": "CRITICAL",
+      "description": "An attacker uses the exposed AWS key (FINDING-0001) to list S3 buckets, exfiltrate customer data, then encrypt buckets for ransom.",
+      "steps": [
+        {
+          "findingIndex": 0,
+          "role": "initial_access",
+          "description": "Exposed AWS key provides unauthenticated API access."
+        },
+        {
+          "findingIndex": 7,
+          "role": "lateral_movement",
+          "description": "Overly permissive IAM role allows the key to assume admin privileges."
+        },
+        {
+          "findingIndex": 12,
+          "role": "impact",
+          "description": "Public S3 bucket enables data exfiltration without further credentials."
+        }
+      ],
+      "overallImpact": "Full data exfiltration and potential ransomware of cloud storage.",
+      "mitigationPriority": "Rotate the AWS key in FINDING-0001 first — this breaks the chain at the entry point."
+    }
+  ]
+}
+```
+
+### Chain step roles
+
+| `role` | Meaning |
+|---|---|
+| `initial_access` | Entry point into the environment |
+| `escalation` | Gaining higher privileges |
+| `lateral_movement` | Moving to other resources or services |
+| `impact` | Achieving the attacker's goal (data theft, disruption) |
+
+### Per-finding `attackChains` array
+
+Each finding that participates in one or more chains carries a summary:
+
+```json
+"attackChains": [
+  {
+    "chainId": "chain-1",
+    "chainName": "AWS Key → S3 Exfiltration → Ransomware",
+    "chainSeverity": "CRITICAL",
+    "role": "initial_access"
+  }
+]
+```
+
+A finding in **zero** chains has `"attackChains": []`. A finding in multiple chains has one entry per chain — its `compositePriority` is boosted by 10 points per chain membership, plus 15 extra if any of those chains is `CRITICAL`.
+
+---
+
+## Executive brief
+
+The `executiveBrief` object is a summary written for engineering leadership. It is always at the top level of the response.
+
+```json
+{
+  "executiveBrief": {
+    "criticalActions": [
+      "Rotate the AWS key in config/deploy.rb immediately — it is live in production and anchors a critical attack chain.",
+      "Patch the OpenSSL CVE-2024-XXXX in the base container image — it is remotely exploitable without authentication.",
+      "Restrict the IAM role used by the deploy pipeline to least privilege."
+    ],
+    "immediateCount": 3,
+    "summary": "This scan identified 3 findings that require action within 24 hours. The most urgent is a hardcoded AWS key in the production deploy config which forms the entry point of a full data-exfiltration chain. Two container-level CVEs are also remotely exploitable. The remaining 14 findings are medium or lower severity and can be addressed in the next sprint."
+  }
+}
+```
+
+| Field | Description |
+|---|---|
+| `criticalActions` | 3–5 concrete, named actions with their reason |
+| `immediateCount` | Number of findings that need remediation within 24 hours |
+| `summary` | One paragraph suitable for a security review meeting |
+
+---
+
+## Full response structure
+
+```json
+{
+  "success": true,
+  "org_id": "org_abc123",
+  "meta": {
+    "generatedAt": "2026-05-27T10:00:00.000Z",
+    "model": "gpt-5.4-mini",
+    "elapsedSeconds": 42.3,
+    "inputFindings": 87,
+    "outputFindings": 54,
+    "attackChains": 3,
+    "tokenUsage": {
+      "prompt": 120000,
+      "completion": 18000,
+      "total": 138000,
+      "calls": 12,
+      "duration": 42300,
+      "cacheWrite": 0,
+      "cacheRead": 4200
+    },
+    "correlationSummary": {
+      "immediatelyExploitable": 2,
+      "exposedSecrets": 5,
+      "reachableVulns": 31,
+      "likelyFalsePositives": 16,
+      "totalAttackChains": 3,
+      "criticalChains": 1
+    }
+  },
+  "findings": [ ],
+  "attackChains": [ ],
+  "executiveBrief": { }
+}
+```
+
+`meta.outputFindings` is less than `meta.inputFindings` because the deduplication stage merges findings that describe the same underlying issue across multiple scanners.
+
+---
+
+## Supported scanners
+
+The pipeline understands findings from any of these sources. Pass them as named array keys in the request body.
+
+| Key | Scanner |
+|---|---|
+| `gitleaks` | Secret detection in code and git history |
+| `kics` | Infrastructure-as-code misconfigs (Terraform, CloudFormation, K8s, Dockerfiles) |
+| `opengrep` / `semgrep` | SAST code pattern matching |
+| `osv-scanner` | Open source CVE database lookups |
+| `kubescape` | Kubernetes security posture (NSA/MITRE) |
+| `sonarqube` | Code quality and security hotspots |
+| `grype` | Container image vulnerability scanning |
+| `zap` / `nuclei` | DAST web and network vulnerability detection |
+| `nmap` | Network port and service enumeration |
+| `testssl` | SSL/TLS configuration analysis |
+| `openapi` | REST API fuzzing and security testing |

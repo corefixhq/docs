@@ -1,0 +1,367 @@
+---
+title: "Security Reports"
+description: "How to access, navigate, and interpret your DeepTraQ AI security scan reports"
+---
+
+## Overview
+
+After every scan, DeepTraQ AI generates a fully self-contained HTML security report and delivers it to your team. This page explains how to access that report, what each section means, and how AI-enriched findings differ from raw scanner output.
+
+---
+
+## Accessing Your Report
+
+### Email Notification
+
+When a scan completes, every email address configured on the project receives a notification email containing:
+
+- **Severity summary** — counts of Critical, High, Medium, and Low findings at a glance
+- **Scanner breakdown** — which scanners ran and how many issues each found
+- **Build details** — commit SHA, commit message, who triggered the build, and the build UUID
+- **Two links** to the report (see below)
+
+### Option 1 — Login via the Reports Portal
+
+The email contains a **View Build Results →** button that takes you to the Reports Portal pre-filled with your project and organization IDs.
+
+**Login flow:**
+
+1. Enter the email address that received the notification (must be an authorized project member)
+2. Enter the project password set by your administrator
+3. Your session is valid for **1 hour** — after that you must re-authenticate
+
+Once logged in:
+
+- You see all branches that have builds
+- Select a branch to see its last **7 builds**, sorted **newest first**
+- Click any build to open the full report
+
+<Note>
+The session token expires after 1 hour. If the report page stops loading or returns a 401 error, log in again via the Reports Portal.
+</Note>
+
+### Option 2 — Direct Signed URL
+
+The email also contains a **Direct link** below the main button. This is a pre-signed R2 URL that opens the report without any login.
+
+- **Expiry:** 5 hours from the time the email was sent
+- After expiry the link returns an error — use the login flow to access the report instead
+- The link is scoped to a single build and cannot be used to browse other builds
+
+---
+
+## Projects and Builds
+
+| Concept | What it is |
+|---|---|
+| **Project** | A repository (Git or web target) tracked in your organization. Identified by `project_id` and `repo` name. |
+| **Build** | One scan run against a specific commit and branch. Each build has a unique `build_uuid`. |
+| **Branch** | A Git branch (e.g. `main`, `dev`). The portal lets you switch between branches and see each branch's history independently. |
+
+Builds are listed **newest first** (by `created_on` timestamp). The top entry is always the most recent scan.
+
+Each build card in the portal shows:
+
+- Branch, commit SHA, and commit message
+- Who triggered the scan
+- Total finding count and severity breakdown
+- Scan status
+
+---
+
+## Inside the Report
+
+Every report shares the same layout:
+
+### Header
+
+```
+DeepTraQ AI / <repo> / <branch>          <org name>  [☀️ theme toggle]
+```
+
+- Clicking **☀️ / 🌙** toggles between light and dark mode. The preference is saved in your browser.
+
+### Build Bar
+
+Below the header, a slim bar shows:
+
+```
+<commit message>   <commit SHA ↗>   by <triggered_by>             <time ago>
+```
+
+- The commit SHA links directly to GitHub / GitLab / Bitbucket depending on your remote URL.
+- Hovering the time shows the exact UTC timestamp.
+
+---
+
+## Tabs
+
+The report has four tabs. Click any tab to switch; counts in the tab badge update with the current filter.
+
+| Tab | Contents |
+|---|---|
+| **Summary** | Severity totals, AI pipeline stats, scanner breakdown, compliance, attack chains overview |
+| **Findings** | AI-enriched findings — prioritized, explained, and classified |
+| **Raw Findings** | Unprocessed scanner output before AI enrichment |
+| **Attack Graph** | Interactive visualization of multi-step attack paths |
+
+---
+
+## Summary Tab
+
+### Severity Cards
+
+Five cards display counts for **Critical · High · Medium · Low · Info**.
+
+Clicking a card jumps directly to the **Findings** tab with that severity pre-selected.
+
+### AI Pipeline Stats
+
+A stats strip shows how the AI enrichment pipeline performed:
+
+| Stat | Meaning |
+|---|---|
+| AI Model | The Claude model used for enrichment |
+| Total Tokens | Combined input + output tokens (hover for prompt / completion split) |
+| API Calls | Number of LLM calls made during the build |
+| LLM Cost | Actual cost of LLM API usage |
+| Forecasted Cost | LLM cost + estimated Cloudflare Worker time (hover for formula) |
+| Pipeline Duration | Time from scan start to enrichment completion |
+
+### Scanner Breakdown
+
+A bar chart showing each scanner's finding count relative to the highest. The longest bar represents the scanner with the most findings.
+
+### Classification
+
+A breakdown of findings by exploit class:
+
+| Class | Meaning |
+|---|---|
+| `IMMEDIATELY_EXPLOITABLE` | No prerequisites — attacker can exploit directly |
+| `EXPOSED_SECRETS` | Credentials, keys, or tokens exposed in code or config |
+| `REACHABLE_VULNS` | Vulnerable code path reachable from application entry points |
+| `LIKELY_FALSE_POSITIVE` | AI assessed low confidence in the finding |
+| `UNCLASSIFIED` | Not enough context to classify |
+
+### Compliance Frameworks
+
+Badges for every compliance standard (e.g. OWASP, SOC2, PCI-DSS) that appears in at least one enriched finding.
+
+### Attack Chains Overview
+
+Up to 10 attack chains are listed here with their severity and steps. The full interactive view is on the **Attack Graph** tab.
+
+---
+
+## Findings Tab — Enriched Findings
+
+This is the primary tab for day-to-day triage. Every finding here has been processed by the AI pipeline, which adds context, scoring, and prioritization on top of raw scanner output.
+
+### Filtering
+
+**Severity pills** (row of clickable chips):
+
+`All · ● Critical · ● High · ● Medium · ● Low · ● Info · ★ AI Priority`
+
+- Click a pill to filter by that severity
+- Click **★ AI Priority** to show only the top-ranked findings (up to 15 per build)
+
+**Search bar** — full-text search on finding names.
+
+**Scanner dropdown** — filter to a single scanner.
+
+**Class dropdown** — filter by exploit class (`IMMEDIATELY_EXPLOITABLE`, `EXPOSED_SECRETS`, etc.).
+
+The result count at the top of the list updates as you filter: `N of M findings`.
+
+### Finding Cards
+
+Each card shows:
+
+```
+[P1]  ▶  <finding name>
+         <scanner tag>  ·  <category>  ·  <finding_id>
+                                          <risk score>  <SEVERITY>  <time ago>
+```
+
+- **P1 … P15** — AI Priority badge (colored by tier: violet > blue > teal > slate). Only top-15 findings have this badge.
+- **Risk score** — a 0–100 composite score. Hovering shows a breakdown panel (Exploitability, Impact, Asset Criticality, Exposure, Context).
+- **Severity badge** — AI-assessed risk rating: CRITICAL / HIGH / MEDIUM / LOW / INFO.
+- Click anywhere on the row to **expand** the full finding detail.
+
+### Expanded Finding Detail
+
+Clicking a card reveals all enriched fields:
+
+| Section | Content |
+|---|---|
+| **AI Priority callout** | Shown for top-15 findings. Displays rank (e.g. P3 of 15), composite priority score, and the AI's reasoning note. |
+| **Description** | AI-written explanation of the vulnerability in plain language. Supports inline code, headers, and bullet points. |
+| **Locations** | File paths and line numbers. Clicking a file with a `gitUrl` opens it directly in your source host. |
+| **Details grid** | Risk Score · CVSS · CWE · Exploit Class · Impact (C/I/A) · Attack Vector · Complexity · Context (Production / Test / Sample) |
+| **Impact** | Prose description of what an attacker can achieve |
+| **Remediation** | Priority badge (IMMEDIATE / SHORT_TERM / MEDIUM_TERM), effort estimate, whether it's automatable, and step-by-step fix instructions |
+| **Attack Chains** | Badges showing which attack chains this finding participates in and its role (e.g. `initial_access`, `escalation`) |
+| **References** | Links to CVEs, advisories, or documentation |
+
+---
+
+## Raw Findings Tab
+
+Raw findings are the **unprocessed output** from scanners before the AI enrichment pipeline runs. They contain less context but are useful for:
+
+- Auditing what each scanner actually reported
+- Cross-checking enriched findings against the source
+- Seeing findings that may have been filtered or merged by AI
+
+### What Raw Findings Are Missing (vs Enriched)
+
+| Field | Raw Findings | Enriched Findings |
+|---|---|---|
+| Severity | Scanner's original `threat` value | AI re-assessed `aiRiskRating` |
+| Risk score (0–100) | — | ✓ `aiRiskScore` |
+| AI Priority rank | — | ✓ P1–P15 |
+| Exploit class | — | ✓ (`IMMEDIATELY_EXPLOITABLE`, etc.) |
+| Detailed description | Short scanner message | AI-expanded explanation |
+| Remediation steps | — | ✓ with effort estimate |
+| Impact (C/I/A triad) | — | ✓ |
+| Compliance frameworks | — | ✓ |
+| Attack chain membership | — | ✓ |
+
+### Filtering Raw Findings
+
+- **Severity pills** filter by the scanner's original threat level
+- **Search bar** searches by finding name
+- **Scanner dropdown** filters to a single scanner
+
+---
+
+## Attack Graph Tab
+
+The attack graph shows how individual findings chain together into multi-step attack scenarios.
+
+### Critical Junctions
+
+At the top of the tab, a **Critical junctions** card lists findings that appear in more than one attack chain. Fixing a junction breaks multiple attack paths at once, giving the highest remediation leverage.
+
+Each junction shows:
+- Finding name and its AI risk score
+- How many chains it appears in
+- The names of those chains
+
+Clicking a junction card jumps to that finding on the **Findings** tab with the card expanded and highlighted.
+
+### Attack Chain Visualization
+
+Each chain is rendered as a horizontal flow of nodes connected by arrows:
+
+```
+[INITIAL ACCESS]  →  [ESCALATION]  →  [LATERAL MOVEMENT]  →  [IMPACT]
+  Finding A             Finding B          Finding C            Finding D
+  scanner · class      score: 87          score: 72            score: 91
+```
+
+**Node roles and colors:**
+
+| Role | Color |
+|---|---|
+| `initial_access` | Red (Critical) |
+| `escalation` | Orange (High) |
+| `lateral_movement` | Yellow (Medium) |
+| `impact` | Gray / Purple (dark mode) |
+
+**Interactions:**
+- **Hover** a node to highlight the full chain (other chains dim)
+- **Click** a node to jump to that finding on the **Findings** tab
+
+### Chain Severity
+
+Each chain has its own severity badge (top-right of chain header), representing the overall severity of the attack path, not any individual finding.
+
+---
+
+## Enriched vs Raw Findings — Side-by-Side
+
+```
+┌─────────────────────────────────┬──────────────────────────────────────────┐
+│ Raw Finding                     │ Enriched Finding                         │
+├─────────────────────────────────┼──────────────────────────────────────────┤
+│ name: "Hardcoded password"      │ name: "Hardcoded password"               │
+│ threat: "high"                  │ aiRiskRating: "CRITICAL"                 │
+│ scanner: "semgrep"              │ scanner: "semgrep"                       │
+│ description: "Password found    │ description: "A hardcoded database       │
+│   in source"                    │   credential was found in config.js      │
+│                                 │   line 42. An attacker with read         │
+│                                 │   access to the repository can extract   │
+│                                 │   the credential and gain direct         │
+│                                 │   access to the production database."    │
+│ mitigation: "Remove hardcoded   │                                          │
+│   values"                       │ aiRiskScore: 94 / 100                    │
+│                                 │ exploitClass: EXPOSED_SECRETS            │
+│                                 │ priorityRank: 2  (of 15)                │
+│                                 │ compositePriority: 96                    │
+│                                 │ priorityNote: "Direct prod DB access,    │
+│                                 │   no prerequisites, publicly visible     │
+│                                 │   in CI logs."                           │
+│                                 │ remediation:                             │
+│                                 │   priority: IMMEDIATE                    │
+│                                 │   effortEstimate: "< 1 hour"            │
+│                                 │   steps: ["Rotate credential",           │
+│                                 │           "Move to env var / secrets",   │
+│                                 │           "Audit git history"]           │
+│                                 │ impact: { confidentiality: HIGH,         │
+│                                 │           integrity: HIGH,               │
+│                                 │           availability: MEDIUM }         │
+│                                 │ compliance: [OWASP A02, PCI-DSS 6.3]    │
+│                                 │ attackChains: [{ chainName:              │
+│                                 │   "DB Exfiltration via Leaked Cred",     │
+│                                 │   role: "initial_access" }]              │
+└─────────────────────────────────┴──────────────────────────────────────────┘
+```
+
+The raw finding tells you *what* was flagged. The enriched finding tells you *why it matters*, *how bad it really is*, *what to do about it*, and *how it connects to a larger attack scenario*.
+
+---
+
+## Attack Chain Description Format
+
+Each attack chain groups findings into an ordered sequence of steps. Every step has:
+
+```json
+{
+  "chainName": "Privilege Escalation via SSRF to Metadata Service",
+  "severity": "CRITICAL",
+  "steps": [
+    {
+      "findingIndex": 3,
+      "role": "initial_access",
+      "description": "SSRF in /api/fetch allows attacker to send internal requests"
+    },
+    {
+      "findingIndex": 7,
+      "role": "escalation",
+      "description": "Metadata endpoint returns IAM role credentials"
+    },
+    {
+      "findingIndex": 12,
+      "role": "impact",
+      "description": "IAM credentials grant S3 write access to production bucket"
+    }
+  ]
+}
+```
+
+The enriched finding for step 3 (`findingIndex: 3`) also carries back-references:
+
+```json
+"attackChains": [
+  {
+    "chainName": "Privilege Escalation via SSRF to Metadata Service",
+    "chainId": "chain-004",
+    "role": "initial_access"
+  }
+]
+```
+
+This is how the red **chain badge** (e.g. `Privilege Escalation via SSRF · initial_access`) appears inside the expanded finding card on the Findings tab.
