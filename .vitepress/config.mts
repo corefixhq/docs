@@ -1,4 +1,8 @@
 import { defineConfig } from "vitepress";
+import { loadEnv } from "vite";
+
+const env = loadEnv("", process.cwd(), "");
+const appUrl = env.VITE_APP_URL || "https://app.corefix.dev";
 
 export default defineConfig({
   title: "Corefix Documentation",
@@ -17,16 +21,18 @@ export default defineConfig({
     siteTitle: "Corefix",
 
     nav: [
-      { text: "Home", link: "/" },
-      { text: "Guide", link: "/guide" },
       {
-        text: "Tools",
-        items: [
-          { text: "Chrome Extension", link: "/docs/chrome-extension-guide" },
-          { text: "AWS Scan Pipeline", link: "/docs/aws-scan-pipeline-setup" },
-        ],
+        text: "Login",
+        link: appUrl,
+        target: "_blank",
+        rel: "noopener noreferrer",
       },
-      { text: "Pricing", link: "/docs/pricing-and-usage" },
+      {
+        text: "Schedule Call",
+        link: "https://cal.com/corefix.dev/30min",
+        target: "_blank",
+        rel: "noopener noreferrer",
+      },
     ],
 
     sidebar: [
@@ -64,6 +70,19 @@ export default defineConfig({
         collapsed: false,
         items: [{ text: "Pricing & Usage", link: "/docs/pricing-and-usage" }],
       },
+      {
+        text: "Vitest Documentation",
+        collapsed: false,
+        items: [
+          { text: "Tools Overview", link: "/docs/vitest-tools-overview" },
+          {
+            text: "Release Logs Overview",
+            link: "/docs/vitest-release-logs-overview",
+          },
+          { text: "Release v1.0.0", link: "/docs/vitest-release-logs-v1.0.0" },
+          { text: "Support Resources", link: "/docs/vitest-support-resources" },
+        ],
+      },
     ],
 
     footer: {
@@ -91,7 +110,10 @@ export default defineConfig({
       },
     },
 
-    socialLinks: [{ icon: "github", link: "https://github.com" }],
+    socialLinks: [
+      { icon: "github", link: "https://github.com/corefixhq" },
+      { icon: "X", link: "https://x.com/corefixhq" },
+    ],
 
     editLink: {
       pattern: "https://github.com/yourusername/docs/edit/main/docs/:path",
