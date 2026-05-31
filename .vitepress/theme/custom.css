@@ -73,7 +73,6 @@
 
 .VPSidebarNav .VPSidebarGroup .VPSidebarLink:hover:not(.active) {
   background-color: var(--vp-c-bg-muted);
-  padding-left: 0.5rem;
 }
 
 /* Footer - Subtle and minimal */
@@ -85,7 +84,7 @@
 
 /* Main content area */
 .VPContent {
-  padding: 3rem var(--vp-layout-padding-block);
+  padding: 2rem var(--vp-layout-padding-block);
 }
 
 /* Headings - Clear hierarchy */
@@ -102,16 +101,11 @@ h2 {
   font-weight: 600;
   letter-spacing: -0.015em;
   color: var(--vp-c-text-1);
-  margin-top: 2rem;
-  margin-bottom: 0.9rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
   border-bottom: 1px solid var(--vp-c-divider);
   padding-bottom: 0.75rem;
 }
-
-/* Extra spacing for better readability */
-.VPMain { gap: 1.25rem }
-.VPContent h2 { margin-top: 2rem }
-.VPContent p { margin-bottom: 0.9rem }
 
 h3,
 h4,
