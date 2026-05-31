@@ -1,215 +1,279 @@
-# DeepTraQ Chrome Extension — User Guide
+# CoreFix Chrome Extension - User Guide
 
 ## Overview
 
-The DeepTraQ Chrome Extension lets you record real browser sessions as HAR (HTTP Archive) files and automatically upload them to Cloudflare R2. These recordings become authenticated, real-traffic inputs for the DeepTraQ web security scanner — replacing synthetic crawls with actual user flows.
+The CoreFix Chrome Extension records an authorized browser workflow and uploads HAR (HTTP Archive) chunks to CoreFix secure object storage. A recording helps CoreFix web scanning understand real application traffic, including authenticated and JavaScript-driven flows that a basic crawl may miss.
+
+The recorder captures the selected browser tab only. It does not record your other open tabs.
+
+::: warning Treat recordings as secrets
+HAR files can contain sensitive values from the recorded workflow, including form values, passwords, tokens, cookies, request and response bodies, URLs, and browser storage. Record only applications and workflows you are authorized to test. Handle uploaded and downloaded HAR files as secrets.
+:::
 
 ---
 
 ## Prerequisites
 
-- Google Chrome (v110+)
-- A DeepTraQ account with access to the target project
-- The target domain must already have a project registered in DeepTraQ (a scan must have been run at least once)
-- Your email address must be listed under the project's authorized emails
+Before recording, make sure you have:
+
+- Google Chrome 120 or later
+- A CoreFix account and your CoreFix organization ID
+- A CoreFix web project registered for the site you want to record
+- An email address authorized for that project
+- Permission to capture and security-test the target workflow
+
+The extension uses the hostname from your active tab to find the matching CoreFix project. For example, opening `https://app.example.com/login` associates the sign-in request with the `app.example.com` project.
 
 ---
 
-## 1. Install the Chrome Extension
+## 1. Install the Extension
 
-### From the Chrome Web Store *(when published)*
-1. Visit the DeepTraQ listing in the Chrome Web Store.
-2. Click **Add to Chrome** → **Add Extension**.
-3. The DeepTraQ icon appears in your toolbar.
+### Install an unpacked package
 
-### Manual / Developer Install
-1. Download the extension package (`.zip`) from your DeepTraQ dashboard.
-2. Unzip it to a local folder.
+Until the Chrome Web Store listing is available, install the extension package manually:
+
+1. Obtain the CoreFix extension package from your CoreFix administrator or release channel.
+2. Unzip the package to a local folder.
 3. Open Chrome and go to `chrome://extensions`.
-4. Enable **Developer mode** (toggle, top-right).
-5. Click **Load unpacked** and select the unzipped folder.
-6. Pin the DeepTraQ icon from the extensions menu.
+4. Enable **Developer mode** in the top-right corner.
+5. Click **Load unpacked**.
+6. Select the unzipped extension folder containing `manifest.json`.
+7. Pin the CoreFix icon from Chrome's extensions menu.
+
+### Chrome Web Store installation
+
+When the extension is published, you will be able to install it from the Chrome Web Store by selecting **Add to Chrome** and then **Add Extension**.
 
 ---
 
-## 2. Authenticate the Extension
+## 2. Authenticate with OTP
 
-Authentication is scoped to a single project and uses a short-lived OTP so no password is ever stored.
+The extension uses an email OTP. Your CoreFix password is not entered into or stored by the extension.
 
-### Step 1 — Request an OTP
+### Request an OTP
 
-Open the extension popup and fill in:
+1. Open the target application in an `http://` or `https://` tab.
+2. Click the CoreFix extension icon.
+3. Enter your email address and organization ID.
+4. Click **Send OTP**.
 
-| Field | Example |
+The extension automatically sends the origin of the active tab with the OTP request. The backend matches its hostname to a CoreFix project and checks that your email is authorized.
+
+### Verify the OTP
+
+1. Check your inbox for the six-digit verification code.
+2. Enter the code in the extension popup.
+3. Click **Verify OTP**.
+
+OTP security limits:
+
+| Limit | Value |
 |---|---|
-| Organization ID | `org_abc123` |
-| Email | `you@company.com` |
-| Target Domain | `https://app.example.com` |
+| OTP validity | 10 minutes |
+| Maximum OTP attempts | 5 |
+| Verified extension session | 2 hours |
 
-Click **Send Code**.
-
-**What happens under the hood:**
-- The extension calls `POST /api/extension/auth` with your org ID, email, and domain.
-- The backend strips the domain to its hostname (e.g. `app.example.com`), looks up the matching project, and verifies your email is authorized.
-- A 6-digit OTP is generated, hashed, and stored in MongoDB (`otp_sessions`) with a **10-minute expiry**.
-- The OTP is emailed to you from DeepTraQ.
-
-### Step 2 — Enter the OTP
-
-Check your inbox for an email with subject **"Your DeepTraQ verification code"**.
-
-Enter the 6-digit code in the extension popup and click **Verify**.
-
-**Security limits:**
-- OTP expires in **10 minutes**.
-- Maximum **5 attempts** before the session is locked (request a new OTP).
-- The OTP is deleted from the database immediately after a successful verify.
-
-**What happens under the hood:**
-- The extension calls `POST /api/extension/verify-otp`.
-- On success, a **JWT** (valid for **2 hours**, type `extension_session`) is issued and stored locally in the extension. It encodes your `organization_id`, `project_id`, and `email`.
+After successful verification, the extension stores a project-scoped session token in Chrome extension storage. If the token expires, authenticate again before uploading more HAR data.
 
 ---
 
-## 3. Record a Session
+## 3. Start a Recording
 
-Once authenticated, the extension is ready to record.
+1. Open the page where the workflow should begin.
+2. Click the CoreFix extension icon.
+3. Optionally enter a **Session Name**. If you leave it empty, the default is `Security Recording`.
+4. Click **Start Capture**.
+5. Review the consent prompt and allow recording for the selected tab.
+6. Approve Chrome's site-access permission prompt if it appears.
+7. Use the application normally: navigate pages, sign in, click controls, fill forms, and submit requests.
 
-1. Navigate to the target site in Chrome.
-2. Click the DeepTraQ icon → **Start Recording**.
-3. Browse the application normally — log in, use features, submit forms.
-4. Click **Stop Recording** when done.
+Chrome requests access to `http://*/*` and `https://*/*` so the recorder can correlate requests made by the selected tab, including traffic sent to API hosts and related origins.
 
-The extension captures all network requests as a HAR file during this session.
+While recording, the popup shows:
 
-### Session Identity
+- Current state and elapsed recording time
+- Captured action, request, and response counts
+- The current URL
+- The planned HAR export name
 
-Each recording session has a unique **Session ID** (UUID) generated by the extension. All HAR chunks from one recording share the same Session ID — this is how the backend groups multi-chunk uploads into a single coherent session.
+### Recording scope
 
----
-
-## 4. How Recorded Data is Saved to Cloudflare R2
-
-The extension uploads the recorded HAR data in chunks as you browse (or on stop). Each chunk upload follows this flow:
-
-### Upload Request
-
-```
-POST /api/extension/upload-har
-Authorization: Bearer <JWT>
-X-Session-Id: <session-uuid>
-Body: raw HAR binary stream
-```
-
-### What Happens Server-Side
-
-1. **JWT is verified** — confirms the token is a valid `extension_session`.
-2. **R2 storage path is computed:**
-   ```
-   har/<organization_id>/<project_id>/<session_id>/chunk_<timestamp>.har
-   ```
-   Example:
-   ```
-   har/org_abc123/proj_xyz/550e8400-e29b-41d4-a716/chunk_2026-05-27T10-30-00-000Z.har
-   ```
-3. **A pre-signed PUT URL** (5-minute expiry) is generated for that R2 path.
-4. **MongoDB `har_sessions` is upserted** — tracking:
-   - `project_id`, `organization_id`
-   - `r2_prefix` (the folder path)
-   - `chunk_name` and `signedUrl` for the latest chunk
-   - `last_accessed_at` timestamp
-   - `num_chunks` (incremented per upload)
-   - `created_at` (set only on first insert)
-5. The **signed URL** is returned to the extension, which streams the HAR chunk directly to R2 — no HAR data passes through the Worker server memory.
-
-### R2 Folder Layout
-
-```
-har/
-└── <org_id>/
-    └── <project_id>/
-        └── <session_id>/
-            ├── chunk_2026-05-27T10-30-00-000Z.har
-            ├── chunk_2026-05-27T10-31-15-123Z.har
-            └── chunk_2026-05-27T10-33-42-456Z.har
-```
-
-All chunks from one recording session live under the same prefix and are later merged by the scanner.
+- Capture is tied to the original browser tab where you clicked **Start Capture**.
+- Switching to another tab does not record that other tab.
+- Closing the original recording tab discards the locally retained recording state.
+- If the original tab navigates to a new origin, the state may change to `needs_permission`. Reopen the popup from the original tab and click **Resume** to continue.
 
 ---
 
-## 5. Using HAR Sessions as Web Scanner Input
+## 4. Stop, Resume, or Discard
 
-Once a session is recorded and stored in R2, it can drive the DeepTraQ web security scanner instead of (or alongside) a synthetic crawl.
+### Stop and upload
 
-### Why HAR-Based Scanning?
+When you finish the workflow:
 
-| Synthetic Crawl | HAR-Based Scan |
+1. Open the CoreFix popup from the original tab.
+2. Click **Stop**.
+3. Wait for the state to change to `exported`.
+
+Stopping captures the final browser-storage snapshot, finishes pending request correlation, uploads the final HAR remainder, and ends active capture.
+
+### Resume
+
+Click **Resume** when you need to continue the same recording after:
+
+- Stopping the recording
+- Returning to an exported recording
+- Reaching a new origin that needs recording permission
+
+Resume must happen from the original recording tab.
+
+### Discard
+
+Click **Discard**, then confirm **Yes**, to remove the current locally retained recording state from the extension.
+
+Discarding a recording does not guarantee deletion of chunks that were already uploaded to CoreFix secure object storage.
+
+---
+
+## 5. What the Extension Captures
+
+Each upload is a HAR 1.2 JSON document. Standard HAR entries contain network traffic. CoreFix adds recorder-specific context under `log._deeptraq`.
+
+| Category | Examples |
 |---|---|
-| Discovers only publicly visible pages | Covers authenticated, post-login flows |
-| May miss complex JS-rendered interactions | Replays exact real-user traffic |
-| No session/cookie context | Uses the real auth tokens from recording |
+| Browser actions | Clicks, field fills, chip or token commits, select changes, and navigations |
+| Element context | Selectors, labels, placeholders, roles, link targets, and checked state |
+| Network requests | URLs, query parameters, methods, headers, text request bodies, resource types, and timing data |
+| Network responses | Status codes, headers, eligible text response bodies, network errors, and timing data |
+| Session context | Cookies, local storage, session storage, visited origins, viewport, user agent, and frame context |
+| CoreFix metadata | Action-to-request correlation, permission summary, capture summary, frame registry, and analysis hints |
 
-### Triggering a Scan from a HAR Session
+Some binary or unsupported response bodies may not appear as text in the HAR file.
 
-From the DeepTraQ dashboard:
+The extension does not record:
 
-1. Go to your project → **Sessions** tab.
-2. Locate the recorded session (identified by Session ID and timestamp).
-3. Click **Run Scan from Session**.
-
-Or via CLI / API:
-
-```bash
-node web-scanner.local.js zap-auth \
-  --target https://app.example.com \
-  --har-session <session_id> \
-  --api-key <X_CFIX_API_KEY>
-```
-
-### What the Scanner Does with the HAR
-
-1. Reads all `chunk_*.har` files from `har/<org_id>/<project_id>/<session_id>/` in R2.
-2. Merges chunks into a unified request list.
-3. Feeds each recorded request through the active scan rules (SQLi, XSS, IDOR, auth bypass, etc.).
-4. Reports findings with the original request context (headers, cookies, body) preserved.
+- Activity from tabs other than the original recording tab
+- Screen video or screenshots
+- File upload contents selected through file inputs
+- Non-browser activity on your device
 
 ---
 
-## 6. Token Lifecycle & Re-Authentication
+## 6. How Uploads Work
 
-| Event | Action |
+Recordings are uploaded in chunks so longer workflows do not need to wait until the end.
+
+By default, the extension stages and uploads the current HAR segment:
+
+| Trigger | Default behavior |
 |---|---|
-| Token valid (< 2 hours) | Extension uploads silently |
-| Token expired | Extension shows "Session expired — re-authenticate" |
-| Wrong email / unauthorized | Auth request returns 401 |
-| OTP expired (> 10 min) | Request a new OTP |
-| Too many wrong OTP attempts | Request a new OTP |
+| Time interval | Every 1 minute while recording |
+| Segment size | When the staged HAR reaches 20 MB |
+| Stop | Upload the final remainder |
 
-You can verify a stored token without re-entering credentials:
-```
-GET /api/extension/verify-token
-Authorization: Bearer <JWT>
-```
-Returns `200 OK` if valid, `401` if expired or tampered.
+Each recording receives a unique session ID. Every chunk from the same recording uses that ID so CoreFix can group the files.
+
+### Direct upload flow
+
+1. The extension requests an authenticated upload handshake from CoreFix.
+2. CoreFix returns a short-lived presigned HTTPS upload URL.
+3. The extension uploads the HAR JSON chunk directly to secure object storage with an HTTPS `PUT`.
+4. If an upload fails, the pending chunk stays in Chrome extension storage for retry.
+
+::: info Storage implementation note
+CoreFix describes this destination as secure object storage in user-facing documentation. The current backend stores extension HAR chunks in Cloudflare R2 using its S3-compatible API and five-minute presigned HTTPS upload URLs.
+:::
 
 ---
 
-## 7. Troubleshooting
+## 7. How HAR Files Are Used
 
-| Problem | Likely Cause | Fix |
+The latest uploaded recording is designed to become authenticated web-scan input automatically for the matching CoreFix project when a web scan runs.
+
+This helps the scanner cover:
+
+- Post-login pages and APIs
+- Workflows with session cookies or bearer tokens
+- JavaScript-driven requests
+- Requests associated with specific user actions
+
+You do not need to select a HAR session in the extension after uploading it. Record the desired workflow, stop the capture successfully, and then run the web scan for the matching project.
+
+---
+
+## 8. Example HAR Output
+
+The shortened example below shows the shape of one uploaded chunk. All values are dummy values.
+
+```json
+{
+  "log": {
+    "version": "1.2",
+    "entries": [
+      {
+        "request": {
+          "method": "POST",
+          "url": "https://api.example.test/v1/orders",
+          "headers": [
+            { "name": "authorization", "value": "Bearer dummy-token-for-documentation" }
+          ],
+          "postData": {
+            "mimeType": "application/json",
+            "text": "{\"sku\":\"demo-plan\",\"quantity\":1}"
+          }
+        },
+        "response": {
+          "status": 201,
+          "content": {
+            "mimeType": "application/json",
+            "text": "{\"success\":true,\"order_id\":\"order_demo_001\"}"
+          }
+        },
+        "_deeptraq": {
+          "requestId": "req_demo_001",
+          "actionId": "a3",
+          "actionType": "click"
+        }
+      }
+    ],
+    "_deeptraq": {
+      "schemaVersion": "1.1.0",
+      "recordingId": "rec_demo_001",
+      "session": {
+        "cookiesCaptured": true,
+        "sensitive": true
+      }
+    }
+  }
+}
+```
+
+[Download the complete dummy HAR sample](/samples/corefix-extension-har.sample.json)
+
+`_deeptraq` is the current compatibility namespace for CoreFix recorder metadata. Despite the historical namespace name, the data belongs to the CoreFix recording format.
+
+---
+
+## 9. Troubleshooting
+
+| Problem | Likely cause | What to do |
 |---|---|---|
-| "No project registered for this domain" | Project not yet created in DeepTraQ | Run an initial scan from the dashboard first |
-| "Email not authorized for this project" | Email not in project's `emailIds` list | Ask your admin to add the email to the project |
-| OTP email not received | Spam filter or wrong email entered | Check spam; re-request OTP with correct email |
-| Upload fails mid-session | Signed URL expired (> 5 min since issued) | The extension will request a fresh signed URL automatically on retry |
-| "Invalid token type" on upload | Using a dashboard JWT, not an extension JWT | Re-authenticate via the extension popup |
+| `No project registered for this domain` | The active tab hostname does not match an existing CoreFix web project | Create or run the initial web project scan, then request a new OTP from the matching site |
+| `Email not authorized for this project` | Your email is not authorized for the matched project | Ask your CoreFix administrator to add your email to the project |
+| OTP email does not arrive | Incorrect email, spam filtering, or delivery delay | Check the entered email and spam folder, then request a new OTP |
+| `OTP expired. Request a new one.` | More than 10 minutes passed | Click **Send OTP** again |
+| `Too many attempts. Request a new OTP.` | Five invalid OTP attempts were used | Request a fresh OTP |
+| Chrome asks for access to all sites | The recorder needs to correlate the selected tab's traffic across related origins | Approve access only if you are authorized to record the workflow |
+| State changes to `needs_permission` | The original tab navigated to a new origin | Reopen the popup from the original tab and click **Resume** |
+| Upload does not complete | Network connectivity, token expiry, or object-storage upload failure | Reconnect, authenticate again if needed, then reopen the extension so pending uploads can retry |
+| Recording disappears after closing a tab | The original recording tab was closed | Start a new recording from the target application |
 
 ---
 
-## 8. Security Notes
+## 10. Security Checklist
 
-- **OTPs are never stored in plain text** — only a SHA-256 hash is persisted.
-- **JWTs are scoped** — each token is tied to a specific `organization_id`, `project_id`, and `email`; it cannot access other projects.
-- **HAR data goes directly to R2** — the Worker acts only as a signed-URL broker; raw traffic bytes never touch server memory.
-- **Signed URLs expire in 5 minutes** — a leaked URL cannot be used to overwrite R2 objects after that window.
+- Record only approved applications and workflows.
+- Use a test account where possible.
+- Avoid recording unrelated personal or production data.
+- Treat HAR files as secrets because they may contain working credentials and session state.
+- Stop or discard the recording when your intended workflow is complete.

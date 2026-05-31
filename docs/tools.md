@@ -1,10 +1,10 @@
 ---
-title: "Tools - Vitest Documentation"
+title: "Security Tools"
 ---
 
 ## Tools Overview
 
-DeepTraQ integrates multiple **open-source security tools and proprietary scanners** across its security modules to detect vulnerabilities, misconfigurations, and security risks.
+CoreFix integrates multiple **open-source security tools and proprietary scanners** across its security modules to detect vulnerabilities, misconfigurations, and security risks.
 
 ## Network Perimeter Scanning
 
@@ -28,15 +28,16 @@ DeepTraQ integrates multiple **open-source security tools and proprietary scanne
   - [Nuclei GitHub](https://github.com/projectdiscovery/nuclei)
 - **OpenAPI Fuzzer** — API fuzz testing for OpenAPI/Swagger endpoints
   - [community scripts](https://github.com/zaproxy/community-scripts)
-- **SSLyze / SSL Testing** — SSL/TLS configuration analysis
+- **testssl.sh + SSLyze** — SSL/TLS configuration and certificate analysis
   - [testssl.sh GitHub](https://github.com/testssl/testssl.sh)
+  - [SSLyze GitHub](https://github.com/nabla-c0d3/sslyze)
 
 ## Code Scanning
 
 - **OSV Scanner** — Detects vulnerable open-source dependencies
   - [osv-scanner GitHub](https://github.com/google/osv-scanner)
-- **DeepTraQ Proprietary Scanner** — Static code analysis and security checks
-  - DeepTraQ internal engine
+- **CoreFix Proprietary Scanner** — Static code analysis and security checks
+  - CoreFix internal engine
 - **Gitleaks** — Detects exposed secrets in repositories
   - [gitleaks GitHub](https://github.com/gitleaks/gitleaks)
 - **KICS** — Infrastructure-as-Code security scanning
@@ -51,6 +52,13 @@ DeepTraQ integrates multiple **open-source security tools and proprietary scanne
 - **Kubescape** — Kubernetes security and compliance scanning
   - [Kubescape docs](https://kubescape.io/docs)
   - [Kubescape GitHub](https://github.com/kubescape/kubescape)
+
+## Container Image Scanning
+
+- **Grype** — Container image and dependency vulnerability scanning
+  - [Grype GitHub](https://github.com/anchore/grype)
+- **Dockle** — Container image linting against CIS Docker Benchmarks and best practices
+  - [Dockle GitHub](https://github.com/goodwithtech/dockle)
 
 ## Cloud Workload Scanning
 

@@ -1,6 +1,6 @@
-# DeepTraq Scanner Guide
+# CoreFix Scanner Guide
 
-Welcome to the DeepTraq Scanner documentation. Choose how you want to get started:
+Welcome to the CoreFix scanner documentation. Choose how you want to get started:
 
 ## 🚀 Quick Start Options
 
@@ -39,9 +39,9 @@ Generate and analyze security reports
 
 [Learn about Reports →](/docs/reports)
 
-### Chrome Extension
+### Browser Extensions
 
-Browse and interact with security reports directly in your browser
+Record authorized browser workflows as HAR files for authenticated web scanning. Chrome is supported today, with additional browser guides planned.
 
 [Chrome Extension Guide →](/docs/chrome-extension-guide)
 
@@ -53,11 +53,11 @@ Get AI-powered insights into your security findings
 
 ## 🔧 Advanced Setup
 
-### AWS Scan Pipeline
+### Docker / Local CLI
 
-Set up automated scanning with AWS infrastructure
+Run CoreFix scanners locally or on any server without a CI/CD pipeline.
 
-[AWS Pipeline Setup →](/docs/aws-scan-pipeline-setup)
+[Docker / Local CLI →](/docs/docker-cli)
 
 ### Models
 

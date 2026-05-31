@@ -1,12 +1,12 @@
 ---
-title: "v1.0.0 Release - Vitest Documentation"
+title: "v1.0.0 Release"
 ---
 
-## v1.0.1 — 12 Nov 2025
+## v1.0.0 — 12 Nov 2025
 
 ### Initial Platform Release
 
-This release introduced the first stable version of the **DeepTraQ vulnerability management platform**.
+This release introduced the first stable version of the **CoreFix vulnerability management platform**.
 
 ### Added
 
@@ -30,7 +30,7 @@ Baseline vulnerability scanning capabilities:
   - OWASP ZAP
 
 - **Software Composition Analysis**
-  - DeepTraQ proprietary dependency scanner
+  - CoreFix proprietary dependency scanner
 
 #### Infrastructure
 
@@ -41,7 +41,7 @@ Baseline vulnerability scanning capabilities:
 
 #### AI Platform
 
-- First version of the **DeepTraQ AI analysis engine** supporting:
+- First version of the **CoreFix analysis engine** supporting:
   - OpenAI
   - Claude
   - Gemini

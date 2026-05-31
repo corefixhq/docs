@@ -1,6 +1,6 @@
 ---
 title: "Account & Usage"
-description: "How to manage your DeepTraQ AI account profile, view usage details, and track build and project consumption"
+description: "How to manage your CoreFix account profile, view usage details, and track build and project consumption"
 ---
 
 # Account & Usage

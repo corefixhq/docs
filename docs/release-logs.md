@@ -1,5 +1,5 @@
 ---
-title: "Release Logs Overview - Vitest Documentation"
+title: "Release Logs"
 ---
 
 ## Current Release
@@ -20,7 +20,7 @@ For full details, see **Release History → v2.3.0**.
 
 ## Platform Evolution
 
-DeepTraQ has expanded from a core vulnerability scanning platform into a **multi-module security platform** covering infrastructure, applications, cloud environments, and code security.
+CoreFix has expanded from a core vulnerability scanning platform into a **multi-module security platform** covering infrastructure, applications, cloud environments, and code security.
 
 | Version  | Key Highlights                                                                                                   |
 | -------- | ---------------------------------------------------------------------------------------------------------------- |
@@ -34,5 +34,5 @@ DeepTraQ has expanded from a core vulnerability scanning platform into a **multi
 ## Related Documentation
 
 - **Release History** – Detailed changes for each platform version
-- **Supported Scanners** – Security tools integrated into DeepTraQ
-- **Scanning with DeepTraQ** – How to run scans on the platform
+- **Supported Scanners** – Security tools integrated into CoreFix
+- **Scanning with CoreFix** – How to run scans on the platform

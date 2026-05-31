@@ -1,6 +1,6 @@
 # Corefix Documentation
 
-A complete VitePress documentation site for the DeepTraq Security Scanner.
+A complete VitePress documentation site for the CoreFix security scanner.
 
 ## ✨ Features
 
@@ -33,7 +33,7 @@ planning/
 │   ├── models.md
 │   ├── chrome-extension-guide.md
 │   ├── cicd-integration.md
-│   ├── aws-scan-pipeline-setup.md
+│   ├── docker-cli.md
 │   └── pricing-and-usage.mdx
 ├── public/
 │   └── logo.png             # Your logo (replace with actual logo)
@@ -141,7 +141,7 @@ All your existing markdown files in `/docs` are automatically included in the si
 
 - **CI/CD Integration** - CI/CD setup
 - **Chrome Extension** - Browser extension guide
-- **AWS Scan Pipeline** - AWS pipeline setup
+- **Docker / Local CLI** - Local Docker and CLI scanning
 
 ### Reference
 

@@ -1,6 +1,6 @@
-# DeepTraq Web Scanner — Standalone Usage
+# CoreFix Web Scanner — Standalone Usage
 
-Run the DeepTraq web security scanner directly on any machine with Docker installed. It performs DAST (Dynamic Application Security Testing) against a live URL — no source code required.
+Run the CoreFix web security scanner directly on any machine with Docker installed. It performs DAST (Dynamic Application Security Testing) against a live URL — no source code required.
 
 ---
 
@@ -51,8 +51,8 @@ docker run --rm \
 
 | Variable | Required | Secret | Description |
 |---|---|---|---|
-| `ORG_ID` | Yes | No | Your DeepTraq organization ID |
-| `X_CFIX_API_KEY` | Yes | **Yes** | DeepTraq platform API key |
+| `ORG_ID` | Yes | No | Your CoreFix organization ID |
+| `X_CFIX_API_KEY` | Yes | **Yes** | CoreFix platform API key |
 | `X_CFIX_API_URL` | No | No | Override the API endpoint. Defaults to production |
 | `USERNAME` | No | **Yes** | Alternative to `--username` flag |
 | `PASSWORD` | No | **Yes** | Alternative to `--password` flag |
@@ -66,7 +66,7 @@ docker run --rm \
 
 | Mount | Purpose |
 |---|---|
-| `-v $(pwd):/web` | Project directory — DeepTraq reads `.cfix.web.yaml`, `.har`, and OpenAPI spec files from here |
+| `-v $(pwd):/web` | Project directory — CoreFix reads `.cfix.web.yaml`, `.har`, and OpenAPI spec files from here |
 | `-v ~/scan-results:/output` | Where scan results, reports, and discovered config are written |
 
 ---
@@ -108,7 +108,7 @@ The URL to scan. Accepts HTTP and HTTPS, with or without a port.
 
 ### `--username` / `--password` (optional)
 
-Credentials for authenticated scanning. DeepTraq uses these to log in and scan protected pages.
+Credentials for authenticated scanning. CoreFix uses these to log in and scan protected pages.
 
 ```bash
 --username admin --password s3cr3t
@@ -172,7 +172,7 @@ Comma-separated email addresses to receive the scan report.
 
 ### `--openai-api-key` / `--model` (optional)
 
-Bring your own API key for AI-powered finding enrichment. If omitted, DeepTraq uses its own model rotation automatically.
+Bring your own API key for AI-powered finding enrichment. If omitted, CoreFix uses its own model rotation automatically.
 
 > If you provide `--openai-api-key`, you **must** also provide `--model`. Omitting `--model` will cause an error.
 
@@ -186,7 +186,7 @@ Place this file in the directory mounted to `/web`. It configures authentication
 
 ### Minimal config (recommended starting point)
 
-DeepTraq derives the full authentication config automatically using Playwright + AI. Requires `--username` and `--password`.
+CoreFix derives the full authentication config automatically using Playwright + AI. Requires `--username` and `--password`.
 
 ```yaml
 authentication:
@@ -218,7 +218,7 @@ openapi:
   url: https://example.com/api/openapi.json
 ```
 
-You can also drop a `.yaml`, `.yml`, or `.json` OpenAPI/Swagger spec file directly into the mounted `/web` directory — DeepTraq detects it automatically.
+You can also drop a `.yaml`, `.yml`, or `.json` OpenAPI/Swagger spec file directly into the mounted `/web` directory — CoreFix detects it automatically.
 
 ---
 
@@ -227,7 +227,9 @@ You can also drop a `.yaml`, `.yml`, or `.json` OpenAPI/Swagger spec file direct
 HAR files recorded from your browser can be used to guide the authenticated scan:
 
 - Drop `.har` files into the directory mounted to `/web`
-- Or upload them via the DeepTraq browser extension — they are pulled automatically at scan time
+- Or use the [CoreFix Chrome Extension](/docs/chrome-extension-guide) to record and upload an authorized workflow
+
+For extension uploads, the latest recording is designed to be pulled automatically for the matching CoreFix project when a web scan starts. Treat HAR files as secrets: they may contain credentials, tokens, cookies, request bodies, and browser storage values from the recorded workflow.
 
 ---
 
@@ -342,4 +344,4 @@ Results are written to the `/output` mount:
 | `enriched_results.json` | AI-enriched findings with context and remediation |
 | `.cfix.web.full.yaml` | Derived full auth config (when minimal config is used) |
 | `discovery.json` | Playwright discovery session details |
-| `*.har` | HAR files pulled from the DeepTraq platform |
+| `*.har` | HAR files pulled from the CoreFix platform |

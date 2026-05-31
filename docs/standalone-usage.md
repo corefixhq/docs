@@ -1,6 +1,6 @@
-# DeepTraq Scanner — Standalone Usage
+# CoreFix Scanner — Standalone Usage
 
-Run the DeepTraq security scanner directly on any machine with Docker installed. No installation beyond Docker is required.
+Run the CoreFix security scanner directly on any machine with Docker installed. No installation beyond Docker is required.
 
 ---
 
@@ -40,8 +40,8 @@ docker run --rm \
 
 | Variable | Required | Secret | Description |
 |---|---|---|---|
-| `ORG_ID` | Yes | No | Your DeepTraq organization ID |
-| `X_CFIX_API_KEY` | No | **Yes** | API key for the DeepTraq platform. Omit to use the production server |
+| `ORG_ID` | Yes | No | Your CoreFix organization ID |
+| `X_CFIX_API_KEY` | No | **Yes** | API key for the CoreFix platform. Omit to use the production server |
 | `X_CFIX_API_URL` | No | No | Override the API endpoint. Defaults to the production URL |
 | `DEBUG` | No | No | Set to `app:*` to enable verbose debug output |
 
@@ -80,7 +80,7 @@ Comma-separated email addresses to receive the scan report.
 
 ### `--openai-api-key` (optional)
 
-Provide your own OpenAI-compatible API key to use a specific model. If omitted, DeepTraq uses its own SaaS model rotation automatically.
+Provide your own OpenAI-compatible API key to use a specific model. If omitted, CoreFix uses its own SaaS model rotation automatically.
 
 > **Note:** If you provide `--openai-api-key`, you **must** also provide `--model`. Omitting `--model` with a key will cause an error.
 

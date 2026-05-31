@@ -1,4 +1,4 @@
-# DeepTraq Web Scanner — CI/CD Integration
+# CoreFix Web Scanner — CI/CD Integration
 
 Add DAST (Dynamic Application Security Testing) to your pipeline with a single step. The scanner targets a live, deployed URL — so the step runs after your app is deployed, not during the build.
 
@@ -7,7 +7,7 @@ Add DAST (Dynamic Application Security Testing) to your pipeline with a single s
 ## How It Works in a Pipeline
 
 1. Your pipeline deploys the app to a staging/test environment (as it normally does)
-2. Add the DeepTraq web scan step — it points at the live URL and runs
+2. Add the CoreFix web scan step — it points at the live URL and runs
 3. Results are written to an output directory and optionally emailed
 
 Store sensitive values as **secrets** in your CI/CD platform:
@@ -30,7 +30,7 @@ Store sensitive values as **secrets** in your CI/CD platform:
    - `APP_TOKEN` — bearer token if using token-based auth (if needed)
    - `OPENAI_API_KEY` — only if bringing your own model
 3. Under **Variables**, add:
-   - `ORG_ID` — your DeepTraq organization ID
+   - `ORG_ID` — your CoreFix organization ID
    - `SCAN_TARGET` — the URL of your staging/test environment
    - `SCAN_REPORT_EMAILS` — comma-separated email addresses for reports
 
@@ -38,7 +38,7 @@ Store sensitive values as **secrets** in your CI/CD platform:
 
 ```yaml
 # .github/workflows/deeptraq-web-scan.yml
-name: DeepTraq Web Security Scan
+name: CoreFix Web Security Scan
 
 on:
   push:
@@ -57,7 +57,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Run DeepTraq Web Scanner
+      - name: Run CoreFix Web Scanner
         run: |
           mkdir -p ${{ github.workspace }}/scan-results
           docker run --rm \
@@ -80,7 +80,7 @@ jobs:
 ### Workflow — Authenticated Scan with Credentials
 
 ```yaml
-      - name: Run DeepTraq Web Scanner (authenticated)
+      - name: Run CoreFix Web Scanner (authenticated)
         run: |
           mkdir -p ${{ github.workspace }}/scan-results
           docker run --rm \
@@ -98,7 +98,7 @@ jobs:
 ### Workflow — Scan with Bearer Token
 
 ```yaml
-      - name: Run DeepTraq Web Scanner (token auth)
+      - name: Run CoreFix Web Scanner (token auth)
         run: |
           docker run --rm \
             -e ORG_ID=${{ vars.ORG_ID }} \
@@ -113,7 +113,7 @@ jobs:
 ### Workflow — Specific Scanners + Custom Model
 
 ```yaml
-      - name: Run DeepTraq DAST (vuln + web only)
+      - name: Run CoreFix DAST (vuln + web only)
         run: |
           docker run --rm \
             -e ORG_ID=${{ vars.ORG_ID }} \
@@ -217,7 +217,7 @@ pipeline {
             }
         }
 
-        stage('DeepTraq Web Scan') {
+        stage('CoreFix Web Scan') {
             steps {
                 withCredentials([
                     string(credentialsId: 'deeptraq-api-key', variable: 'DEEPTRAQ_API_KEY'),
@@ -283,7 +283,7 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Run DeepTraq Web Scanner
+          name: Run CoreFix Web Scanner
           command: |
             mkdir -p scan-results
             docker run --rm \
@@ -407,7 +407,7 @@ stages:
                 --username $(APP_USERNAME) \
                 --password $(APP_PASSWORD) \
                 --emailids $(SCAN_REPORT_EMAILS)
-            displayName: Run DeepTraq Web Scanner
+            displayName: Run CoreFix Web Scanner
 
           - task: PublishBuildArtifacts@1
             condition: always()
@@ -442,7 +442,7 @@ pipelines:
           - echo "Deploy your app here"
 
     - step:
-        name: DeepTraq Web Security Scan
+        name: CoreFix Web Security Scan
         image: docker:24
         services:
           - docker
@@ -536,7 +536,7 @@ deeptraq-web-scanner --target https://example.com --cf-browser
 
 ## Bring Your Own Model
 
-If you provide `--openai-api-key`, you must also specify `--model`. Otherwise DeepTraq uses its own SaaS model rotation with no extra configuration.
+If you provide `--openai-api-key`, you must also specify `--model`. Otherwise CoreFix uses its own SaaS model rotation with no extra configuration.
 
 ```bash
 # Using your own key — model is required
@@ -544,7 +544,7 @@ deeptraq-web-scanner --target $TARGET \
   --openai-api-key $OPENAI_API_KEY \
   --model gpt-4o-mini
 
-# No key — DeepTraq handles model selection automatically
+# No key — CoreFix handles model selection automatically
 deeptraq-web-scanner --target $TARGET
 ```
 

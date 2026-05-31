@@ -1,0 +1,401 @@
+{
+  "log": {
+    "version": "1.2",
+    "creator": {
+      "name": "corefix Security Recorder",
+      "version": "1.1.0"
+    },
+    "browser": {
+      "name": "Chrome",
+      "version": "145.0.0.0"
+    },
+    "pages": [
+      {
+        "startedDateTime": "2026-03-20T10:00:00.000Z",
+        "id": "page_a1",
+        "title": "https://app.example.test/checkout",
+        "pageTimings": {
+          "onContentLoad": -1,
+          "onLoad": -1
+        },
+        "_deeptraq": {
+          "actionId": "a1",
+          "trigger": "page_load",
+          "frame": {
+            "frameId": 0,
+            "parentFrameId": null,
+            "isTop": true,
+            "origin": "https://app.example.test",
+            "path": "/checkout"
+          }
+        }
+      }
+    ],
+    "entries": [
+      {
+        "pageref": "page_a1",
+        "startedDateTime": "2026-03-20T10:00:02.100Z",
+        "time": 84,
+        "request": {
+          "method": "POST",
+          "url": "https://api.example.test/v1/orders?source=checkout",
+          "httpVersion": "HTTP/1.1",
+          "cookies": [],
+          "headers": [
+            {
+              "name": "accept",
+              "value": "application/json"
+            },
+            {
+              "name": "authorization",
+              "value": "Bearer dummy-token-for-documentation-not-valid"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json"
+            }
+          ],
+          "queryString": [
+            {
+              "name": "source",
+              "value": "checkout"
+            }
+          ],
+          "postData": {
+            "mimeType": "application/json",
+            "text": "{\"sku\":\"demo-plan\",\"quantity\":1}"
+          },
+          "headersSize": -1,
+          "bodySize": 32
+        },
+        "response": {
+          "status": 201,
+          "statusText": "Created",
+          "httpVersion": "HTTP/1.1",
+          "cookies": [],
+          "headers": [
+            {
+              "name": "content-type",
+              "value": "application/json; charset=utf-8"
+            }
+          ],
+          "content": {
+            "size": 44,
+            "mimeType": "application/json; charset=utf-8",
+            "text": "{\"success\":true,\"order_id\":\"order_demo_001\"}"
+          },
+          "redirectURL": "",
+          "headersSize": -1,
+          "bodySize": 44,
+          "_transferSize": -1
+        },
+        "cache": {},
+        "timings": {
+          "blocked": 1,
+          "dns": 2,
+          "connect": 8,
+          "ssl": 5,
+          "send": 1,
+          "wait": 65,
+          "receive": 7
+        },
+        "_deeptraq": {
+          "requestId": "req_demo_001",
+          "actionId": "a3",
+          "actionType": "click",
+          "actionTrigger": "click",
+          "reqSignature": "POST|/v1/orders|hash:demo001",
+          "normalizedPath": "/v1/orders",
+          "resourceType": "fetch",
+          "frameId": 0,
+          "tabId": 42,
+          "parentFrameId": null,
+          "frameOrigin": "https://app.example.test",
+          "framePath": "/checkout",
+          "initiator": "https://app.example.test",
+          "postDataRedacted": false,
+          "error": null,
+          "captureSource": "merged",
+          "pageObserverDerived": true,
+          "timingsSource": "resource_timing"
+        }
+      }
+    ],
+    "comment": "Network traffic is stored as standard HAR entries. corefix interaction and session context is embedded under log._deeptraq.",
+    "_deeptraq": {
+      "schemaVersion": "1.1.0",
+      "recordingId": "rec_demo_001",
+      "meta": {
+        "recordedAt": "2026-03-20T10:00:00.000Z",
+        "stoppedAt": "2026-03-20T10:00:05.000Z",
+        "baseUrl": "https://app.example.test",
+        "currentUrl": "https://app.example.test/checkout/complete",
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "grantedOrigins": [
+          "https://app.example.test"
+        ],
+        "permissionScope": [
+          "http://*/*",
+          "https://*/*"
+        ],
+        "visitedOrigins": [
+          "https://api.example.test",
+          "https://app.example.test"
+        ]
+      },
+      "interactionTimeline": {
+        "actions": [
+          {
+            "schemaVersion": "1.1.0",
+            "recordingId": "rec_demo_001",
+            "actionId": "a1",
+            "type": "navigation",
+            "ts": 1774000800000,
+            "url": "https://app.example.test/checkout",
+            "frame": {
+              "frameId": 0,
+              "parentFrameId": null,
+              "isTop": true,
+              "origin": "https://app.example.test",
+              "path": "/checkout"
+            },
+            "elementMeta": {
+              "trigger": "page_load"
+            }
+          },
+          {
+            "schemaVersion": "1.1.0",
+            "recordingId": "rec_demo_001",
+            "actionId": "a2",
+            "type": "fill",
+            "ts": 1774000801000,
+            "url": "https://app.example.test/checkout",
+            "frame": {
+              "frameId": 0,
+              "parentFrameId": null,
+              "isTop": true,
+              "origin": "https://app.example.test",
+              "path": "/checkout"
+            },
+            "selector": {
+              "primary": {
+                "kind": "name",
+                "value": "customer_email"
+              },
+              "fallback": {
+                "kind": "css",
+                "value": "input[name=\"customer_email\"]"
+              },
+              "aux": {
+                "tagName": "INPUT",
+                "inputType": "email",
+                "labelText": "Email"
+              }
+            },
+            "value": "demo.user@example.test",
+            "valueRedacted": false,
+            "elementMeta": {
+              "trigger": "blur-change"
+            }
+          },
+          {
+            "schemaVersion": "1.1.0",
+            "recordingId": "rec_demo_001",
+            "actionId": "a3",
+            "type": "click",
+            "ts": 1774000802000,
+            "url": "https://app.example.test/checkout",
+            "frame": {
+              "frameId": 0,
+              "parentFrameId": null,
+              "isTop": true,
+              "origin": "https://app.example.test",
+              "path": "/checkout"
+            },
+            "selector": {
+              "primary": {
+                "kind": "role",
+                "value": "button",
+                "name": "Place order"
+              },
+              "fallback": {
+                "kind": "css",
+                "value": "button.place-order"
+              },
+              "aux": {
+                "tagName": "BUTTON",
+                "visibleText": "Place order",
+                "role": "button"
+              }
+            },
+            "elementMeta": {
+              "trigger": "click"
+            }
+          }
+        ],
+        "actionMap": {
+          "a3": [
+            "req_demo_001"
+          ]
+        }
+      },
+      "session": {
+        "origins": [
+          {
+            "origin": "https://app.example.test",
+            "capturedAt": "2026-03-20T10:00:04.900Z",
+            "localStorage": {
+              "demo_access_token": {
+                "value": "dummy-local-storage-token-not-valid",
+                "redacted": false
+              },
+              "theme": {
+                "value": "dark",
+                "redacted": false
+              }
+            },
+            "sessionStorage": {
+              "checkout_step": {
+                "value": "complete",
+                "redacted": false
+              }
+            },
+            "sensitive": true
+          }
+        ],
+        "cookies": [
+          {
+            "name": "demo_session",
+            "value": "dummy-cookie-value-not-valid",
+            "domain": ".example.test",
+            "path": "/",
+            "secure": true,
+            "httpOnly": true,
+            "sameSite": "lax",
+            "session": false,
+            "expirationDate": 1774010000,
+            "storeId": "0"
+          }
+        ],
+        "cookiesCaptured": true,
+        "sensitive": true
+      },
+      "permissions": {
+        "browserPermissionScope": [
+          "http://*/*",
+          "https://*/*"
+        ],
+        "registeredContentScriptOrigins": [
+          "https://app.example.test"
+        ],
+        "executedContentScriptOrigins": [
+          "https://app.example.test"
+        ],
+        "visitedOrigins": [
+          "https://api.example.test",
+          "https://app.example.test"
+        ]
+      },
+      "frameRegistry": {
+        "frames": [
+          {
+            "frameId": 0,
+            "parentFrameId": null,
+            "tabId": 42,
+            "isTop": true,
+            "origin": "https://app.example.test",
+            "path": "/checkout",
+            "firstSeenAt": "2026-03-20T10:00:00.000Z",
+            "lastSeenAt": "2026-03-20T10:00:02.100Z",
+            "actionCount": 3,
+            "requestCount": 1,
+            "sourceKinds": [
+              "action",
+              "merged",
+              "snapshot"
+            ],
+            "unresolved": false
+          }
+        ]
+      },
+      "analysis": {
+        "errors": {
+          "summary": {
+            "networkErrors": 0,
+            "http4xx": 0,
+            "http5xx": 0,
+            "businessErrors": 0
+          },
+          "failedRequests": [],
+          "businessErrors": []
+        },
+        "requests": {
+          "firstPartyEndpoints": [
+            {
+              "method": "POST",
+              "normalizedPath": "/v1/orders",
+              "count": 1,
+              "lastStatus": 201,
+              "lastUrl": "https://api.example.test/v1/orders?source=checkout",
+              "firstParty": true
+            }
+          ],
+          "authBearingRequests": [
+            {
+              "requestId": "req_demo_001",
+              "method": "POST",
+              "url": "https://api.example.test/v1/orders?source=checkout",
+              "normalizedPath": "/v1/orders",
+              "headers": [
+                "authorization"
+              ],
+              "firstParty": true
+            }
+          ]
+        },
+        "resources": {
+          "createdResources": [
+            {
+              "path": "$.order_id",
+              "key": "order_id",
+              "value": "order_demo_001"
+            }
+          ]
+        },
+        "outcome": {
+          "finalWorkflowOutcome": {
+            "actionId": "a3",
+            "method": "POST",
+            "url": "https://api.example.test/v1/orders?source=checkout",
+            "normalizedPath": "/v1/orders",
+            "status": 201,
+            "result": "success",
+            "message": null,
+            "createdResources": [
+              {
+                "path": "$.order_id",
+                "key": "order_id",
+                "value": "order_demo_001"
+              }
+            ]
+          }
+        }
+      },
+      "captureSummary": {
+        "clicks": true,
+        "fills": true,
+        "chips": false,
+        "selects": false,
+        "navigations": true,
+        "networkRequests": 1,
+        "networkResponses": 1,
+        "storageSnapshots": 1,
+        "cookiesCaptured": true
+      }
+    }
+  }
+}

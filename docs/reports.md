@@ -1,13 +1,13 @@
 ---
 title: "Security Reports"
-description: "How to access, navigate, and interpret your DeepTraQ AI security scan reports"
+description: "How to access, navigate, and interpret your CoreFix security scan reports"
 ---
 
 # Security Reports
 
 ## Overview
 
-After every scan, DeepTraQ AI generates a fully self-contained HTML security report and delivers it to your team. This page explains how to access that report, what each section means, and how AI-enriched findings differ from raw scanner output.
+After every scan, CoreFix generates a fully self-contained HTML security report and delivers it to your team. This page explains how to access that report, what each section means, and how AI-enriched findings differ from raw scanner output.
 
 ---
 
@@ -76,7 +76,7 @@ Every report shares the same layout:
 ### Header
 
 ```
-DeepTraQ AI / <repo> / <branch>          <org name>  [☀️ theme toggle]
+CoreFix / <repo> / <branch>          <org name>  [☀️ theme toggle]
 ```
 
 - Clicking **☀️ / 🌙** toggles between light and dark mode. The preference is saved in your browser.

@@ -1,13 +1,13 @@
-# DeepTraq Scanner — CI/CD Integration
+# CoreFix Scanner — CI/CD Integration
 
-Add DeepTraq security scanning to your existing pipeline with a single step. The scanner runs as a Docker container and can be dropped into any job that already checks out your code.
+Add CoreFix security scanning to your existing pipeline with a single step. The scanner runs as a Docker container and can be dropped into any job that already checks out your code.
 
 ---
 
 ## How It Works in a Pipeline
 
 1. Your pipeline checks out the repository (as it normally does)
-2. Add the DeepTraq scan step — it mounts the workspace and runs the scanner
+2. Add the CoreFix scan step — it mounts the workspace and runs the scanner
 3. Results are written to an output directory and optionally emailed
 
 Store sensitive values as **secrets** in your CI/CD platform. `ORG_ID` can be a plain environment variable. `X_CFIX_API_KEY` must always be a secret.
@@ -28,7 +28,7 @@ Store sensitive values as **secrets** in your CI/CD platform. `ORG_ID` can be a 
 
 ```yaml
 # .github/workflows/deeptraq-scan.yml
-name: DeepTraq Security Scan
+name: CoreFix Security Scan
 
 on:
   push:
@@ -43,7 +43,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Run DeepTraq Scanner
+      - name: Run CoreFix Scanner
         run: |
           mkdir -p ${{ github.workspace }}/scan-results
           docker run --rm \
@@ -78,7 +78,7 @@ jobs:
 ### Workflow — Bring Your Own AI Model
 
 ```yaml
-      - name: Run DeepTraq Scanner with custom model
+      - name: Run CoreFix Scanner with custom model
         run: |
           docker run --rm \
             -e ORG_ID=${{ vars.ORG_ID }} \
@@ -166,7 +166,7 @@ pipeline {
             }
         }
 
-        stage('DeepTraq Security Scan') {
+        stage('CoreFix Security Scan') {
             steps {
                 withCredentials([string(credentialsId: 'deeptraq-api-key', variable: 'DEEPTRAQ_API_KEY')]) {
                     sh '''
@@ -191,7 +191,7 @@ pipeline {
 }
 ```
 
-> Add the `DeepTraq Security Scan` stage to your existing `Jenkinsfile` pipeline.
+> Add the `CoreFix Security Scan` stage to your existing `Jenkinsfile` pipeline.
 
 ---
 
@@ -217,7 +217,7 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Run DeepTraq Security Scanner
+          name: Run CoreFix Security Scanner
           command: |
             mkdir -p scan-results
             docker run --rm \
@@ -310,7 +310,7 @@ steps:
         -v $(Build.ArtifactStagingDirectory)/scan-results:/output \
         deeptraq-scanner \
         --emailids $(SCAN_REPORT_EMAILS)
-    displayName: Run DeepTraq Security Scanner
+    displayName: Run CoreFix Security Scanner
 
   - task: PublishBuildArtifacts@1
     condition: always()
@@ -339,7 +339,7 @@ steps:
 pipelines:
   default:
     - step:
-        name: DeepTraq Security Scan
+        name: CoreFix Security Scan
         image: docker:24
         services:
           - docker
@@ -400,7 +400,7 @@ deeptraq-scanner osv,iac,secrets,k8s,sast
 
 ## Bring Your Own Model
 
-If you provide your own API key, you must also specify the model. Otherwise DeepTraq uses its own SaaS model rotation at no extra configuration.
+If you provide your own API key, you must also specify the model. Otherwise CoreFix uses its own SaaS model rotation at no extra configuration.
 
 ```bash
 # Using your own key — model is required
@@ -408,7 +408,7 @@ docker run --rm ... deeptraq-scanner \
   --openai-api-key $OPENAI_API_KEY \
   --model gpt-4o-mini
 
-# No key provided — DeepTraq handles model selection automatically
+# No key provided — CoreFix handles model selection automatically
 docker run --rm ... deeptraq-scanner
 ```
 
