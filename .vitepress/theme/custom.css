@@ -77,8 +77,9 @@
 }
 
 .VPNavBarTitle .logo {
-  width: 28px;
-  height: 28px;
+  width: 116px;
+  height: auto;
+  max-height: 48px;
   object-fit: contain;
 }
 

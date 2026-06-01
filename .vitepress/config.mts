@@ -11,19 +11,19 @@ export default defineConfig({
   appearance: true,
 
   head: [
-    ["link", { rel: "icon", href: "/logo.png" }],
+    ["link", { rel: "icon", href: "/dark/cf-on-dark.svg" }],
     ["meta", { name: "theme-color", content: "#ffffff", media: "(prefers-color-scheme: light)" }],
     ["meta", { name: "theme-color", content: "#0b0d10", media: "(prefers-color-scheme: dark)" }],
   ],
 
   themeConfig: {
     logo: {
-      light: "/light/cf-on-light.svg",
-      dark: "/dark/cf-on-dark.svg",
+      light: "/light/corefix-logo-light.svg",
+      dark: "/dark/corefix-logo-dark.svg",
       alt: "CoreFix",
     },
     logoLink: "https://corefix.dev",
-    siteTitle: "CoreFix",
+    siteTitle: false,
 
     nav: [
       {
@@ -67,12 +67,6 @@ export default defineConfig({
           { text: "CI/CD Pipelines", link: "/docs/cicd-integration" },
           { text: "Web CI/CD Integration", link: "/docs/web-cicd-integration" },
           { text: "Docker / Local CLI", link: "/docs/docker-cli" },
-        ],
-      },
-      {
-        text: "Browser Extensions",
-        collapsed: false,
-        items: [
           { text: "Chrome Extension", link: "/docs/chrome-extension-guide" },
         ],
       },
@@ -99,28 +93,6 @@ export default defineConfig({
         items: [
           { text: "Usage & Credits", link: "/docs/account-usage" },
           { text: "Pricing", link: "/docs/pricing-and-usage" },
-        ],
-      },
-      {
-        text: "Tools",
-        collapsed: false,
-        items: [
-          { text: "Overview", link: "/docs/tools" },
-          { text: "Nmap", link: "/docs/tools/nmap" },
-          { text: "OpenVAS", link: "/docs/tools/openvas" },
-          { text: "Nuclei", link: "/docs/tools/nuclei" },
-          { text: "OWASP ZAP", link: "/docs/tools/zap" },
-          { text: "testssl.sh + SSLyze", link: "/docs/tools/testssl" },
-          { text: "OpenAPI Fuzzer", link: "/docs/tools/openapi-fuzzer" },
-          { text: "OSV Scanner", link: "/docs/tools/osv-scanner" },
-          { text: "Gitleaks", link: "/docs/tools/gitleaks" },
-          { text: "KICS", link: "/docs/tools/kics" },
-          { text: "Kubescape", link: "/docs/tools/kubescape" },
-          { text: "OpenGrep", link: "/docs/tools/opengrep" },
-          { text: "Prowler", link: "/docs/tools/prowler" },
-          { text: "Grype", link: "/docs/tools/grype" },
-          { text: "Dockle", link: "/docs/tools/dockle" },
-          { text: "SonarQube", link: "/docs/tools/sonarqube" },
         ],
       },
       {
@@ -168,7 +140,7 @@ export default defineConfig({
 
     socialLinks: [
       { icon: "github", link: "https://github.com/corefixhq" },
-      { icon: "X", link: "https://x.com/corefixhq" },
+      { icon: "x", link: "https://x.com/corefixhq" },
     ],
 
     lastUpdatedText: "Last updated",
