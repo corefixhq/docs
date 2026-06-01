@@ -33,7 +33,7 @@ export default defineConfig({
         rel: "noopener noreferrer",
       },
       {
-        text: "Schedule Call",
+        text: "Schedule Demo",
         link: "https://cal.com/corefix.dev/30min",
         target: "_blank",
         rel: "noopener noreferrer",

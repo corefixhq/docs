@@ -83,6 +83,41 @@
   object-fit: contain;
 }
 
+.VPNavBarMenu {
+  align-items: center;
+  gap: 8px;
+}
+
+.VPNavBarMenu .VPNavBarMenuLink,
+.VPNavScreenMenu .VPNavScreenMenuLink {
+  border: 1px solid #000000;
+  border-radius: 8px;
+  background-color: #000000;
+  color: #ffffff;
+  text-decoration: none;
+}
+
+.VPNavBarMenu .VPNavBarMenuLink {
+  height: 36px;
+  padding: 0 14px;
+  line-height: 1;
+}
+
+.VPNavScreenMenu .VPNavScreenMenuLink {
+  margin-bottom: 8px;
+  padding: 10px 14px;
+  text-align: center;
+}
+
+.VPNavBarMenu .VPNavBarMenuLink:hover,
+.VPNavBarMenu .VPNavBarMenuLink.active,
+.VPNavScreenMenu .VPNavScreenMenuLink:hover {
+  border-color: #242424;
+  background-color: #242424;
+  color: #ffffff;
+  text-decoration: none;
+}
+
 /* Sidebar - Subtle and functional */
 .VPSidebar {
   background-color: var(--vp-sidebar-bg-color);
