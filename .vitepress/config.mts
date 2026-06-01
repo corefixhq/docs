@@ -11,7 +11,7 @@ export default defineConfig({
   appearance: true,
 
   head: [
-    ["link", { rel: "icon", href: "/dark/cf-on-dark.svg" }],
+    ["link", { rel: "icon", href: "/light/cf-on-light.svg" }],
     ["meta", { name: "theme-color", content: "#ffffff", media: "(prefers-color-scheme: light)" }],
     ["meta", { name: "theme-color", content: "#0b0d10", media: "(prefers-color-scheme: dark)" }],
   ],
