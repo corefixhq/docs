@@ -27,14 +27,14 @@ export default defineConfig({
 
     nav: [
       {
-        text: "Login",
-        link: appUrl,
+        text: "Schedule Demo",
+        link: "https://cal.com/corefix.dev/30min",
         target: "_blank",
         rel: "noopener noreferrer",
       },
       {
-        text: "Schedule Demo",
-        link: "https://cal.com/corefix.dev/30min",
+        text: "Login",
+        link: appUrl,
         target: "_blank",
         rel: "noopener noreferrer",
       },

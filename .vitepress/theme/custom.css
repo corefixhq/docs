@@ -118,6 +118,21 @@
   text-decoration: none;
 }
 
+.VPNavBarMenu .VPNavBarMenuLink:first-of-type,
+.VPNavScreenMenu .VPNavScreenMenuLink:first-of-type {
+  border-color: var(--vp-c-divider);
+  background-color: transparent;
+  color: var(--vp-c-text-1);
+}
+
+.VPNavBarMenu .VPNavBarMenuLink:first-of-type:hover,
+.VPNavBarMenu .VPNavBarMenuLink:first-of-type.active,
+.VPNavScreenMenu .VPNavScreenMenuLink:first-of-type:hover {
+  border-color: var(--vp-c-divider);
+  background-color: var(--vp-c-bg-muted);
+  color: var(--vp-c-text-1);
+}
+
 /* Sidebar - Subtle and functional */
 .VPSidebar {
   background-color: var(--vp-sidebar-bg-color);
@@ -125,6 +140,17 @@
 
 .VPSidebarNav {
   padding: 1rem 0;
+}
+
+.VPSidebarNav .group {
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--vp-c-divider);
+}
+
+.VPSidebarNav .group + .group {
+  padding-top: 0;
+  border-top: 0;
 }
 
 .VPSidebarNav .VPSidebarGroup .VPSidebarLink {
@@ -170,10 +196,6 @@ h2 {
   font-weight: 600;
   letter-spacing: -0.015em;
   color: var(--vp-c-text-1);
-  margin-top: 2rem;
-  margin-bottom: 0.9rem;
-  border-bottom: 1px solid var(--vp-c-divider);
-  padding-bottom: 0.75rem;
 }
 
 /* Extra spacing for better readability */
@@ -181,10 +203,20 @@ h2 {
   gap: 1.25rem;
 }
 .VPContent h2 {
-  margin-top: 2rem;
+  margin: 2rem 0 0.9rem;
+  padding: 1.25rem 0 0;
+  border-bottom: 0;
 }
 .VPContent p {
   margin-bottom: 0.9rem;
+}
+
+.vp-doc hr:has(+ h2) {
+  display: none;
+}
+
+.vp-doc h2 .header-anchor {
+  top: 1.25rem;
 }
 
 h3,

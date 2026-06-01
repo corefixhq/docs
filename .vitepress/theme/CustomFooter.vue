@@ -40,7 +40,7 @@ const columns = [
   {
     title: "Company",
     links: [
-      { label: "About", href: "#" },
+      // { label: "About", href: "#" },
       { label: "Contact", href: `${WEBSITE_URL}/contact` },
       { label: "Pricing", href: `${WEBSITE_URL}/pricing` },
       { label: "Roadmap", href: `${WEBSITE_URL}/roadmap` },
@@ -112,6 +112,11 @@ function toggleColumn(title: string) {
                 <circle cx="4" cy="4" r="2" stroke="currentColor" stroke-width="1.5" />
               </svg>
             </a>
+            <span class="ft-social ft-social--disabled" aria-label="Discord - coming soon" title="Discord - coming soon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M20.32 4.37A19.8 19.8 0 0015.44 2.9a13.8 13.8 0 00-.62 1.27 18.3 18.3 0 00-5.63 0 13.3 13.3 0 00-.63-1.27 19.7 19.7 0 00-4.88 1.48C.6 8.96-.23 13.43.18 17.84a19.9 19.9 0 005.98 3.03 14.6 14.6 0 001.28-1.66 12.9 12.9 0 01-2.02-.97l.5-.39a14.2 14.2 0 0012.16 0l.5.39c-.65.38-1.33.7-2.03.97.38.58.81 1.14 1.28 1.66a19.8 19.8 0 005.99-3.03c.48-5.11-.82-9.54-3.5-13.47zM8.02 15.13c-1.2 0-2.19-1.1-2.19-2.45s.96-2.45 2.19-2.45 2.2 1.11 2.18 2.45c0 1.35-.96 2.45-2.18 2.45zm7.96 0c-1.2 0-2.18-1.1-2.18-2.45s.96-2.45 2.18-2.45 2.2 1.11 2.18 2.45c0 1.35-.95 2.45-2.18 2.45z" />
+              </svg>
+            </span>
           </div>
         </div>
 
