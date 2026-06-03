@@ -67,7 +67,7 @@ export default defineConfig({
         collapsed: false,
         items: [
           { text: "Code Scanning", link: "/docs/code-agent-usage" },
-          { text: "Web Scanning", link: "/docs/web-agent-usagee" },
+          { text: "Web Scanning", link: "/docs/web-agent-usage" },
           {
             text: "CI/CD Integration",
             collapsed: true,
