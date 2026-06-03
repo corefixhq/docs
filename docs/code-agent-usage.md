@@ -465,7 +465,7 @@ https://2e5c44a3ee97117f91674c1f3f463981.r2.cloudflarestorage.com/deeptraq-findi
 
 ## Related
 
-- [Web Scanner — Standalone Usage](./web-standalone-usage)
+- [Web Scanner — Standalone Usage](./web-agent-usage.md)
 - [CI/CD Integration](./cicd-integration)
 - [Supported Models](./models)
 - [Pricing & Usage](./pricing-and-usage)

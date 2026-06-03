@@ -9,7 +9,7 @@ Welcome to the CoreFix scanner documentation. Choose how you want to get started
 Run the scanner directly on any machine with Docker installed.
 
 - **Best for**: Quick scans, local development, CI/CD pipelines
-- **Get started**: [Standalone Usage Guide](/docs/standalone-usage)
+- **Get started**: [Standalone Usage Guide](/docs/code-agent-usage)
 
 ### Web CI/CD Integration
 
@@ -23,7 +23,7 @@ Integrate directly with your CI/CD pipeline for automated security scanning.
 Use the web interface for standalone deployments without CI/CD.
 
 - **Best for**: Web-based usage, standalone deployments
-- **Get started**: [Web Standalone Usage](/docs/web-standalone-usage)
+- **Get started**: [Web Standalone Usage](/docs/web-agent-usage)
 
 ## 📚 Core Features
 
@@ -31,7 +31,7 @@ Use the web interface for standalone deployments without CI/CD.
 
 Organize and manage your scanning projects
 
-[Learn about Projects →](/docs/projects)
+[Learn about Projects →](./docs/creating-a-project.md)
 
 ### Reports
 

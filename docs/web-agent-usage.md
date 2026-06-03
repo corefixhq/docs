@@ -269,7 +269,7 @@ In headless CI pipelines (GitHub Actions, GitLab CI), you must install Chromium 
 
 ## AI Models
 
-Same behaviour as the code scanner — see [AI Models](./standalone-usage#ai-models) for the full logic.
+Same behaviour as the code scanner — see [AI Models](./code-agent-usage#ai-models) for the full logic.
 
 **If you provide `--openai-api-key`:**
 - `--model` is required
@@ -475,7 +475,7 @@ Results are written to your `/output` mount:
 
 ## Related
 
-- [Code Scanner — Standalone Usage](./standalone-usage)
+- [Code Scanner — Standalone Usage](./code-agent-usage.md)
 - [Chrome Extension Guide](./chrome-extension-guide)
 - [CI/CD Integration](./web-cicd-integration)
 - [Supported Models](./models)
