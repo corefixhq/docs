@@ -1,68 +1,56 @@
 # Refund Policy
 
-**Last updated:** May 2026
+**Effective Date:** June 02, 2026
+**Last Updated:** June 02, 2026
 
-## Overview
+This Refund Policy applies to all credit purchases made on the CoreFix platform.
 
-This Refund Policy describes how CoreFix handles subscription cancellations, billing disputes, and refund requests. By subscribing to a CoreFix plan, you agree to the billing terms shown on the pricing page and in this policy.
+---
 
-Enterprise agreements may define separate billing and refund terms. When an enterprise agreement conflicts with this policy, the signed agreement takes precedence.
+## 1. Credits Are Non-Refundable
 
-## Subscription Plans
+All credit purchases on CoreFix are **final and non-refundable**. Once credits are added to your account, they cannot be returned for a monetary refund, except as described in Section 3 below.
 
-- **Monthly subscriptions** are billed each month on the anniversary of the subscription start date.
-- **Annual subscriptions** are billed once per year and are non-refundable except under the eligibility conditions below.
-- **Enterprise plans** may include custom billing terms.
-- **Usage-based services** may include separate terms communicated before activation.
+This applies to all credit top-up amounts, including $10, $50, $150, $500, and any custom amounts.
 
-Prices are shown in USD unless stated otherwise. Applicable taxes may be added based on your billing location.
+## 2. Credits Do Not Expire
 
-## Cancellation Policy
+Purchased credits remain in your account indefinitely. There is no monthly reset, no expiration date, and no "use it or lose it" policy. Your credits are available until you use them or delete your account.
 
-You may cancel your CoreFix subscription at any time without a cancellation fee.
+## 3. Refund Exception: Cumulative Purchases Over $50
 
-- Cancellation stops future automatic renewals.
-- Access remains active through the end of the paid billing period.
-- No additional subscription charges are processed after cancellation.
-- Scan data and account information are retained for 30 days after cancellation before deletion.
+If your **total cumulative credit purchases** (not individual transactions) exceed **$50**, you may request a refund of your **unused credit balance**. Refunds under this exception are:
 
-Cancellation does not automatically provide a refund for the unused portion of a billing period.
+- Available only for the unused portion of your credit balance
+- Processed as a single bulk refund — not per individual purchase
+- Subject to a processing time of up to 14 business days
+- Issued to the original payment method used for the most recent purchase
+- Available only once per account — subsequent refund requests for the same account may be declined at our discretion
 
-## Refund Eligibility
+To request a refund, contact us at hello@corefix.dev with your account email and the reason for your request. We will verify your purchase history and unused balance before processing.
 
-Refund requests are reviewed case by case.
+## 4. Early Access Starter Credits
 
-### Typically Eligible
+During our early access period, the first 100 signups receive $10 in starter credits at no cost. These promotional credits are **not refundable** and have no cash value. They are provided as a welcome benefit and are subject to the same usage terms as purchased credits.
 
-- Duplicate charges in the same billing cycle
-- Incorrect billing caused by a CoreFix technical error
-- Charges processed after a confirmed cancellation
-- Unauthorized billing verified by CoreFix
+## 5. Account Deletion
 
-### Typically Not Eligible
+If you delete your account, any remaining credits — both purchased and promotional — are **permanently forfeited** and cannot be recovered or refunded. Please ensure you have used or requested a refund for eligible credits before deleting your account.
 
-- Partial use of a subscription during a billing period
-- A change of mind after purchase
-- Failure to use the service during the subscription term
-- Issues caused by user configuration unrelated to CoreFix
+## 6. Service Issues
 
-Approved refunds are returned to the original payment method within 5-10 business days, depending on the payment provider.
+If you experience a technical issue with the Service that causes a scan to fail or produce no results, and credits were deducted, contact us at hello@corefix.dev. We will investigate and, at our discretion, restore the deducted credits to your account. This is a credit restoration, not a monetary refund.
 
-## Free Trials
+## 7. Chargebacks
 
-When free trials are available, the duration, limitations, and billing behavior will be shown before activation. Trials do not convert to paid subscriptions without explicit confirmation.
+If you initiate a chargeback or payment dispute with your bank or payment provider without first contacting us, we reserve the right to suspend your account immediately pending resolution of the dispute.
 
-## Requesting A Refund
+## 8. Changes to This Policy
 
-To request a refund:
+We may update this Refund Policy from time to time. Changes will be posted on the Service and, if material, communicated via email.
 
-1. Contact the CoreFix support team.
-2. Include the email address associated with your account.
-3. Provide your invoice number or payment reference.
-4. Describe the billing issue clearly.
+## 9. Contact
 
-Expected review time is 5-10 business days. Incomplete billing details may delay the review.
+For refund requests or billing questions, contact us at:
 
-## Contact
-
-For billing questions or refund requests, email [hello@corefix.dev](mailto:hello@corefix.dev).
+**Email:** hello@corefix.dev

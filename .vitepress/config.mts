@@ -27,6 +27,10 @@ export default defineConfig({
 
     nav: [
       {
+        text: "Overview",
+        link: "/docs/introduction",
+      },
+      {
         text: "Schedule Demo",
         link: "https://cal.com/corefix.dev/30min",
         target: "_blank",
@@ -45,7 +49,7 @@ export default defineConfig({
         text: "Introduction",
         collapsed: false,
         items: [
-          { text: "What is CoreFix?", link: "/docs/introduction" },
+          { text: "Overview", link: "/docs/introduction" },
           { text: "How It Works", link: "/docs/how-it-works" },
         ],
       },
@@ -100,11 +104,12 @@ export default defineConfig({
         collapsed: false,
         items: [
           { text: "Terms of Service", link: "/docs/terms-of-service" },
-          { text: "Privacy Policy", link: "/docs/privacy-protection" },
+          { text: "Privacy Policy", link: "/docs/privacy-policy" },
           { text: "Cookie Policy", link: "/docs/cookie-policy" },
           { text: "Refund Policy", link: "/docs/refund-policy" },
           { text: "Security Policy", link: "/docs/security-policy" },
-          { text: "AI Usage Policy", link: "/docs/ai-policy" },
+          { text: "AI Usage Policy", link: "/docs/ai-usage-policy" },
+          { text: "Disclaimer", link: "/docs/disclaimer" },
           { text: "Open Source Acknowledgements", link: "/docs/acknowledgements" },
         ],
       },

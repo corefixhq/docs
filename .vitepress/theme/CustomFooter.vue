@@ -45,9 +45,10 @@ const columns = [
       { label: "Pricing", href: `${WEBSITE_URL}/pricing` },
       { label: "Roadmap", href: `${WEBSITE_URL}/roadmap` },
       { label: "Terms & Conditions", href: "/docs/terms-of-service" },
-      { label: "Privacy Policy", href: "/docs/privacy-protection" },
+      { label: "Privacy Policy", href: "/docs/privacy-policy" },
       { label: "Refund Policy", href: "/docs/refund-policy" },
-      { label: "AI Usage Policy", href: "/docs/ai-policy" },
+      { label: "AI Usage Policy", href: "/docs/ai-usage-policy" },
+      { label: "Disclaimer", href: "/docs/disclaimer" },
     ],
   },
 ];

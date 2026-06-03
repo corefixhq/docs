@@ -2,37 +2,35 @@
 title: "Release Logs"
 ---
 
+# Release Logs
+
 ## Current Release
 
-**Version:** v2.3.0
-**Release Date:** 9 March 2026
+**Version:** v1.0.0  
+**Release Date:** June 2, 2026
 
-This release focuses on **expanding reporting capabilities and improving the stability of web application scanning**.
+CoreFix v1.0.0 is the first public release of the unified scanning platform. It brings code scanning, web/DAST scanning, CI/CD integration, AI enrichment, compliance mapping, HTML reports, BYOK options, Chrome Extension support, and usage visibility into one Docker-based workflow.
 
-### Key Updates
+[Read the full v1.0.0 release notes](/docs/release-v1.0.0)
 
-- Added **new security reports for Web Application scans**
-- Added **report generation for Code Security scans**
-- Improvements to **web application scanning stability**
-- Enhancements to **report formatting and vulnerability presentation**
+## Highlights
 
-For full details, see **Release History → v2.3.0**.
+- Code scanning with OSV Scanner, Gitleaks, KICS, Kubescape, and Opengrep.
+- Web and DAST scanning with Nmap, Nuclei, OWASP ZAP, and testssl.sh.
+- Ready-to-paste CI/CD examples for common pipeline providers.
+- AI enrichment for deduplication, risk scoring, attack-chain context, and remediation guidance.
+- Compliance mapping for OWASP, SOC2, PCI-DSS, HIPAA, GDPR, NIST, CIS, ISO-27001, and MITRE ATT&CK.
+- Chrome Extension recording for authenticated web scanning workflows.
 
-## Platform Evolution
+## Release History
 
-CoreFix has expanded from a core vulnerability scanning platform into a **multi-module security platform** covering infrastructure, applications, cloud environments, and code security.
-
-| Version  | Key Highlights                                                                                                   |
-| -------- | ---------------------------------------------------------------------------------------------------------------- |
-| **v2.3** | Added new reports for Web Application and Code Security modules, and improved web application scanning stability |
-| **v2.2** | Secret scanning, improved CSPM reporting, enhanced authentication scanning                                       |
-| **v2.1** | Infrastructure-as-Code scanning, Oracle Cloud integration, credentialed web scanning                             |
-| **v2.0** | Web application security module and user management                                                              |
-| **v1.1** | Asset inventory, CSPM module, unified security findings                                                          |
-| **v1.0** | Initial platform release with core vulnerability scanning capabilities                                           |
+| Version | Release Date | Key Highlights |
+|---|---:|---|
+| [v1.0.0](/docs/release-v1.0.0) | June 2, 2026 | First public CoreFix release with code scanning, web scanning, AI enrichment, reports, and Chrome Extension support |
 
 ## Related Documentation
 
-- **Release History** – Detailed changes for each platform version
-- **Supported Scanners** – Security tools integrated into CoreFix
-- **Scanning with CoreFix** – How to run scans on the platform
+- [Docker / Local CLI](/docs/docker-cli)
+- [GitHub Integration](/docs/github-integration)
+- [Chrome Extension Guide](/docs/chrome-extension-guide)
+- [AI Enrichment](/docs/ai-enrichment)

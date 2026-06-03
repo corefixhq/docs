@@ -1,121 +1,94 @@
 ---
-hide_title: true
-sidebar_label: Introduction
+title: "Overview"
+sidebar_label: Overview
 ---
 
-## **What is CoreFix?**
+# CoreFix Docs Overview
 
-**CoreFix** is an AI-powered unified security platform designed to help organizations identify, assess, and remediate vulnerabilities across their entire technology stack.
+<div class="docs-overview">
 
-From **source code and cloud infrastructure** to **APIs, containers, networks, and AI systems**, CoreFix provides a single platform to secure everything — eliminating tool sprawl and security blind spots.
+## Getting Started
 
----
+<div class="overview-grid">
+  <a class="overview-card" href="/docs/getting-started">
+    <span class="overview-card-title">Sign Up & Setup</span>
+    <span class="overview-card-copy">Create your CoreFix account, configure your workspace, and prepare your first project.</span>
+  </a>
+  <a class="overview-card" href="/docs/first-scan">
+    <span class="overview-card-title">Your First Scan</span>
+    <span class="overview-card-copy">Run the first scan and understand the workflow from setup to results.</span>
+  </a>
+  <a class="overview-card" href="/docs/github-integration">
+    <span class="overview-card-title">GitHub App</span>
+    <span class="overview-card-copy">Connect repositories and trigger automated scans from pushes and pull requests.</span>
+  </a>
+  <a class="overview-card" href="/docs/chrome-extension-guide">
+    <span class="overview-card-title">Chrome Extension</span>
+    <span class="overview-card-copy">Record authenticated browser workflows for deeper web application scanning.</span>
+  </a>
+</div>
 
-## **Overview**
+## Scan With CoreFix
 
-CoreFix combines advanced scanning technologies with an AI-driven intelligence engine to deliver:
+<div class="overview-grid">
+  <a class="overview-card" href="/docs/docker-cli">
+    <span class="overview-card-title">Docker / Local CLI</span>
+    <span class="overview-card-copy">Run CoreFix scanners locally or on any server with Docker installed.</span>
+  </a>
+  <a class="overview-card" href="/docs/cicd-integration">
+    <span class="overview-card-title">CI/CD Pipelines</span>
+    <span class="overview-card-copy">Add security scanning to GitHub Actions, GitLab CI, Jenkins, and more.</span>
+  </a>
+  <a class="overview-card" href="/docs/web-standalone-usage">
+    <span class="overview-card-title">Web Scanning</span>
+    <span class="overview-card-copy">Scan live web applications with DAST, CVE checks, recon, and TLS analysis.</span>
+  </a>
+  <a class="overview-card" href="/docs/web-cicd-integration">
+    <span class="overview-card-title">Web CI/CD Integration</span>
+    <span class="overview-card-copy">Run web scans automatically after deployments in your delivery pipeline.</span>
+  </a>
+</div>
 
-* Real-time threat detection across cloud and hybrid environments
-* Automated vulnerability assessment across code, infrastructure, and applications
-* Compliance monitoring aligned with industry standards
-* Risk prioritization to focus on critical security issues
-* Actionable remediation guidance with AI-powered insights
-* Unified visibility across all layers of your stack
+## Manage Findings
 
----
+<div class="overview-grid">
+  <a class="overview-card" href="/docs/projects">
+    <span class="overview-card-title">Projects</span>
+    <span class="overview-card-copy">Organize repositories, applications, scan targets, and project settings.</span>
+  </a>
+  <a class="overview-card" href="/docs/findings">
+    <span class="overview-card-title">Findings & Triage</span>
+    <span class="overview-card-copy">Review, prioritize, and act on normalized security findings across scanners.</span>
+  </a>
+  <a class="overview-card" href="/docs/reports">
+    <span class="overview-card-title">Reports</span>
+    <span class="overview-card-copy">Generate shareable security reports for teams, audits, and stakeholders.</span>
+  </a>
+  <a class="overview-card" href="/docs/account-usage">
+    <span class="overview-card-title">Usage & Credits</span>
+    <span class="overview-card-copy">Track scan runtime, AI usage, credits, and account-level consumption.</span>
+  </a>
+</div>
 
-## **Security Across Your Entire Stack**
+## AI, Models & Policies
 
-CoreFix provides end-to-end security coverage across:
+<div class="overview-grid">
+  <a class="overview-card" href="/docs/ai-enrichment">
+    <span class="overview-card-title">AI Enrichment</span>
+    <span class="overview-card-copy">See how CoreFix deduplicates, prioritizes, and explains scanner findings.</span>
+  </a>
+  <a class="overview-card" href="/docs/models">
+    <span class="overview-card-title">Supported Models</span>
+    <span class="overview-card-copy">Review model options, BYOK behavior, and AI provider coverage.</span>
+  </a>
+  <a class="overview-card" href="/docs/ai-usage-policy">
+    <span class="overview-card-title">AI Usage Policy</span>
+    <span class="overview-card-copy">Understand what data is sent to AI providers and how AI output should be used.</span>
+  </a>
+  <a class="overview-card" href="/docs/release-logs">
+    <span class="overview-card-title">Release Logs</span>
+    <span class="overview-card-copy">Read the latest CoreFix release notes and product changes.</span>
+  </a>
+</div>
 
-* Source Code (SAST)
-* Cloud Workloads
-* Network Perimeter
-* Web Applications
-* APIs and Microservices
-* Containers
-* Endpoints
-* Infrastructure as Code (IaC)
-* AI / LLM Systems
-
----
-
-## **One Unified Platform**
-
-Security teams often rely on multiple disconnected tools, each with its own dashboards and alerts.
-
-CoreFix replaces this complexity with a **single, unified platform** that enables:
-
-* Centralized visibility across all environments
-* Consolidated findings and risk insights
-* Faster decision-making and remediation
-* Reduced operational overhead
-
----
-
-## **AI-Powered Security Intelligence**
-
-At the core of CoreFix is its **AI Intelligence Engine**, which enables:
-
-* Automated vulnerability discovery
-* Intelligent risk analysis and prioritization
-* Context-aware security insights
-* Natural language querying of security findings
-* Faster root cause analysis and remediation
-
----
-
-## **How It Works**
-
-1. **Connect** your cloud accounts, repositories, and infrastructure
-2. **Scan** your environment continuously for vulnerabilities and misconfigurations
-3. **Analyze** findings using AI-powered insights
-4. **Remediate** issues with guided recommendations and automation
-5. **Monitor** your security posture in real time
-
----
-
-## **Built for Modern Teams**
-
-CoreFix is designed for:
-
-* Security Teams managing cloud and infrastructure security
-* DevOps and SRE Teams implementing secure deployments
-* Developers building secure applications
-* CISOs and Leadership teams requiring unified visibility
-* Compliance Officers ensuring regulatory adherence
-* Security Researchers and Consultants
-
----
-
-## **From Detection to Resolution**
-
-CoreFix enables organizations to move faster from **vulnerability detection to remediation** by combining:
-
-* Continuous scanning
-* AI-driven insights
-* Integrated workflows
-* Unified reporting
-
----
-
-## **Why CoreFix**
-
-* One platform for complete security visibility
-* Covers code, cloud, applications, and infrastructure
-* Reduces dependency on multiple security tools
-* Accelerates vulnerability management with AI
-* Built for scale across startups to enterprises
-
----
-
-## **Get Started**
-
-Get started with CoreFix in minutes:
-
-* Create your account
-* Connect your environments
-* Start scanning and gaining insights immediately
-
-Secure your entire stack with one unified, AI-powered platform.
-
+</div>

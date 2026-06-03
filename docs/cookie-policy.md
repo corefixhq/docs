@@ -1,55 +1,132 @@
----
-hide_title: true
-sidebar_label: Cookie Policy
+# Cookie Policy
+
+**Effective Date:** June 02, 2026
+**Last Updated:** June 02, 2026
+
+This Cookie Policy explains what cookies and similar technologies CoreFix uses on corefix.dev, app.corefix.dev, and docs.corefix.dev (collectively, the "Service"), why we use them, and your options for controlling them.
+
+CoreFix is operated by CoreFix (Corefixhq), 503, Capital Park, Capital Pk Rd, Cyber Hills Colony, VIP Hills, Silicon Valley, Madhapur, Hyderabad, Telangana 500081, India. Contact: hello@corefix.dev.
 
 ---
 
-**Effective Date:** Aug 16th, 2025
+## 1. What Are Cookies?
 
-### About
+Cookies are small text files stored in your browser when you visit a website. They help websites remember your preferences, maintain your session, and understand how the site is being used. We also use similar technologies such as **local storage** (browser-based key-value storage) as described below.
 
-This Cookie Policy explains how CoreFix ("we," "us," or "our") uses cookies and similar technologies on our website https://corefix.dev (the "Site") and within our platform. By accessing or using our Site or Services, you consent to the use of cookies as described in this policy.
+---
 
-### 1. What Are Cookies
+## 2. Our Approach to Cookies
 
-Cookies are small text files stored on your device when you visit websites. They help websites recognize your device, remember your preferences, and improve your browsing experience. Cookies can also help us deliver personalized content, analyze traffic, and measure the effectiveness of marketing campaigns.
+We keep cookie usage as minimal as possible. We do not use cookies for advertising, tracking across third-party websites, or selling data to any third party. CoreFix does not display ads and does not participate in ad networks.
 
-### 2. Types of Cookies We Use
+---
 
-We use the following categories of cookies on our Site:
+## 3. Cookies We Use
 
-1. **Essential Cookies** – Necessary for the operation of our Site and to provide you with the Services you request, including logging in, session management, and security.
-2. **Performance and Analytics Cookies** – Help us understand how visitors interact with our Site, measure traffic, and improve functionality. Tools like Google Analytics may be used.
-3. **Functional Cookies** – Remember your preferences and settings (e.g., language, region) to enhance your experience.
-4. **Marketing and Advertising Cookies** – Used to deliver relevant advertising, track conversions, and analyze marketing effectiveness. These cookies may be placed by third-party service providers.
+### 3.1 OAuth State Cookies (Essential)
 
-### 3. Third-Party Cookies
+| Cookie | Purpose | Duration |
+|---|---|---|
+| `oauth_state` | Stores a temporary CSRF protection token during GitHub or Google OAuth authentication flows | Deleted immediately after authentication completes |
+| `auth_callback_state` | Maintains the authentication flow state during GitHub App installation | Deleted immediately after installation completes |
 
-Some cookies are set by third-party services integrated into our Site, such as analytics platforms or marketing providers. These third parties may collect information about your online activities across different websites.
+These cookies are **essential** for OAuth authentication to function securely. Without them, login and GitHub App installation flows would be vulnerable to cross-site request forgery (CSRF) attacks. They cannot be disabled without breaking authentication.
 
-### 4. Managing Cookies
+### 3.2 Preference Cookies (Optional)
 
-Most web browsers allow you to manage cookies through browser settings. You can choose to block or delete cookies, although doing so may affect the functionality of our Site or limit your ability to use certain features.
+| Cookie | Purpose | Duration |
+|---|---|---|
+| `ui_preferences` | Stores your interface preferences (e.g. theme, display settings) if set | Up to 12 months |
 
-For example:
+These cookies are optional. If not set, default preferences apply. You can clear them at any time via your browser settings without affecting core functionality.
 
-* Google Chrome
-* Mozilla Firefox
-* Microsoft Edge
-* Safari
+---
 
-### 5. Your Consent
+## 4. Local Storage (Not Cookies)
 
-By using our Site, you consent to the use of cookies in accordance with this Cookie Policy. If you do not agree, you should adjust your browser settings to block or delete cookies.
+CoreFix uses **browser local storage** for session management in the application (app.corefix.dev). This is technically distinct from cookies — it is not sent to our servers with every request and is managed entirely within your browser.
 
-### 6. Changes to this Policy
+| Item | Purpose | Cleared |
+|---|---|---|
+| Session tokens | Keeps you logged in to app.corefix.dev | When you log out or clear browser storage |
+| App state | Stores current project, navigation state | When you clear browser storage |
 
-We may update this Cookie Policy from time to time. Any changes will be posted on this page with the "Effective Date" updated. Your continued use of the Site after changes constitutes your acceptance of the updated policy.
+Local storage data does not leave your browser except when explicitly needed for authenticated API requests. It is not accessible to third-party scripts.
 
-### 7. Contact Us
+---
 
-If you have questions about this Cookie Policy or our use of cookies, please contact us at:
+## 5. Third-Party Technologies
+
+### PostHog Analytics
+
+We use PostHog on corefix.dev and app.corefix.dev to collect anonymized product analytics — page views, feature interactions, and general usage patterns. PostHog may set its own cookies or use local storage to maintain an anonymous session identifier.
+
+| Cookie / Storage | Purpose |
+|---|---|
+| `ph_*` (PostHog cookies) | Anonymous session tracking for product analytics |
+
+PostHog analytics does **not** identify you personally and we do not link PostHog data to your CoreFix account. No personal information is sent to PostHog. You can learn more about PostHog's data practices at [posthog.com/privacy](https://posthog.com/privacy).
+
+We do **not** use Google Analytics, Facebook Pixel, Hotjar, Mixpanel, Intercom, or any advertising or retargeting technologies.
+
+---
+
+## 6. What We Do Not Use Cookies For
+
+To be explicit:
+
+- We do **not** use cookies for advertising or ad targeting
+- We do **not** use cookies to track you across other websites
+- We do **not** sell cookie data or share it with data brokers
+- We do **not** use third-party advertising networks
+- We do **not** use fingerprinting or other tracking techniques beyond what is described above
+
+---
+
+## 7. Your Choices
+
+### Browser Settings
+
+You can control and delete cookies through your browser settings. Most browsers allow you to:
+
+- View which cookies are set
+- Block cookies from specific sites or all sites
+- Delete cookies individually or all at once
+
+Note that blocking essential OAuth state cookies will prevent you from logging in or installing the GitHub App. Blocking PostHog cookies will not affect your ability to use the Service.
+
+Links to cookie settings for common browsers:
+- [Google Chrome](https://support.google.com/chrome/answer/95647)
+- [Mozilla Firefox](https://support.mozilla.org/en-US/kb/clear-cookies-and-site-data-firefox)
+- [Safari](https://support.apple.com/en-gb/guide/safari/sfri11471/mac)
+- [Microsoft Edge](https://support.microsoft.com/en-us/microsoft-edge/delete-cookies-in-microsoft-edge-63947406-40ac-c3b8-57b9-2a946a29ae09)
+
+### Opt Out of Analytics
+
+If you want to opt out of PostHog analytics, you can use a browser-level ad or tracking blocker (such as uBlock Origin or Privacy Badger), which will prevent PostHog from loading. Your ability to use the Service is not affected.
+
+---
+
+## 8. European Users
+
+If you are located in the European Economic Area (EEA), United Kingdom, or Switzerland, you have the right to:
+
+- Be informed about the cookies we use (this policy fulfills that obligation)
+- Consent to or refuse non-essential cookies
+
+Essential cookies (OAuth state cookies) do not require consent under applicable law as they are strictly necessary for the Service to function. Optional preference cookies and PostHog analytics are used based on legitimate interest for product improvement. If you wish to withdraw from analytics tracking, follow the opt-out steps in Section 7.
+
+---
+
+## 9. Changes to This Policy
+
+We may update this Cookie Policy from time to time. If we make material changes, we will update the "Last Updated" date at the top and, where appropriate, notify you via email or a notice on the Service.
+
+---
+
+## 10. Contact
+
+For questions about this Cookie Policy, contact us at:
 
 **Email:** hello@corefix.dev
-
-**Website:** https://corefix.dev
+**Address:** 503, Capital Park, Capital Pk Rd, Cyber Hills Colony, VIP Hills, Silicon Valley, Madhapur, Hyderabad, Telangana 500081, India.
