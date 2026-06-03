@@ -1,107 +1,147 @@
----
-hide_title: true
-label: Scan with CoreFix
-sidebar_label: Scan with CoreFix
----
+# CoreFix — How It Works
 
-## Scan with CoreFix
+CoreFix is offered as a **SaaS solution**. All security findings from code or web scans are pushed to the cloud for review.
 
-CoreFix is a unified security scanning platform that helps organizations identify vulnerabilities across **networks, applications, source code, and cloud environments**.
-
-The platform combines **multiple specialized security scanners and CoreFix proprietary analysis engines** to detect vulnerabilities, misconfigurations, and exposed assets across your infrastructure.
-
-CoreFix consolidates findings from different scanners into a single dashboard where security teams can **analyze risks, prioritize vulnerabilities, and take remediation actions**.
+> **Privacy Note:** No source code is retained. Only small code snippets may be saved as part of security findings to provide context for remediation.
 
 ---
 
-## What CoreFix Scans
+## Ways to Run Scans
 
-CoreFix scans different layers of your technology stack to identify potential security risks.
+### 1. GitHub Integration (Automated)
 
-| Scan Module           | Description                                                                |
-| --------------------- | -------------------------------------------------------------------------- |
-| Network Perimeter     | Detect exposed services, open ports, and infrastructure vulnerabilities    |
-| Web Applications      | Identify vulnerabilities such as SQL injection, XSS, and misconfigurations |
-| Code Repositories     | Detect vulnerable dependencies, secrets, and insecure code patterns        |
-| Cloud Security (CSPM) | Identify cloud configuration risks and compliance violations               |
-| Cloud Workloads       | Detect vulnerabilities in running cloud compute instances                  |
+CoreFix integrates directly with GitHub. For every pull request raised, or on a matching push to a configured branch, a full scan is automatically triggered — no manual steps required.
 
-Each module uses specialized scanning engines optimized for the asset type being analyzed.
+### 2. CLI Agent via Docker (Local / On-Premise)
 
----
+Pull the CoreFix CLI agent image from Docker Hub or GHCR and run it directly against your source code:
 
-## How Scanning Works
+```bash
+# Pull the image
+docker pull corefix/cli-agent:latest
 
-CoreFix scanning typically follows three stages.
+# Run against your source code
+docker run --rm -v $(pwd):/app corefix/cli-agent:latest
+```
 
-### 1. Asset Discovery
+The agent mounts into your source directory and executes all configured scans locally, then pushes findings to the cloud.
 
-CoreFix identifies and registers the assets that need to be scanned, such as:
+### 3. Web Application Scanning via Docker
 
-* IP addresses
-* Domains and web applications
-* Source code repositories
-* Cloud accounts
-* Cloud workloads
+To scan a running web application:
 
-Once assets are registered, CoreFix builds an inventory for continuous security analysis.
+1. Create a `.ci.web.yaml` configuration file and place it in a dedicated folder.
+2. Optionally include your OpenAPI spec file or HAR files in the same folder for deeper coverage.
+3. Launch the web scanner agent via Docker, pointing it at your config folder.
 
----
+The scanner will use your configuration to perform authenticated and unauthenticated scans against your live application.
 
-### 2. Security Scanning
+### 4. CI/CD Pipeline Integration
 
-CoreFix runs automated scans using integrated security tools and proprietary engines to detect:
+The same Docker CLI agent can be integrated into any CI/CD pipeline with minimal setup. Example with GitHub Actions:
 
-* Known vulnerabilities (CVEs)
-* Security misconfigurations
-* Exposed services
-* Vulnerable dependencies
-* Hardcoded secrets
+```yaml
+- name: CoreFix Security Scan
+  run: |
+    docker run --rm -v ${{ github.workspace }}:/app \
+      -e COREFIX_API_KEY=${{ secrets.COREFIX_API_KEY }} \
+      corefix/cli-agent:latest
+```
 
-The scanners analyze the asset based on the selected scanning module.
+Compatible with GitHub Actions, GitLab CI, Jenkins, CircleCI, and any other pipeline that supports Docker.
 
----
+### 5. Manual Scans & Scheduling (Dashboard)
 
-### 3. Results & Remediation
+From the CoreFix web dashboard, you can:
 
-After scanning is completed, findings are presented in the CoreFix dashboard where users can:
-
-* View vulnerability summaries
-* Analyze detailed findings
-* Track vulnerability history
-* Generate AI-powered remediation reports
-
-This helps teams quickly understand the security posture of their infrastructure and address vulnerabilities efficiently.
+- **Run on demand** — hit the **Run** button after creating a project to trigger an immediate scan.
+- **Schedule scans** — configure recurring scans on a flexible schedule:
+  - Daily
+  - Weekly
+  - Monthly
+  - Custom cron expression
 
 ---
 
-## Supported Scan Targets
+## How a Scan Works End-to-End
 
-CoreFix can scan multiple asset types across infrastructure and applications.
+```
+Your Code / Web App
+        │
+        ▼
+┌───────────────────────────────┐
+│   Open Source Scanners        │
+│   (all launched in parallel)  │
+└───────────────────────────────┘
+        │
+        ▼
+┌───────────────────────────────┐
+│   AI Enrichment Layer         │
+│  • Deduplication              │
+│  • Enrichment                 │
+│  • Cross-scanner correlation  │
+│  • Prioritization             │
+└───────────────────────────────┘
+        │
+        ▼
+┌───────────────────────────────┐
+│   HTML Report Generated       │
+│   + Pushed to Cloud           │
+└───────────────────────────────┘
+        │
+        ▼
+  Email notification sent
+  ├── HTML report (public link, valid 1 hour)
+  └── Project results link (password-protected)
+```
 
-| Asset Type               |
-| ------------------------ |
-| IP Addresses             |
-| Domains                  |
-| Web Applications         |
-| APIs                     |
-| Source Code Repositories |
-| Cloud Accounts           |
-| Cloud Workloads          |
+All applicable open source scanners are launched simultaneously for each scan type. Results flow into the AI enrichment layer, which deduplicates overlapping findings, enriches them with context, correlates signals across scanners, and prioritizes findings by severity and exploitability.
 
 ---
 
-## Vulnerability Intelligence
+## Open Source Scanners
 
-CoreFix correlates detected issues with vulnerability intelligence sources such as:
+CoreFix is powered by industry-standard open source security tools.
 
-* National Vulnerability Database (NVD)
-* MITRE CVE database
-* Cloud provider security advisories
-* Open-source vulnerability databases
+### Code Scanning
 
-This ensures vulnerabilities discovered during scans are matched with **latest security advisories and risk data**.
+| Tool | Purpose | License |
+|---|---|---|
+| **OpenGrep** | Static analysis (SAST) — finds injection flaws, insecure patterns, hardcoded credentials, and logic bugs across 30+ languages | LGPL-2.1 |
+| **Gitleaks** | Secret detection — scans full git history across every commit and branch for leaked API keys, tokens, and passwords | MIT |
+| **OSV-Scanner** | Software composition analysis (SCA) — identifies known vulnerabilities in open source dependencies using Google's OSV database, with reachability analysis | Apache-2.0 |
+| **KICS** | Infrastructure as Code scanning — detects misconfigurations in Terraform, CloudFormation, Ansible, Helm, Dockerfiles, and Kubernetes manifests | Apache-2.0 |
+| **Kubescape** | Kubernetes security auditing — checks manifests, RBAC, network policies, and pod security against NSA-CISA, MITRE ATT&CK, and CIS benchmarks | Apache-2.0 |
 
+### Web Application Scanning
 
+| Tool | Purpose | License |
+|---|---|---|
+| **OWASP ZAP** | Dynamic analysis (DAST) — authenticated and unauthenticated active/passive scanning for OWASP Top 10 vulnerabilities in live applications | Apache-2.0 |
+| **Nuclei** | Template-based scanning — runs 8,000+ templates to detect known CVEs, exposed admin panels, default credentials, and misconfigurations | MIT |
+| **Nmap** | Network reconnaissance — maps open ports, identifies services and versions, and reveals network-level attack surface | NPSL/GPLv2 |
+| **testssl.sh** | TLS/SSL analysis — checks protocol support, cipher strength, certificate validity, HSTS, and known TLS vulnerabilities (Heartbleed, POODLE, etc.) | GPL-2.0 |
+| **SSLyze** | SSL/TLS auditing — deep analysis of certificate chains, key strength, cipher ordering, and compliance standards | AGPL-3.0 |
 
+### Coming Soon
 
+| Tool | Purpose | License |
+|---|---|---|
+| Grype | Container image vulnerability scanning | Apache-2.0 |
+| Dockle | Container image best practices linting | Apache-2.0 |
+| SonarQube (OSS) | Code quality and security analysis | LGPL-3.0 |
+
+---
+
+## Viewing Results
+
+After each scan completes:
+
+- An **email notification** is sent with a link to the HTML report.
+- The HTML report is **publicly accessible for 1 hour** via a time-limited link.
+- Full results are available at your **project's permanent link**, protected by a password.
+- All findings can be browsed directly in the **CoreFix cloud dashboard**.
+
+---
+
+*Questions? Reach out at [hello@corefix.dev](mailto:hello@corefix.dev)*

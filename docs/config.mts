@@ -85,8 +85,8 @@ export default defineConfig({
         text: "Projects",
         collapsed: false,
         items: [
-          { text: "Creating Projects", link: "/docs/creating-a-project" },
-          { text: "Managing Projects", link: "/docs/managing-projects" },
+          { text: "Creating Projects", link: "/docs/projects" },
+          { text: "Managing Projects", link: "/docs/projects" },
           { text: "Viewing Reports", link: "/docs/reports" },
           { text: "Findings & Triage", link: "/docs/findings" },
 
