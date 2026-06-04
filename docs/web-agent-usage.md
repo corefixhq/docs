@@ -477,6 +477,6 @@ Results are written to your `/output` mount:
 
 - [Code Scanner — Standalone Usage](./code-agent-usage.md)
 - [Chrome Extension Guide](./chrome-extension-guide)
-- [CI/CD Integration](./web-cicd-integration)
+- [CI/CD Integration](./cicd-web-scan)
 - [Supported Models](./models)
 - [Pricing & Usage](./pricing-and-usage)

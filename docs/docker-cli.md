@@ -170,5 +170,5 @@ After a scan completes, results are available in multiple places:
 - [Code Scanner — Standalone Usage](./code-agent-usage) — full CLI reference for code scanning
 - [Web Scanner — Standalone Usage](./web-agent-usage) — full CLI reference for web scanning
 - [Code Scanning CI/CD Integration](./cicd-integration) — add code scanning to your pipeline
-- [Web Scanning CI/CD Integration](./web-cicd-integration) — add DAST to your pipeline
+- [Web Scanning CI/CD Integration](./cicd-web-scan) — add DAST to your pipeline
 - [Web Scan Config Reference](./web-scan-config-reference.md) — configure scope, authentication, and coverage

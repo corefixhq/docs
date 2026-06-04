@@ -42,4 +42,4 @@ HTTPS targets also enable TLS checks automatically when the `web` scanner shorth
 
 - [Docker / Local CLI](/docs/docker-cli)
 - [Web Scanning](/docs/web-agent-usage)
-- [Web CI/CD Integration](/docs/web-cicd-integration)
+- [Web CI/CD Integration](/docs/cicd-web-scan)

@@ -68,7 +68,7 @@ Drop the CoreFix Docker agent into any existing pipeline as a step or standalone
 
 Results from every pipeline run appear in the CoreFix dashboard under your project automatically.
 
-**→** [Code Scanning CI/CD](/docs/cicd-integration) · [Web Scanning CI/CD](/docs/web-cicd-integration)
+**→** [Code Scanning CI/CD](/docs/cicd-integration) · [Web Scanning CI/CD](/docs/cicd-web-scan)
 
 ---
 
