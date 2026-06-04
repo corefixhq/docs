@@ -78,4 +78,4 @@ Results from every pipeline run appear in the CoreFix dashboard under your proje
 - **Want code scanning with no CI/CD setup** → [GitHub App](/docs/github-integration)
 - **Want to scan locally before pushing** → [Docker / Local CLI](/docs/docker-cli)
 - **Want scanning baked into your pipeline** → [CI/CD Integration](/docs/cicd-integration)
-- **Want deep authenticated or API web scanning** → [Web Scan Config Reference](/docs/web-cicd-config)
+- **Want deep authenticated or API web scanning** → [Web Scan Config Reference](./web-scan-config-reference.md)
