@@ -1,14 +1,19 @@
+import type { Theme } from "vitepress";
 import { h } from "vue";
-import Theme from "vitepress/theme";
+import DefaultTheme from "vitepress/theme";
+import { enhanceAppWithTabs } from "vitepress-plugin-tabs/client";
 import "./custom.css";
 import "./Footer.css";
 import CustomFooter from "./CustomFooter.vue";
 
 export default {
-  ...Theme,
+  extends: DefaultTheme,
+  enhanceApp({ app }) {
+    enhanceAppWithTabs(app);
+  },
   Layout() {
-    return h(Theme.Layout, null, {
+    return h(DefaultTheme.Layout, null, {
       "layout-bottom": () => h(CustomFooter),
     });
   },
-};
+} satisfies Theme;

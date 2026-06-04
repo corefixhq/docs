@@ -90,10 +90,10 @@
 
 .VPNavBarMenu .VPNavBarMenuLink,
 .VPNavScreenMenu .VPNavScreenMenuLink {
-  border: 1px solid #000000;
+  border: 1px solid var(--vp-c-text-1);
   border-radius: 8px;
-  background-color: #000000;
-  color: #ffffff;
+  background-color: var(--vp-c-text-1);
+  color: var(--vp-c-bg);
   text-decoration: none;
 }
 
@@ -112,22 +112,22 @@
 .VPNavBarMenu .VPNavBarMenuLink:hover,
 .VPNavBarMenu .VPNavBarMenuLink.active,
 .VPNavScreenMenu .VPNavScreenMenuLink:hover {
-  border-color: #242424;
-  background-color: #242424;
-  color: #ffffff;
+  border-color: var(--vp-c-text-2);
+  background-color: var(--vp-c-text-2);
+  color: var(--vp-c-bg);
   text-decoration: none;
 }
 
-.VPNavBarMenu .VPNavBarMenuLink:first-of-type,
-.VPNavScreenMenu .VPNavScreenMenuLink:first-of-type {
+.VPNavBarMenu .VPNavBarMenuLink:nth-of-type(-n + 2),
+.VPNavScreenMenu .VPNavScreenMenuLink:nth-of-type(-n + 2) {
   border-color: var(--vp-c-divider);
-  background-color: transparent;
+  background-color: var(--vp-c-bg);
   color: var(--vp-c-text-1);
 }
 
-.VPNavBarMenu .VPNavBarMenuLink:first-of-type:hover,
-.VPNavBarMenu .VPNavBarMenuLink:first-of-type.active,
-.VPNavScreenMenu .VPNavScreenMenuLink:first-of-type:hover {
+.VPNavBarMenu .VPNavBarMenuLink:nth-of-type(-n + 2):hover,
+.VPNavBarMenu .VPNavBarMenuLink:nth-of-type(-n + 2).active,
+.VPNavScreenMenu .VPNavScreenMenuLink:nth-of-type(-n + 2):hover {
   border-color: var(--vp-c-divider);
   background-color: var(--vp-c-bg-muted);
   color: var(--vp-c-text-1);

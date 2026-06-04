@@ -66,8 +66,6 @@ If using a Personal Access Token (PAT), grant **Code Scanning** with **Read and 
 
 Add secrets in your repository under **Settings → Secrets and variables → Actions → New repository secret**. See [GitHub Actions encrypted secrets](https://docs.github.com/en/actions/security-for-github-actions/security-guides/using-secrets-in-github-actions) for details.
 
-<div v-pre>
-
 :::tabs
 == Standalone Workflow File
 
@@ -121,8 +119,7 @@ jobs:
           path: scan-results/
 ```
 
-
-> Remove `--username` and `--password` for unauthenticated scans. For token-based auth, replace them with `--token ${{ "{{" }} secrets.TOKEN {{ "}}" }}`.
+> Remove `--username` and `--password` for unauthenticated scans. For token-based auth, replace them with <code v-pre>--token ${{ secrets.TOKEN }}</code>.
 
 == Add as Step
 
@@ -155,15 +152,11 @@ Ensure the web scan step runs **after** your application is deployed and accessi
 
 :::
 
-</div>
-
 ---
 
 ## GitLab CI
 
 Add variables in your project under **Settings → CI/CD → Variables**. Mark `X_CFIX_API_KEY`, `USERNAME`, `PASSWORD`, and `TOKEN` as **Masked** and **Protected**. See [GitLab CI/CD variables](https://docs.gitlab.com/ee/ci/variables/) for details.
-
-<div v-pre>
 
 :::tabs
 == Standalone Pipeline File
@@ -260,15 +253,11 @@ Replace `deploy-staging` in `needs` with the name of your actual deploy job.
 
 :::
 
-</div>
-
 ---
 
 ## Jenkins
 
 Add credentials in **Manage Jenkins → Credentials → System → Global credentials** as **Secret text** entries. See [Jenkins credentials](https://www.jenkins.io/doc/book/using/using-credentials/) for details.
-
-<div v-pre>
 
 :::tabs
 == Standalone Jenkinsfile
@@ -367,15 +356,11 @@ Ensure `ORG_ID`, `SCAN_TARGET`, and `SCAN_EMAILS` are set in your pipeline's `en
 
 :::
 
-</div>
-
 ---
 
 ## CircleCI
 
 Add environment variables in your project under **Project Settings → Environment Variables**. See [CircleCI environment variables](https://circleci.com/docs/env-vars/) for details.
-
-<div v-pre>
 
 :::tabs
 == Standalone Config File
@@ -477,8 +462,6 @@ workflows:
 ```
 
 :::
-
-</div>
 
 ---
 
