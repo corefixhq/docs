@@ -66,6 +66,7 @@ export default defineConfig({
         text: "Scanning",
         collapsed: false,
         items: [
+          { text: "Ways to Scan", link: "/docs/ways-to-scan" },
           { text: "Code Scanning", link: "/docs/code-agent-usage" },
           { text: "Web Scanning", link: "/docs/web-agent-usage" },
           {
@@ -73,12 +74,12 @@ export default defineConfig({
             collapsed: true,
             items: [
               { text: "Code Scanning", link: "/docs/cicd-integration" },
-              { text: "Web Scanning", link: "/docs/web-cicd-integration" },
+              { text: "Web Scanning", link: "/docs/cicd-web-scan" },
             ],
           },
           { text: "Docker / Local CLI", link: "/docs/docker-cli" },
           { text: "Chrome Extension", link: "/docs/chrome-extension-guide" },
-          { text: "Web Scan Config Reference", link: "/docs/web-cicd-config" },
+          { text: "Web Scan Config Reference", link: "/docs/web-scan-config-reference" },
         ],
       },
       {
@@ -87,19 +88,19 @@ export default defineConfig({
         items: [
           { text: "Creating Projects", link: "/docs/creating-a-project" },
           { text: "Managing Projects", link: "/docs/managing-projects" },
-          { text: "Viewing Reports", link: "/docs/reports" },
-          { text: "Findings & Triage", link: "/docs/findings" },
-
+          { text: "Viewing Results", link: "/docs/reports" }
         ],
       },
-      {
-        text: "AI & Models",
-        collapsed: false,
-        items: [
-          { text: "AI Enrichment", link: "/docs/ai-enrichment" },
-          { text: "Supported Models", link: "/docs/models" },
-        ],
-      },
+    {
+      text: "AI & Models",
+      collapsed: false,
+      items: [
+        { text: "AI Enrichment", link: "/docs/ai-enrichment" },
+        { text: "Supported Models", link: "/docs/modelss" },
+        { text: "Model Pricing", link: "/docs/models-pricing" },
+        { text: "Model Availability Matrix", link: "/docs/models-matrix" },
+      ],
+    },
       {
         text: "Account",
         collapsed: false,

@@ -1,11 +1,26 @@
-# Docker / Local CLI
+---
+hide_title: true
+sidebar_label: Docker / Local CLI
+---
 
-Run CoreFix scanners entirely on your local machine or any server — no CI/CD pipeline required. Your source code never leaves your environment. Only findings are sent to the CoreFix dashboard for AI enrichment, deduplication, and reporting.
+## Docker Agent — Overview
 
-## When to use Docker / CLI
+CoreFix provides two Docker images for running security scans locally or on any server. Your source code never leaves your environment — only security findings are sent to the CoreFix cloud for AI enrichment, deduplication, and reporting.
+
+| Image | Purpose | Detailed Guide |
+|---|---|---|
+| `corefixhq/cfix` | Code scanning — SAST, secrets, SCA, IaC, Kubernetes | [Code Scanner — Standalone Usage](./code-agent-usage) |
+| `corefixhq/cfix-web` | Web application scanning — DAST, CVEs, port scanning, SSL/TLS | [Web Scanner — Standalone Usage](./web-agent-usage) |
+
+Both images are available on [Docker Hub](https://hub.docker.com/u/corefixhq) and [GitHub Container Registry (GHCR)](https://github.com/orgs/corefixhq/packages).
+
+---
+
+## When to Use Docker / CLI
 
 - Scan a repo locally before pushing to remote
 - One-off security audits on any codebase
+- Run web scans against staging or production URLs
 - Environments without a GitHub App or CI/CD integration
 - Air-gapped or restricted environments
 - Evaluating CoreFix before setting up a full integration
@@ -15,398 +30,145 @@ Run CoreFix scanners entirely on your local machine or any server — no CI/CD p
 ## Prerequisites
 
 - [Docker](https://docs.docker.com/get-docker/) installed and running
-- A CoreFix API key — get one from your [dashboard](https://app.corefix.dev)
-- Your Organization ID — visible in dashboard settings
+- A CoreFix API key and Organization ID — get both from [Account & API Keys](https://app.corefix.dev/settings/api-keys)
 
 ---
 
-## Code Scanning
+## Common Environment Variables
 
-### Pull the image
-
-```bash
-# Latest stable
-docker pull cfix:latest
-
-# Or use shorthand
-docker pull cfix
-
-# Specific version
-docker pull cfix:1.0.0
-```
-
-### Run a scan
-
-Navigate to your project directory, then run:
-
-```bash
-docker run --rm \
-  -e X_CFIX_API_KEY=cfix_live_YOUR_API_KEY \
-  -e ORG_ID=YOUR_ORG_ID \
-  -e X_CFIX_API_URL=https://api.corefix.dev \
-  -v $(pwd):/code \
-  -v ~/scan-results:/output \
-  cfix:latest \
-  --emailids you@example.com \
-  --model gpt-4o-mini
-```
-
-The scan mounts your current directory (`$(pwd)`) into the container as `/code`. Results are written to `~/scan-results` on your host machine and also sent to your CoreFix dashboard.
-
-### Run specific scanners only
-
-By default, all five code scanners run in parallel: `osv,iac,secrets,k8s,sast`
-
-To run specific scanners, pass the scanner names as the first argument:
-
-```bash
-# Secrets and SAST only
-docker run --rm \
-  -e X_CFIX_API_KEY=cfix_live_YOUR_API_KEY \
-  -e ORG_ID=YOUR_ORG_ID \
-  -e X_CFIX_API_URL=https://api.corefix.dev \
-  -v $(pwd):/code \
-  -v ~/scan-results:/output \
-  cfix:latest secrets,sast \
-  --emailids you@example.com \
-  --model gpt-4o-mini
-```
-
-**Available scanners:**
-
-| Scanner | Flag | What it covers |
-|---|---|---|
-| SAST | `sast` | Code vulnerabilities via OpenGrep |
-| Secrets | `secrets` | Hardcoded credentials via Gitleaks |
-| Dependencies | `osv` | CVEs in open source packages via OSV-Scanner |
-| IaC | `iac` | Terraform, Dockerfile, CloudFormation via KICS |
-| Kubernetes | `k8s` | K8s manifests, RBAC, pod security via Kubescape |
-
-### Use your own AI key (BYOK)
-
-Pass your own OpenAI-compatible API key to avoid using CoreFix credits for AI enrichment:
-
-```bash
-docker run --rm \
-  -e X_CFIX_API_KEY=cfix_live_YOUR_API_KEY \
-  -e ORG_ID=YOUR_ORG_ID \
-  -e X_CFIX_API_URL=https://api.corefix.dev \
-  -v $(pwd):/code \
-  -v ~/scan-results:/output \
-  cfix:latest \
-  --emailids you@example.com \
-  --openai-api-key sk-YOUR_OPENAI_KEY \
-  --model gpt-4o-mini
-```
-
-### Code scan options
-
-| Flag | Required | Description |
-|---|---|---|
-| `--emailids` | No | Comma-separated email addresses to notify when scan completes |
-| `--openai-api-key` | No | Your own OpenAI-compatible API key (BYOK) |
-| `--model` | No | AI model to use for enrichment (see [Supported Models](/docs/models)) |
-
-### Environment variables
+The following environment variables are shared by both the code and web scanning agents. They can only be passed via `-e` flags on the Docker command.
 
 | Variable | Required | Description |
 |---|---|---|
-| `X_CFIX_API_KEY` | Yes | Your CoreFix API key from the dashboard |
-| `ORG_ID` | Yes | Your Organization ID from dashboard settings |
-| `X_CFIX_API_URL` | Yes | CoreFix API endpoint: `https://api.corefix.dev` |
+| `ORG_ID` | **Yes** | Your CoreFix Organization ID |
+| `X_CFIX_API_KEY` | **Yes** | Your CoreFix API key |
+| `GITHUB_TOKEN` | No | GitHub Personal Access Token for pushing scan results as SARIF to GitHub Code Scanning |
 | `DEBUG` | No | Set to `app:*` to enable verbose debug logging |
 
----
-
-## Web Scanning
-
-### Pull the image
-
-```bash
-# Latest stable
-docker pull cfix-web:latest
-
-# Or use shorthand
-docker pull cfix-web
-
-# Specific version
-docker pull cfix-web:1.0.0
-```
-
-### Run an unauthenticated quick scan
-
-The fastest way to get results — no credentials needed:
-
-```bash
-docker run --rm \
-  --network host \
-  -e X_CFIX_API_KEY=cfix_live_YOUR_API_KEY \
-  -e ORG_ID=YOUR_ORG_ID \
-  -e X_CFIX_API_URL=https://api.corefix.dev \
-  -v $(pwd):/web \
-  -v ~/scan-results-web:/output \
-  cfix-web:latest web \
-  --target https://your-app.com \
-  --emailids you@example.com \
-  --model gpt-4o-mini
-```
-
-::: tip
-`--network host` is required for web scanning so the container can reach your target URL, including local or staging environments on your network.
-:::
-
-### Run an authenticated scan
-
-Provide credentials to scan behind login:
-
-```bash
-docker run --rm \
-  --network host \
-  -e X_CFIX_API_KEY=cfix_live_YOUR_API_KEY \
-  -e ORG_ID=YOUR_ORG_ID \
-  -e X_CFIX_API_URL=https://api.corefix.dev \
-  -v $(pwd):/web \
-  -v ~/scan-results-web:/output \
-  cfix-web:latest web \
-  --target https://your-app.com \
-  --username admin \
-  --password yourpassword \
-  --emailids you@example.com \
-  --model gpt-4o-mini
-```
-
-### Use a bearer token or session cookie
-
-For complex auth flows — OAuth, SSO, MFA — bypass credential login and provide a session token directly:
-
-```bash
-docker run --rm \
-  --network host \
-  -e X_CFIX_API_KEY=cfix_live_YOUR_API_KEY \
-  -e ORG_ID=YOUR_ORG_ID \
-  -e X_CFIX_API_URL=https://api.corefix.dev \
-  -v $(pwd):/web \
-  -v ~/scan-results-web:/output \
-  cfix-web:latest web \
-  --target https://your-app.com \
-  --token "Bearer eyJhbGciOiJIUzI1NiIs..." \
-  --emailids you@example.com \
-  --model gpt-4o-mini
-```
+> **Note:** `GITHUB_TOKEN` is available for both agents. For web scans, this allows pushing DAST findings to your GitHub repository's Code Scanning tab as SARIF, giving you a unified view of code and web findings directly in GitHub.
 
 ---
 
-## Browser Options for Web Scanning
+## Bring Your Own Model (BYOK)
 
-Web scanning requires a browser to crawl your application. CoreFix supports three browser modes.
+Both agents support AI enrichment using CoreFix's built-in model rotation or your own OpenAI-compatible API key.
 
-### Option 1 — Cloudflare Browser (recommended, zero setup)
+**If you don't specify a model or API key**, CoreFix automatically selects a model based on your plan — no configuration needed.
 
-Use CoreFix's managed Cloudflare browser. No local browser installation needed, no extra flags:
-
-```bash
-docker run --rm \
-  --network host \
-  -e X_CFIX_API_KEY=cfix_live_YOUR_API_KEY \
-  -e ORG_ID=YOUR_ORG_ID \
-  -e X_CFIX_API_URL=https://api.corefix.dev \
-  -v $(pwd):/web \
-  -v ~/scan-results-web:/output \
-  cfix-web:latest web \
-  --target https://your-app.com \
-  --cf-browser true \
-  --emailids you@example.com
-```
-
-### Option 2 — Remote Playwright Server
-
-Launch a Playwright server on your host, then connect to it from the container. Keeps the Docker image lean.
-
-**Start the Playwright server on your host:**
+**If you provide `--openai-api-key`**, you must also specify `--model`. The scan will fail without it. You pay your provider directly.
 
 ```bash
-npx playwright launch-server --port 9323
+# BYOK — model is required
+--openai-api-key sk-proj-xxxxxxxx --model gpt-4o-mini
+
+# No key — CoreFix handles model selection automatically
+# (no flags needed)
 ```
 
-**Run the scan connecting to it:**
-
-```bash
-docker run --rm \
-  --network host \
-  -e X_CFIX_API_KEY=cfix_live_YOUR_API_KEY \
-  -e ORG_ID=YOUR_ORG_ID \
-  -e X_CFIX_API_URL=https://api.corefix.dev \
-  -v $(pwd):/web \
-  -v ~/scan-results-web:/output \
-  cfix-web:latest web \
-  --target https://your-app.com \
-  --remote ws://localhost:9323 \
-  --emailids you@example.com
-```
-
-### Option 3 — Remote Chrome via CDP
-
-Launch Chrome in headless mode on your host and connect via Chrome DevTools Protocol:
-
-**Start Chrome on your host:**
-
-```bash
-# Google Chrome
-google-chrome \
-  --remote-debugging-port=9222 \
-  --headless \
-  --no-sandbox
-
-# Or Chromium
-chromium-browser \
-  --remote-debugging-port=9222 \
-  --remote-debugging-address=0.0.0.0 \
-  --headless \
-  --no-sandbox
-```
-
-**Run the scan connecting to it:**
-
-```bash
-docker run --rm \
-  --network host \
-  -e X_CFIX_API_KEY=cfix_live_YOUR_API_KEY \
-  -e ORG_ID=YOUR_ORG_ID \
-  -e X_CFIX_API_URL=https://api.corefix.dev \
-  -v $(pwd):/web \
-  -v ~/scan-results-web:/output \
-  cfix-web:latest web \
-  --target https://your-app.com \
-  --remote http://localhost:9222 \
-  --emailids you@example.com
-```
-
-::: info Auto-detection
-CoreFix auto-detects the remote browser type from the URL — `ws://` for Playwright, `http://` for CDP. No extra flags needed.
-:::
+See [Supported Models](https://docs.corefix.dev/docs/models) for the full reference.
 
 ---
 
-## Web scan options
+## CLI Options — Code Scanner (`corefixhq/cfix`)
 
 | Flag | Required | Description |
 |---|---|---|
-| `--target` | Yes | Target URL. Accepts `https://app.com`, `http://IP:8080`, or bare domain `app.com` |
-| `--username` | No | Login username for authenticated scans |
-| `--password` | No | Login password for authenticated scans |
-| `--token` | No | Bearer token or session cookie — use for OAuth, SSO, MFA flows |
-| `--remote` | No | Remote browser endpoint. `ws://HOST:9323` for Playwright, `http://HOST:9222` for CDP |
-| `--cf-browser` | No | Use Cloudflare managed browser. Pass `true` to enable |
-| `--emailids` | No | Comma-separated emails to notify on completion |
+| `[scanner]` | No | Positional argument. Comma-separated scanner names. Default: `osv,iac,secrets,k8s,sast` |
+| `--emailids` | No | Comma-separated email addresses to notify when scan completes |
 | `--openai-api-key` | No | Your own OpenAI-compatible API key (BYOK) |
-| `--model` | No | AI model to use for enrichment |
+| `--model` | No | AI model to use for enrichment. Required when `--openai-api-key` is provided |
+| `--github-token` | No | GitHub PAT for pushing SARIF to GitHub Code Scanning |
+
+**Available scanners:**
+
+| Scanner | Flag | What It Covers |
+|---|---|---|
+| SAST | `sast` | Code vulnerabilities across 30+ languages via OpenGrep |
+| Secrets | `secrets` | Hardcoded credentials, API keys, tokens via Gitleaks |
+| Dependencies | `osv` | CVEs in open source packages via OSV-Scanner |
+| IaC | `iac` | Terraform, Dockerfile, CloudFormation misconfigs via KICS |
+| Kubernetes | `k8s` | K8s manifests, RBAC, pod security via Kubescape |
 
 ---
 
-## Supported Models
+## CLI Options — Web Scanner (`corefixhq/cfix-web`)
 
-Pass any of these to `--model`:
-
-| Model | Flag value | Best for |
+| Flag | Required | Description |
 |---|---|---|
-| GPT-4o mini | `gpt-4o-mini` | Fast, cost-efficient enrichment |
-| GPT-5.4 mini | `gpt-5.4-mini` | Balanced accuracy and cost |
-| Minimax 2.5 | `minimax-2.5` | Alternative provider |
-| GLM 5.1 | `glm-5.1` | Alternative provider |
-| Kimi 2.6 | `kimi-2.6` | Alternative provider |
-| Grok 4.3 | `grok-4.3` | Alternative provider |
+| `[scanner]` | No | Positional argument. Comma-separated scanner names. Default: `nmap,vuln,web` |
+| `--target` | Yes | Target URL. Accepts `https://app.com`, `http://IP:8080`, or bare domain |
+| `--username` | No | Login username for authenticated scans |
+| `--password` | No | Login password for authenticated scans |
+| `--token` | No | Bearer token or session cookie — use for OAuth, SSO, MFA, or API scanning |
+| `--remote` | No | Remote browser endpoint. `ws://HOST:PORT` for Playwright, `http://HOST:PORT` for Chrome CDP |
+| `--cf-browser` | No | Use Cloudflare managed browser. Pass `true` to enable |
+| `--emailids` | No | Comma-separated emails to notify on completion |
+| `--openai-api-key` | No | Your own OpenAI-compatible API key (BYOK) |
+| `--model` | No | AI model to use for enrichment. Required when `--openai-api-key` is provided |
+| `--github-token` | No | GitHub PAT for pushing SARIF to GitHub Code Scanning |
 
-::: tip Free plan models
-Open source projects on the free plan can use: `gpt-4o-mini`, `gpt-5.4-mini`, `deepseek-v4-flash`, and `gpt-120b-oss`.
-:::
+**Available scanners:**
+
+| Scanner | Flag | What It Covers |
+|---|---|---|
+| Port scan | `nmap` | Open ports, services, network discovery via Nmap |
+| CVE scan | `vuln` | Known CVEs, misconfigs, exposed panels via Nuclei |
+| Web scan | `web` | Smart shorthand — auto-selects sub-scanners based on config |
+| DAST (unauth) | `web` | Unauthenticated web crawl and active scan via OWASP ZAP |
+| DAST (auth) | `web` | Authenticated web scan using credentials or token via OWASP ZAP. Configure `.cfix.web.yaml` |
+| API fuzzing | `web` | API fuzzing against OpenAPI/Swagger spec. Launches automatically (Coming Soon) |
+| ZAP API fuzzing | `web` | ZAP-based API fuzzing  (Coming Soon) |
+| SSL/TLS | `web` | SSL/TLS configuration and certificate analysis via testssl.sh, Launches automatically if `https` website |
+
+---
+
+## Quick Start
+
+### Code Scanning
+
+```bash
+docker run --rm \
+  -e ORG_ID=<your-org-id> \
+  -e X_CFIX_API_KEY=<your-api-key> \
+  -v $(pwd):/code \
+  -v ~/scan-results:/output \
+  corefixhq/cfix
+```
+
+For the full CLI reference, scanner flags, examples, and output details, see [Code Scanner — Standalone Usage](./code-agent-usage).
+
+### Web Scanning
+
+```bash
+docker run --rm \
+  --network host \
+  -e ORG_ID=<your-org-id> \
+  -e X_CFIX_API_KEY=<your-api-key> \
+  -v $(pwd):/web \
+  -v ~/scan-results:/output \
+  corefixhq/cfix-web \
+  --target https://your-app.com
+```
+
+For the full CLI reference, authentication options, browser setup, and config file details, see [Web Scanner — Standalone Usage](./web-agent-usage).
 
 ---
 
 ## Viewing Results
 
-After a scan completes:
+After a scan completes, results are available in multiple places:
 
-- **Dashboard** — findings appear automatically at [app.corefix.dev](https://app.corefix.dev) under your project
-- **Local output** — raw results written to your mounted output directory (`~/scan-results` or `~/scan-results-web`)
-- **Email** — if `--emailids` was passed, a summary report is sent on completion
-
----
-
-## Full Examples
-
-### Scan a Node.js project locally, secrets and SAST only
-
-```bash
-cd ~/projects/my-api
-
-docker run --rm \
-  -e X_CFIX_API_KEY=cfix_live_YOUR_API_KEY \
-  -e ORG_ID=YOUR_ORG_ID \
-  -e X_CFIX_API_URL=https://api.corefix.dev \
-  -v $(pwd):/code \
-  -v ~/scan-results:/output \
-  cfix:latest secrets,sast \
-  --emailids you@example.com \
-  --model gpt-4o-mini
-```
-
-### Full authenticated web scan with Cloudflare browser
-
-```bash
-docker run --rm \
-  --network host \
-  -e X_CFIX_API_KEY=cfix_live_YOUR_API_KEY \
-  -e ORG_ID=YOUR_ORG_ID \
-  -e X_CFIX_API_URL=https://api.corefix.dev \
-  -v $(pwd):/web \
-  -v ~/scan-results-web:/output \
-  cfix-web:latest web \
-  --target https://staging.my-app.com \
-  --username admin \
-  --password secret \
-  --cf-browser true \
-  --emailids security@mycompany.com \
-  --model gpt-5.4-mini
-```
-
-### Debug mode — verbose output
-
-```bash
-docker run --rm \
-  -e DEBUG=app:* \
-  -e X_CFIX_API_KEY=cfix_live_YOUR_API_KEY \
-  -e ORG_ID=YOUR_ORG_ID \
-  -e X_CFIX_API_URL=https://api.corefix.dev \
-  -v $(pwd):/code \
-  -v ~/scan-results:/output \
-  cfix:latest \
-  --emailids you@example.com \
-  --model gpt-4o-mini
-```
-
----
-
-## Available Docker Images
-
-| Image | Tag | Purpose |
-|---|---|---|
-| `cfix` | `latest` | Code scanning (SAST, secrets, SCA, IaC, K8s) |
-| `cfix` | `1.0.0` | Specific version of code scanner |
-| `cfix-web` | `latest` | Web application scanning (DAST, CVEs, recon, SSL) |
-| `cfix-web` | `1.0.0` | Specific version of web scanner |
-
-Pull from Docker Hub:
-
-```bash
-docker pull cfix:latest
-docker pull cfix-web:latest
-```
+- **Dashboard** — findings appear automatically at [app.corefix.dev](https://app.corefix.dev) under your project.
+- **Local output** — raw, normalized, and enriched results are written to your mounted output directory.
+- **Email** — if `--emailids` was passed, recipients receive a password-protected report link (no CoreFix account required).
+- **GitHub Code Scanning** — if `GITHUB_TOKEN` was provided, SARIF results are pushed to your repository's Security tab.
 
 ---
 
 ## Next Steps
 
-- [Set up CI/CD integration](/docs/cicd-integration) — auto-scan on every push
-- [Chrome Extension](/docs/chrome-extension-guide) — capture HAR files for deep authenticated web scanning
-- [Supported Models](/docs/models) — full model reference
-- [Pricing & Usage](/docs/pricing-and-usage) — understand how credits are consumed
+- [Code Scanner — Standalone Usage](./code-agent-usage) — full CLI reference for code scanning
+- [Web Scanner — Standalone Usage](./web-agent-usage) — full CLI reference for web scanning
+- [Code Scanning CI/CD Integration](./cicd-integration) — add code scanning to your pipeline
+- [Web Scanning CI/CD Integration](./web-cicd-integration) — add DAST to your pipeline
+- [Web Scan Config Reference](./web-cicd-config) — configure scope, authentication, and coverage
