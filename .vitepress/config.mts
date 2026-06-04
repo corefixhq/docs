@@ -60,11 +60,12 @@ export default defineConfig({
     ],
 
     sidebar: [
+      { text: "Corefix Docs", link: "/docs/introduction" },
       {
         text: "Introduction",
         collapsed: false,
         items: [
-          { text: "What is CoreFix?", link: "/docs/introduction" },
+          { text: "What is CoreFix?", link: "/docs/what-is-corefix" },
           { text: "How It Works", link: "/docs/how-it-works" },
         ],
       },
