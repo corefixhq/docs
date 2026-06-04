@@ -16,7 +16,7 @@ Run the scanner directly on any machine with Docker installed.
 Integrate directly with your CI/CD pipeline for automated security scanning.
 
 - **Best for**: Automated pipelines, continuous monitoring
-- **Get started**: [Web CI/CD Integration](/docs/web-cicd-integration)
+- **Get started**: [Web CI/CD Integration](/docs/cicd-web-scan)
 
 ### Web Standalone
 

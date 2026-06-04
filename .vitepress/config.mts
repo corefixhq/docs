@@ -1,5 +1,6 @@
 import { defineConfig } from "vitepress";
 import { loadEnv } from "vite";
+import { tabsMarkdownPlugin } from "vitepress-plugin-tabs";
 
 const env = loadEnv("", process.cwd(), "");
 const appUrl = env.VITE_APP_URL || "https://app.corefix.dev";
@@ -12,8 +13,22 @@ export default defineConfig({
 
   head: [
     ["link", { rel: "icon", href: "/light/cf-on-light.svg" }],
-    ["meta", { name: "theme-color", content: "#ffffff", media: "(prefers-color-scheme: light)" }],
-    ["meta", { name: "theme-color", content: "#0b0d10", media: "(prefers-color-scheme: dark)" }],
+    [
+      "meta",
+      {
+        name: "theme-color",
+        content: "#ffffff",
+        media: "(prefers-color-scheme: light)",
+      },
+    ],
+    [
+      "meta",
+      {
+        name: "theme-color",
+        content: "#0b0d10",
+        media: "(prefers-color-scheme: dark)",
+      },
+    ],
   ],
 
   themeConfig: {
@@ -45,11 +60,12 @@ export default defineConfig({
     ],
 
     sidebar: [
+      { text: "Corefix Docs", link: "/docs/introduction" },
       {
         text: "Introduction",
         collapsed: false,
         items: [
-          { text: "Overview", link: "/docs/introduction" },
+          { text: "What is CoreFix?", link: "/docs/what-is-corefix" },
           { text: "How It Works", link: "/docs/how-it-works" },
         ],
       },
@@ -59,13 +75,17 @@ export default defineConfig({
         items: [
           { text: "Sign Up & Setup", link: "/docs/sign-up-and-sign-in" },
           { text: "Web Scan in 2 Minutes", link: "/docs/web-scan-quickstart" },
-          { text: "Connect GitHub for Code Scanning", link: "/docs/github-integration" },
+          {
+            text: "Connect GitHub for Code Scanning",
+            link: "/docs/github-integration",
+          },
         ],
       },
       {
         text: "Scanning",
         collapsed: false,
         items: [
+          { text: "Ways to Scan", link: "/docs/ways-to-scan" },
           { text: "Code Scanning", link: "/docs/code-agent-usage" },
           { text: "Web Scanning", link: "/docs/web-agent-usage" },
           {
@@ -73,12 +93,15 @@ export default defineConfig({
             collapsed: true,
             items: [
               { text: "Code Scanning", link: "/docs/cicd-integration" },
-              { text: "Web Scanning", link: "/docs/web-cicd-integration" },
+              { text: "Web Scanning", link: "/docs/cicd-web-scan" },
             ],
           },
           { text: "Docker / Local CLI", link: "/docs/docker-cli" },
           { text: "Chrome Extension", link: "/docs/chrome-extension-guide" },
-          { text: "Web Scan Config Reference", link: "/docs/web-cicd-config" },
+          {
+            text: "Web Scan Config Reference",
+            link: "/docs/web-scan-config-reference",
+          },
         ],
       },
       {
@@ -87,9 +110,7 @@ export default defineConfig({
         items: [
           { text: "Creating Projects", link: "/docs/creating-a-project" },
           { text: "Managing Projects", link: "/docs/managing-projects" },
-          { text: "Viewing Reports", link: "/docs/reports" },
-          { text: "Findings & Triage", link: "/docs/findings" },
-
+          { text: "Viewing Results", link: "/docs/reports" },
         ],
       },
       {
@@ -98,6 +119,8 @@ export default defineConfig({
         items: [
           { text: "AI Enrichment", link: "/docs/ai-enrichment" },
           { text: "Supported Models", link: "/docs/models" },
+          { text: "Model Pricing", link: "/docs/models-pricing" },
+          { text: "Model Availability Matrix", link: "/docs/models-matrix" },
         ],
       },
       {
@@ -113,13 +136,15 @@ export default defineConfig({
         collapsed: false,
         items: [
           { text: "Terms of Service", link: "/docs/terms-of-service" },
-          { text: "Privacy Policy", link: "/docs/privacy-policy" },
+          { text: "Privacy Policy", link: "/docs/privacy-protection" },
           { text: "Cookie Policy", link: "/docs/cookie-policy" },
           { text: "Refund Policy", link: "/docs/refund-policy" },
           { text: "Security Policy", link: "/docs/security-policy" },
-          { text: "AI Usage Policy", link: "/docs/ai-usage-policy" },
-          { text: "Disclaimer", link: "/docs/disclaimer" },
-          { text: "Open Source Acknowledgements", link: "/docs/acknowledgements" },
+          { text: "AI Usage Policy", link: "/docs/ai-policy" },
+          {
+            text: "Open Source Acknowledgements",
+            link: "/docs/acknowledgements",
+          },
         ],
       },
       {
@@ -162,5 +187,8 @@ export default defineConfig({
 
   markdown: {
     lineNumbers: true,
+    config(md) {
+      md.use(tabsMarkdownPlugin);
+    },
   },
 });

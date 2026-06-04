@@ -16,5 +16,3 @@ onMounted(() => {
   window.location.replace("/docs/introduction");
 });
 </script>
-
-Opening the [CoreFix Docs Overview](/docs/introduction)...

@@ -73,7 +73,7 @@ export default defineConfig({
             collapsed: true,
             items: [
               { text: "Code Scanning", link: "/docs/cicd-integration" },
-              { text: "Web Scanning", link: "/docs/web-cicd-integration" },
+              { text: "Web Scanning", link: "/docs/cicd-web-scan" },
             ],
           },
           { text: "Docker / Local CLI", link: "/docs/docker-cli" },

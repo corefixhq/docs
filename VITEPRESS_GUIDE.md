@@ -24,7 +24,7 @@ planning/
 │       └── custom.css       # Custom styling
 ├── docs/                     # Your existing markdown documentation
 │   ├── standalone-usage.md
-│   ├── web-cicd-integration.md
+│   ├── cicd-web-scan.md
 │   ├── web-standalone-usage.md
 │   ├── projects.md
 │   ├── reports.md

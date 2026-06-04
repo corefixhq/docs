@@ -22,6 +22,8 @@ When a scan completes, every email address configured on the project receives a 
 - **Build details** — commit SHA, commit message, who triggered the build, and the build UUID
 - **Two links** to the report (see below)
 
+![Email Report](./assets/projects/email-notification.png)
+
 ### Option 1 — Login via the Reports Portal
 
 The email contains a **View Build Results →** button that takes you to the Reports Portal pre-filled with your project and organization IDs.
@@ -44,28 +46,57 @@ Once logged in:
 
 The email also contains a **Direct link** below the main button. This is a pre-signed R2 URL that opens the report without any login.
 
-- **Expiry:** 5 hours from the time the email was sent
+- **Expiry:** 1 hour from the time the email was sent
 - After expiry the link returns an error — use the login flow to access the report instead
 - The link is scoped to a single build and cannot be used to browse other builds
+- Clicking **☀️ / 🌙** toggles between light and dark mode. The preference is saved in your browser.
+
+
+![HTMl Report](./assets/projects/html-report.png)
 
 ---
 
 ## Projects and Builds
 
-| Concept     | What it is                                                                                                                  |
+| Concept | What it is |
 | ----------- | --------------------------------------------------------------------------------------------------------------------------- |
-| **Project** | A repository (Git or web target) tracked in your organization. Identified by `project_id` and `repo` name.                  |
-| **Build**   | One scan run against a specific commit and branch. Each build has a unique `build_uuid`.                                    |
-| **Branch**  | A Git branch (e.g. `main`, `dev`). The portal lets you switch between branches and see each branch's history independently. |
+| **Project** | A repository (Git or web target) tracked in your organization. Identified by `project_id` and `repo` name. |
+| **Build** | One scan run against a specific commit and branch. Each build has a unique `build_uuid`. |
+| **Branch** | A Git branch (e.g. `main`, `dev`). The portal lets you switch between branches and see each branch's history independently. |
 
 Builds are listed **newest first** (by `created_on` timestamp). The top entry is always the most recent scan.
 
-Each build card in the portal shows:
+Click on a project from the Projects list to open it and view its findings, build history, and scan details.
+
+![Project List](./assets/projects/project-findings.png)
+
+Once inside a project, each build card shows:
 
 - Branch, commit SHA, and commit message
 - Who triggered the scan
 - Total finding count and severity breakdown
 - Scan status
+
+
+### Header
+
+```
+CoreFix / <repo> / <branch> / <build>
+```
+
+![Breadcumb](./assets/projects/breadcumb-tabs.png)
+
+
+### Switching Branches and Builds
+
+Use the **branch dropdown in the breadcrumb** to switch between branches and view findings scoped to that branch independently.
+
+![Branch Dropdown](./assets/projects/branch-dropdown.png)
+
+Once a branch is selected, use the **build dropdown** to switch between individual scan runs on that branch — useful for comparing findings across commits or revisiting a previous scan.
+
+![Build Dropdown](./assets/projects/build-dropdown.png)
+
 
 ---
 
@@ -73,28 +104,8 @@ Each build card in the portal shows:
 
 Every report shares the same layout:
 
-### Header
 
-```
-CoreFix / <repo> / <branch>          <org name>  [☀️ theme toggle]
-```
-
-- Clicking **☀️ / 🌙** toggles between light and dark mode. The preference is saved in your browser.
-
-### Build Bar
-
-Below the header, a slim bar shows:
-
-```
-<commit message>   <commit SHA ↗>   by <triggered_by>             <time ago>
-```
-
-- The commit SHA links directly to GitHub / GitLab / Bitbucket depending on your remote URL.
-- Hovering the time shows the exact UTC timestamp.
-
----
-
-## Tabs
+### Tabs
 
 The report has four tabs. Click any tab to switch; counts in the tab badge update with the current filter.
 
@@ -127,6 +138,8 @@ A stats strip shows how the AI enrichment pipeline performed:
 | LLM Cost          | Actual cost of LLM API usage                                         |
 | Forecasted Cost   | LLM cost + estimated Cloudflare Worker time (hover for formula)      |
 | Pipeline Duration | Time from scan start to enrichment completion                        |
+
+![AI Usage Metrics](./assets/projects/ai-usage-metrics.png)
 
 ### Scanner Breakdown
 
@@ -185,6 +198,10 @@ Each card shows:
                                           <risk score>  <SEVERITY>  <time ago>
 ```
 
+
+![Findings List](./assets/projects/findings-list.png)
+
+
 - **P1 … P15** — AI Priority badge (colored by tier: violet > blue > teal > slate). Only top-15 findings have this badge.
 - **Risk score** — a 0–100 composite score. Hovering shows a breakdown panel (Exploitability, Impact, Asset Criticality, Exposure, Context).
 - **Severity badge** — AI-assessed risk rating: CRITICAL / HIGH / MEDIUM / LOW / INFO.
@@ -198,3 +215,5 @@ Clicking a card reveals all enriched fields:
 | ----------------------- | ---------------------------------------------------------------------------------------------------------------- |
 | **AI Priority callout** | Shown for top-15 findings. Displays rank (e.g. P3 of 15), composite priority score, and the AI's reasoning note. |
 | **Description**         | AI-written explanation of the vulnerability in plain language. Supports inline code, headers, and bullet points. |
+
+![Detailed Findings](./assets/projects/detail-findings-expand.png)

@@ -1,45 +1,207 @@
 ---
-title: "AI-Enriched Findings"
-description: "How the AI enrichment pipeline transforms raw scanner output into prioritized, actionable security intelligence — with attack chains, risk scores, and remediation guidance."
+hide_title: true
+sidebar_label: AI Enrichment
 ---
 
-# AI-Enriched Findings
+## AI Enrichment
 
-## Overview
+Every scan in CoreFix — code or web — passes through a four-stage AI pipeline that transforms raw scanner output into prioritized, actionable security intelligence. The AI adds context that raw scanners cannot provide: deduplication across tools, risk scoring, compliance mapping, exploitability analysis, attack chain discovery, and an executive brief.
 
-When you submit scanner findings to `/api/enrich`, they pass through a four-stage AI pipeline that adds context a raw scan cannot provide: deduplication across scanners, risk scoring, compliance mapping, exploitability analysis, attack chain discovery, and an executive brief.
+The final output is sorted by **composite priority** — the most urgent issue is always first.
 
-The output is stored per-job and retrieved via `/api/enrich/status`. Findings are returned sorted by **composite priority** — the most urgent issue is always first.
+---
+
+## How It Works
+
+After all scanners complete, their raw findings are collected and passed through the AI pipeline in four sequential stages.
 
 ```
-Raw findings  →  Dedup  →  Enrich  →  Correlate  →  Prioritize  →  Enriched output
+┌─────────────────────────────────────────────────────────────────────┐
+│                        SCANNER OUTPUT                              │
+│  OpenGrep · Gitleaks · OSV-Scanner · KICS · Kubescape             │
+│  OWASP ZAP · Nuclei · Nmap · testssl.sh · SSLyze                  │
+└────────────────────────────┬────────────────────────────────────────┘
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  STAGE 1 — DEDUPLICATION                                           │
+│                                                                     │
+│  Multiple scanners often flag the same issue. The AI merges         │
+│  duplicate findings across scanners into a single entry,            │
+│  preserving the strongest evidence from each source.                │
+│                                                                     │
+│  Example: Gitleaks and OpenGrep both find the same hardcoded        │
+│  AWS key in config/deploy.rb → merged into one finding with         │
+│  both scanners cited.                                               │
+└────────────────────────────┬────────────────────────────────────────┘
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  STAGE 2 — ENRICHMENT                                              │
+│                                                                     │
+│  Each deduplicated finding is enriched with:                        │
+│  • AI risk score (1–100) and risk rating                            │
+│  • Impact analysis (confidentiality, integrity, availability)       │
+│  • Exploitability assessment (complexity, auth required, EPSS)      │
+│  • Compliance mapping (PCI-DSS, SOC2, OWASP, CIS, etc.)            │
+│  • Context analysis (production vs test code, false positive check) │
+│  • Remediation steps with code fix suggestions                      │
+└────────────────────────────┬────────────────────────────────────────┘
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  STAGE 3 — CORRELATION                                             │
+│                                                                     │
+│  The AI looks across all findings to discover attack chains —       │
+│  sequences of vulnerabilities that, when combined, enable a         │
+│  larger attack.                                                     │
+│                                                                     │
+│  Example: Hardcoded AWS key (initial access) + open S3 bucket       │
+│  (lateral movement) + no CloudTrail logging (persistence)           │
+│  → "AWS Key → S3 Exfiltration → Ransomware" attack chain.          │
+│                                                                     │
+│  Each finding is classified into an exploit class and tagged         │
+│  with its role in any chains it belongs to.                         │
+└────────────────────────────┬────────────────────────────────────────┘
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  STAGE 4 — PRIORITIZATION                                          │
+│                                                                     │
+│  All findings are ranked by composite priority, which factors in:   │
+│  • AI risk score                                                    │
+│  • Exploit class severity                                           │
+│  • Attack chain membership (chain anchors rank higher)              │
+│  • Production vs test context                                       │
+│  • Exploitability and EPSS score                                    │
+│                                                                     │
+│  An executive brief is generated summarizing the overall risk       │
+│  posture, top findings, and recommended actions.                    │
+└────────────────────────────┬────────────────────────────────────────┘
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  ENRICHED OUTPUT                                                    │
+│                                                                     │
+│  • Findings sorted by priority (most urgent first)                  │
+│  • Attack chains with severity and kill-chain mapping               │
+│  • Executive brief for stakeholders                                 │
+│  • HTML report generated and pushed to cloud                        │
+│  • Email notification sent with report link                         │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Job lifecycle
+## Pipeline Status
 
-Poll `/api/enrich/status` with the `job_id` returned from the submission call. The `status` field progresses through these states:
+During AI processing, the scan status progresses through these stages visible in the dashboard:
 
-| Status          | Meaning                                       |
-| --------------- | --------------------------------------------- |
-| `processing`    | Job accepted, queued                          |
-| `deduplicating` | Merging duplicate findings across scanners    |
-| `enriching`     | Adding risk scores, impact, remediation       |
-| `correlating`   | Building attack chains, classifying findings  |
-| `prioritizing`  | Generating priority notes and executive brief |
-| `completed`     | Results ready — `result` field is populated   |
-| `failed`        | Pipeline error — `error` field explains why   |
-
-> Results are deleted from storage once retrieved. Fetch them once and store locally.
+| Status | What's Happening |
+|---|---|
+| `processing` | Scan complete, findings queued for AI |
+| `deduplicating` | Merging duplicate findings across scanners |
+| `enriching` | Adding risk scores, impact, remediation |
+| `correlating` | Building attack chains, classifying findings |
+| `prioritizing` | Generating priority rankings and executive brief |
+| `completed` | Results ready to view |
 
 ---
 
-## Raw finding vs enriched finding
+## What the AI Adds to Each Finding
 
-A **raw finding** is what a scanner emits. An **enriched finding** is that same object with AI-generated fields merged in, plus metadata from dedup and correlation.
+A raw finding from a scanner contains the basics — vulnerability name, severity, file location, and a description. After AI enrichment, that same finding is augmented with the fields below.
 
-### Raw finding (scanner output)
+### Risk Assessment
+
+| Field | Description |
+|---|---|
+| **AI Risk Score** | Composite score (1–100) combining CVSS, exploitability, data sensitivity, and production context |
+| **AI Risk Rating** | `CRITICAL` (90–100), `HIGH` (70–89), `MEDIUM` (40–69), `LOW` (20–39), `INFO` (1–19) |
+| **Composite Priority** | Final ranking score (0–100) factoring in risk, exploit class, chain membership, and context |
+| **Priority Rank** | 1-based position in the sorted findings list (1 = most urgent) |
+
+### Impact Analysis
+
+For each finding, the AI assesses the impact on the CIA triad:
+
+| Field | Values |
+|---|---|
+| **Confidentiality** | HIGH, MEDIUM, LOW, NONE |
+| **Integrity** | HIGH, MEDIUM, LOW, NONE |
+| **Availability** | HIGH, MEDIUM, LOW, NONE |
+| **Scope** | Changed (affects systems beyond the vulnerable component) or Unchanged |
+| **Description** | Plain-language explanation of what an attacker achieves |
+
+### Exploitability
+
+| Field | Description |
+|---|---|
+| **Is Exploitable** | Whether this vulnerability can be exploited in practice |
+| **Exploit Complexity** | LOW, MEDIUM, HIGH — how difficult the exploit is |
+| **Requires Auth** | Whether authentication is needed to exploit |
+| **Requires User Interaction** | Whether a user must take action for the exploit to succeed |
+| **Known Exploits** | Whether public exploits exist |
+| **Attack Vector** | NETWORK, ADJACENT, LOCAL, PHYSICAL |
+| **EPSS Score** | Exploit Prediction Scoring System probability (0–1) |
+
+### Compliance Mapping
+
+Each finding is mapped to relevant compliance frameworks and their specific controls:
+
+- PCI-DSS
+- SOC2
+- OWASP Top 10
+- CIS Benchmarks
+- NIST
+- And others as applicable
+
+### Context Analysis
+
+The AI evaluates whether the finding is likely to be a real issue or a false positive:
+
+| Field | Description |
+|---|---|
+| **Is Test Code** | Whether the finding is in test files or fixtures |
+| **Is Sample Config** | Whether the finding is in example or template configuration |
+| **Is Production** | Whether the finding is in production code paths |
+| **False Positive Likelihood** | LOW, MEDIUM, HIGH |
+| **Reasoning** | Explanation of why the AI reached its conclusion |
+
+### Remediation
+
+| Field | Description |
+|---|---|
+| **Priority** | IMMEDIATE, HIGH, MEDIUM, LOW |
+| **Steps** | Ordered list of specific actions to fix the issue |
+| **Code Fix** | Suggested code change where applicable |
+| **Automatable** | Whether the fix can be automated |
+| **Effort Estimate** | LOW, MEDIUM, HIGH |
+
+### Attack Chains
+
+If a finding is part of an attack chain, it includes:
+
+| Field | Description |
+|---|---|
+| **Chain ID** | Unique identifier for the chain |
+| **Chain Name** | Descriptive name (e.g. "AWS Key → S3 Exfiltration → Ransomware") |
+| **Chain Severity** | Overall severity of the chain |
+| **Role** | The finding's role: `initial_access`, `lateral_movement`, `persistence`, `exfiltration`, etc. |
+
+### Deduplication Metadata
+
+| Field | Description |
+|---|---|
+| **Merged From** | List of scanners that detected this same issue |
+| **Dedup Reason** | Why the AI determined these were the same finding |
+| **Merged Count** | Number of raw findings merged into this one |
+
+---
+
+## Example — Before and After
+
+### Raw Finding (Scanner Output)
 
 ```json
 {
@@ -51,7 +213,6 @@ A **raw finding** is what a scanner emits. An **enriched finding** is that same 
   "category": "secret",
   "cwe": "CWE-798",
   "cvss": 9.1,
-  "refs": ["https://cwe.mitre.org/data/definitions/798.html"],
   "locations": [
     {
       "file": "config/deploy.rb",
@@ -62,9 +223,7 @@ A **raw finding** is what a scanner emits. An **enriched finding** is that same 
 }
 ```
 
-### Enriched finding (after pipeline)
-
-The same object now carries every AI-generated field, dedup metadata, chain membership, and a priority rank:
+### Enriched Finding (After AI Pipeline)
 
 ```json
 {
@@ -76,7 +235,6 @@ The same object now carries every AI-generated field, dedup metadata, chain memb
   "category": "secret",
   "cwe": "CWE-798",
   "cvss": 9.1,
-  "refs": ["https://cwe.mitre.org/data/definitions/798.html"],
   "locations": [
     {
       "file": "config/deploy.rb",
@@ -111,9 +269,9 @@ The same object now carries every AI-generated field, dedup metadata, chain memb
   "remediation": {
     "priority": "IMMEDIATE",
     "steps": [
-      "Rotate the AWS key immediately via the IAM console — assume it is compromised.",
+      "Rotate the AWS key immediately via the IAM console.",
       "Remove the hardcoded value from config/deploy.rb.",
-      "Inject the credential via an environment variable or secrets manager (AWS Secrets Manager, Vault).",
+      "Inject the credential via an environment variable or secrets manager.",
       "Audit CloudTrail for any usage of this key in the last 90 days."
     ],
     "automatable": true,
@@ -155,35 +313,15 @@ The same object now carries every AI-generated field, dedup metadata, chain memb
 
 ---
 
-## Enriched fields reference
+## Executive Brief
 
-### Identity and ranking
+After prioritization, the AI generates an executive brief included in every report. It summarizes:
 
-| Field               | Type           | Description                                                                               |
-| ------------------- | -------------- | ----------------------------------------------------------------------------------------- |
-| `findingId`         | string         | Stable ID for this finding within the job, e.g. `FINDING-0001`                            |
-| `priorityRank`      | number         | 1-based rank after sorting by composite priority (1 = most urgent)                        |
-| `compositePriority` | number (0–100) | Computed score combining AI risk, exploit class, chain membership, and production context |
+- Overall risk posture of the project
+- Total findings broken down by severity
+- Top critical findings requiring immediate attention
+- Attack chains discovered and their potential business impact
+- Compliance gaps across applicable frameworks
+- Recommended next steps
 
-### AI risk assessment
-
-| Field          | Type           | Description                                                                                    |
-| -------------- | -------------- | ---------------------------------------------------------------------------------------------- |
-| `aiRiskScore`  | number (1–100) | Composite risk considering CVSS, exploitability, data sensitivity, and test/production context |
-| `aiRiskRating` | string         | `CRITICAL` (90–100) · `HIGH` (70–89) · `MEDIUM` (40–69) · `LOW` (20–39) · `INFO` (1–19)        |
-
-### Impact
-
-```json
-"impact": {
-  "confidentiality": "HIGH | MEDIUM | LOW | NONE",
-  "integrity": "HIGH | MEDIUM | LOW | NONE",
-  "availability": "HIGH | MEDIUM | LOW | NONE",
-  "scope": "Changed | Unchanged",
-  "description": "Plain-language description of what an attacker achieves."
-}
-```
-
-### Compliance
-
-An array of frameworks this finding violates.
+This brief is designed for stakeholders who need the security picture without reading individual findings.

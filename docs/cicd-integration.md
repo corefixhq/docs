@@ -1,39 +1,92 @@
-# CoreFix Scanner — CI/CD Integration
+---
+hide_title: true
+sidebar_label: Code Scan — CI/CD
+---
 
-Add CoreFix security scanning to your existing pipeline with a single step. The scanner runs as a Docker container and can be dropped into any job that already checks out your code.
+## Code Scanning — CI/CD Integration
+
+Add CoreFix code scanning to your existing pipeline with a single step. The scanner runs as a Docker container (`corefixhq/cfix`) and can be dropped into any job that already checks out your code.
+
+For detailed CLI options, scanner flags, and BYOK model configuration, refer to [Docker / Local CLI](/docs/docker-cli).
 
 ---
 
-## How It Works in a Pipeline
+## How It Works
 
-1. Your pipeline checks out the repository (as it normally does)
-2. Add the CoreFix scan step — it mounts the workspace and runs the scanner
-3. Results are written to an output directory and optionally emailed
+1. Your pipeline checks out the repository as it normally does.
+2. Add the CoreFix scan step — it pulls the `corefixhq/cfix` Docker image, mounts the workspace, and runs the scanner.
+3. Results are written to an output directory, pushed to the CoreFix dashboard, and optionally emailed.
 
-Store sensitive values as **secrets** in your CI/CD platform. `ORG_ID` can be a plain environment variable. `X_CFIX_API_KEY` must always be a secret.
+You can add the CoreFix scan as a **standalone workflow file** or as a **step in an existing job**.
+
+---
+
+## Secrets & Permissions
+
+Store sensitive values as **secrets** in your CI/CD platform. `ORG_ID` can be a plain environment variable.
+
+| Variable | Storage | Description |
+|---|---|---|
+| `X_CFIX_API_KEY` | **Secret** (required) | Your CoreFix API key |
+| `GITHUB_TOKEN` | **Secret** | GitHub token for pushing SARIF to GitHub Code Scanning (see below) |
+| `OPENAI_API_KEY` | **Secret** | Only if bringing your own AI model |
+| `ORG_ID` | Plain variable or secret | Your CoreFix Organization ID |
+
+### GitHub Token for SARIF Upload
+
+You have two options for providing `GITHUB_TOKEN`:
+
+**Option 1 — Use the built-in `GITHUB_TOKEN` (GitHub Actions only)**
+
+GitHub Actions automatically exposes a `GITHUB_TOKEN`. Add the following permissions to your workflow so it can upload SARIF results:
+
+```yaml
+permissions:
+  contents: write
+  packages: write
+  security-events: write   # required to upload SARIF results to code scanning
+```
+
+**Option 2 — Use a Personal Access Token (PAT)**
+
+If you are not using GitHub Actions, or prefer a PAT, create one with **Code Scanning — Read and Write** access under the token's repository permissions. Store it as a secret in your CI/CD platform.
+
+
+---
+
+## Supported Platforms
+
+| Platform | Status |
+|---|---|
+| GitHub Actions | Supported |
+| GitLab CI | Supported |
+| Jenkins | Supported |
+| CircleCI | Supported |
+| Travis CI | Coming soon |
+| Bitbucket Pipelines | Coming soon |
+| Azure DevOps Pipelines | Coming soon |
 
 ---
 
 ## GitHub Actions
 
-### Setting Up Secrets
+Add secrets in your repository under **Settings → Secrets and variables → Actions → New repository secret**. See [GitHub Actions encrypted secrets](https://docs.github.com/en/actions/security-for-github-actions/security-guides/using-secrets-in-github-actions) for details.
 
-1. Go to your repository → **Settings** → **Secrets and variables** → **Actions**
-2. Click **New repository secret** and add:
-   - `DEEPTRAQ_API_KEY` — your `X_CFIX_API_KEY` value
-   - `OPENAI_API_KEY` — only if you bring your own model key
-3. Add a plain variable (not a secret) for `ORG_ID` under **Variables** tab, or store it as a secret too
+:::tabs
+== Standalone Workflow File
 
-### Workflow — Scan on Every Push and PR
+Create `.github/workflows/corefix-code-scan.yml`:
 
 ```yaml
-# .github/workflows/deeptraq-scan.yml
-name: CoreFix Security Scan
+name: CoreFix Code Security Scan
 
 on:
   push:
     branches: [main, master]
   pull_request:
+
+permissions:
+  security-events: write
 
 jobs:
   security-scan:
@@ -43,73 +96,74 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Run CoreFix Scanner
+      - name: Run CoreFix Code Scanner
         run: |
           mkdir -p ${{ github.workspace }}/scan-results
           docker run --rm \
             -e ORG_ID=${{ vars.ORG_ID }} \
-            -e X_CFIX_API_KEY=${{ secrets.DEEPTRAQ_API_KEY }} \
+            -e X_CFIX_API_KEY=${{ secrets.X_CFIX_API_KEY }} \
+            -e GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} \
             -v ${{ github.workspace }}:/code \
             -v ${{ github.workspace }}/scan-results:/output \
-            deeptraq-scanner \
-            --emailids ${{ vars.SCAN_REPORT_EMAILS }}
+            corefixhq/cfix:latest \
+            --emailids ${{ vars.SCAN_REPORT_EMAILS }} \
+            --model gpt-4o-mini
 
       - name: Upload scan results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: deeptraq-scan-results
+          name: corefix-scan-results
           path: scan-results/
 ```
 
-### Workflow — Scan Specific Scanners Only
+== Add as Step
+
+Add the following step to any existing job in your workflow after the `checkout` step:
 
 ```yaml
-      - name: Run secrets and SAST scan
+      - name: Run CoreFix Code Scanner
         run: |
+          mkdir -p ${{ github.workspace }}/scan-results
           docker run --rm \
             -e ORG_ID=${{ vars.ORG_ID }} \
-            -e X_CFIX_API_KEY=${{ secrets.DEEPTRAQ_API_KEY }} \
+            -e X_CFIX_API_KEY=${{ secrets.X_CFIX_API_KEY }} \
+            -e X_CFIX_API_URL=https://api.corefix.dev \
+            -e GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} \
             -v ${{ github.workspace }}:/code \
             -v ${{ github.workspace }}/scan-results:/output \
-            deeptraq-scanner secrets,sast
-```
-
-### Workflow — Bring Your Own AI Model
-
-```yaml
-      - name: Run CoreFix Scanner with custom model
-        run: |
-          docker run --rm \
-            -e ORG_ID=${{ vars.ORG_ID }} \
-            -e X_CFIX_API_KEY=${{ secrets.DEEPTRAQ_API_KEY }} \
-            -v ${{ github.workspace }}:/code \
-            -v ${{ github.workspace }}/scan-results:/output \
-            deeptraq-scanner \
-            --openai-api-key ${{ secrets.OPENAI_API_KEY }} \
+            corefixhq/cfix:latest \
+            --emailids ${{ vars.SCAN_REPORT_EMAILS }} \
             --model gpt-4o-mini
+
+      - name: Upload scan results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: corefix-scan-results
+          path: scan-results/
 ```
+
+Ensure your workflow has `permissions: security-events: write` if pushing SARIF to GitHub Code Scanning.
+
+:::
 
 ---
 
 ## GitLab CI
 
-### Setting Up Variables
+Add variables in your project under **Settings → CI/CD → Variables**. Mark `X_CFIX_API_KEY` as **Masked** and **Protected**. See [GitLab CI/CD variables](https://docs.gitlab.com/ee/ci/variables/) for details.
 
-1. Go to your project → **Settings** → **CI/CD** → **Variables**
-2. Add the following:
-   - `DEEPTRAQ_API_KEY` — set as **Masked** and **Protected**
-   - `ORG_ID` — can be plain or masked
-   - `OPENAI_API_KEY` — masked, only if using your own model
+:::tabs
+== Standalone Pipeline File
 
-### `.gitlab-ci.yml`
+Create or add to `.gitlab-ci.yml`:
 
 ```yaml
 stages:
-  - test
   - security
 
-deeptraq-scan:
+corefix-code-scan:
   stage: security
   image: docker:24
   services:
@@ -122,11 +176,12 @@ deeptraq-scan:
     - |
       docker run --rm \
         -e ORG_ID=$ORG_ID \
-        -e X_CFIX_API_KEY=$DEEPTRAQ_API_KEY \
+        -e X_CFIX_API_KEY=$X_CFIX_API_KEY \
         -v $CI_PROJECT_DIR:/code \
         -v $CI_PROJECT_DIR/scan-results:/output \
-        deeptraq-scanner \
-        --emailids $SCAN_REPORT_EMAILS
+        corefixhq/cfix:latest \
+        --emailids $SCAN_REPORT_EMAILS \
+        --model gpt-4o-mini
   artifacts:
     when: always
     paths:
@@ -134,29 +189,65 @@ deeptraq-scan:
     expire_in: 7 days
 ```
 
-> Drop the `deeptraq-scan` job into your existing pipeline's stages. It does not need to be a separate pipeline.
+== Add as Stage
+
+Add the `corefix-code-scan` job to your existing pipeline's stages:
+
+```yaml
+stages:
+  - build
+  - test
+  - security  # Add this stage
+
+# Your existing build and test jobs above...
+
+corefix-code-scan:
+  stage: security
+  image: docker:24
+  services:
+    - docker:24-dind
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
+  before_script:
+    - mkdir -p scan-results
+  script:
+    - |
+      docker run --rm \
+        -e ORG_ID=$ORG_ID \
+        -e X_CFIX_API_KEY=$X_CFIX_API_KEY \
+        -e X_CFIX_API_URL=https://api.corefix.dev \
+        -v $CI_PROJECT_DIR:/code \
+        -v $CI_PROJECT_DIR/scan-results:/output \
+        corefixhq/cfix:latest \
+        --emailids $SCAN_REPORT_EMAILS \
+        --model gpt-4o-mini
+  artifacts:
+    when: always
+    paths:
+      - scan-results/
+    expire_in: 7 days
+```
+
+:::
 
 ---
 
 ## Jenkins
 
-### Setting Up Credentials
+Add credentials in **Manage Jenkins → Credentials → System → Global credentials** as **Secret text** entries. See [Jenkins credentials](https://www.jenkins.io/doc/book/using/using-credentials/) for details.
 
-1. Go to **Manage Jenkins** → **Credentials** → **System** → **Global credentials**
-2. Add a **Secret text** credential:
-   - ID: `deeptraq-api-key` for `X_CFIX_API_KEY`
-   - ID: `openai-api-key` if using your own model
-3. Add a plain environment variable for `ORG_ID` in your job or pipeline configuration
+:::tabs
+== Standalone Jenkinsfile
 
-### Declarative Pipeline
+Create a `Jenkinsfile` for a dedicated security scan pipeline:
 
 ```groovy
 pipeline {
     agent any
 
     environment {
-        ORG_ID = 'b7a526b4-f6xx-xxxx-xxxx-xxxxxxxxxxxx'
-        SCAN_EMAIL = 'security@example.com'
+        ORG_ID      = 'YOUR_ORG_ID'
+        SCAN_EMAILS = 'security@example.com'
     }
 
     stages {
@@ -166,18 +257,21 @@ pipeline {
             }
         }
 
-        stage('CoreFix Security Scan') {
+        stage('CoreFix Code Scan') {
             steps {
-                withCredentials([string(credentialsId: 'deeptraq-api-key', variable: 'DEEPTRAQ_API_KEY')]) {
+                withCredentials([
+                    string(credentialsId: 'corefix-api-key', variable: 'X_CFIX_API_KEY')
+                ]) {
                     sh '''
                         mkdir -p scan-results
                         docker run --rm \
                           -e ORG_ID=${ORG_ID} \
-                          -e X_CFIX_API_KEY=${DEEPTRAQ_API_KEY} \
+                          -e X_CFIX_API_KEY=${X_CFIX_API_KEY} \
                           -v ${WORKSPACE}:/code \
                           -v ${WORKSPACE}/scan-results:/output \
-                          deeptraq-scanner \
-                          --emailids ${SCAN_EMAIL}
+                          corefixhq/cfix:latest \
+                          --emailids ${SCAN_EMAILS} \
+                          --model gpt-4o-mini
                     '''
                 }
             }
@@ -191,225 +285,155 @@ pipeline {
 }
 ```
 
-> Add the `CoreFix Security Scan` stage to your existing `Jenkinsfile` pipeline.
+== Add as Stage
+
+Add the following stage to your existing `Jenkinsfile`:
+
+```groovy
+        stage('CoreFix Code Scan') {
+            steps {
+                withCredentials([
+                    string(credentialsId: 'corefix-api-key', variable: 'X_CFIX_API_KEY')
+                ]) {
+                    sh '''
+                        mkdir -p scan-results
+                        docker run --rm \
+                          -e ORG_ID=${ORG_ID} \
+                          -e X_CFIX_API_KEY=${X_CFIX_API_KEY} \
+                          -v ${WORKSPACE}:/code \
+                          -v ${WORKSPACE}/scan-results:/output \
+                          corefixhq/cfix:latest \
+                          --emailids ${SCAN_EMAILS} \
+                          --model gpt-4o-mini
+                    '''
+                }
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'scan-results/**', allowEmptyArchive: true
+                }
+            }
+        }
+```
+
+Ensure `ORG_ID` and `SCAN_EMAILS` are set in your pipeline's `environment` block.
+
+:::
 
 ---
 
 ## CircleCI
 
-### Setting Up Environment Variables
+Add environment variables in your project under **Project Settings → Environment Variables**. See [CircleCI environment variables](https://circleci.com/docs/env-vars/) for details.
 
-1. Go to your project → **Project Settings** → **Environment Variables**
-2. Add:
-   - `DEEPTRAQ_API_KEY` — your `X_CFIX_API_KEY`
-   - `ORG_ID` — your organization ID
-   - `OPENAI_API_KEY` — only if using your own model
+:::tabs
+== Standalone Config File
 
-### `.circleci/config.yml`
+Create `.circleci/config.yml`:
 
 ```yaml
 version: 2.1
 
 jobs:
-  deeptraq-scan:
+  corefix-code-scan:
     machine:
       image: ubuntu-2204:current
     steps:
       - checkout
       - run:
-          name: Run CoreFix Security Scanner
+          name: Run CoreFix Code Scanner
           command: |
             mkdir -p scan-results
             docker run --rm \
               -e ORG_ID=$ORG_ID \
-              -e X_CFIX_API_KEY=$DEEPTRAQ_API_KEY \
+              -e X_CFIX_API_KEY=$X_CFIX_API_KEY \
               -v $PWD:/code \
               -v $PWD/scan-results:/output \
-              deeptraq-scanner \
-              --emailids $SCAN_REPORT_EMAILS
+              corefixhq/cfix:latest \
+              --emailids $SCAN_REPORT_EMAILS \
+              --model gpt-4o-mini
       - store_artifacts:
           path: scan-results
-          destination: deeptraq-scan-results
+          destination: corefix-scan-results
 
 workflows:
   security:
     jobs:
-      - deeptraq-scan
+      - corefix-code-scan
 ```
 
 > Use the `machine` executor (not `docker`) so that Docker-in-Docker is available.
 
----
+== Add as Job
 
-## Travis CI
-
-### Setting Up Environment Variables
-
-1. Go to your repository on Travis CI → **Settings** → **Environment Variables**
-2. Add:
-   - `DEEPTRAQ_API_KEY` — mark as **secret (not shown in log)**
-   - `ORG_ID` — can be non-secret
-   - `OPENAI_API_KEY` — secret, only if using your own model
-
-### `.travis.yml`
+Add the following job and workflow entry to your existing `.circleci/config.yml`:
 
 ```yaml
-services:
-  - docker
+jobs:
+  # Your existing jobs above...
 
-before_script:
-  - mkdir -p scan-results
-
-script:
-  - docker run --rm
-      -e ORG_ID=$ORG_ID
-      -e X_CFIX_API_KEY=$DEEPTRAQ_API_KEY
-      -v $TRAVIS_BUILD_DIR:/code
-      -v $TRAVIS_BUILD_DIR/scan-results:/output
-      deeptraq-scanner
-      --emailids $SCAN_REPORT_EMAILS
-```
-
-> Add the `deeptraq-scanner` `docker run` call to your existing `script` block.
-
----
-
-## Azure DevOps Pipelines
-
-### Setting Up Variables
-
-1. Go to your pipeline → **Edit** → **Variables**
-2. Add:
-   - `DEEPTRAQ_API_KEY` — enable **Keep this value secret**
-   - `ORG_ID` — plain variable
-   - `OPENAI_API_KEY` — secret, only if using your own model
-
-### `azure-pipelines.yml`
-
-```yaml
-trigger:
-  branches:
-    include:
-      - main
-      - master
-
-pool:
-  vmImage: ubuntu-latest
-
-steps:
-  - checkout: self
-
-  - bash: mkdir -p $(Build.ArtifactStagingDirectory)/scan-results
-    displayName: Create output directory
-
-  - bash: |
-      docker run --rm \
-        -e ORG_ID=$(ORG_ID) \
-        -e X_CFIX_API_KEY=$(DEEPTRAQ_API_KEY) \
-        -v $(Build.SourcesDirectory):/code \
-        -v $(Build.ArtifactStagingDirectory)/scan-results:/output \
-        deeptraq-scanner \
-        --emailids $(SCAN_REPORT_EMAILS)
-    displayName: Run CoreFix Security Scanner
-
-  - task: PublishBuildArtifacts@1
-    condition: always()
-    inputs:
-      pathToPublish: $(Build.ArtifactStagingDirectory)/scan-results
-      artifactName: deeptraq-scan-results
-```
-
-> Paste the three steps above into your existing `azure-pipelines.yml` under `steps:`.
-
----
-
-## Bitbucket Pipelines
-
-### Setting Up Repository Variables
-
-1. Go to your repository → **Repository settings** → **Repository variables**
-2. Add:
-   - `DEEPTRAQ_API_KEY` — enable **Secured**
-   - `ORG_ID` — plain variable
-   - `OPENAI_API_KEY` — secured, only if using your own model
-
-### `bitbucket-pipelines.yml`
-
-```yaml
-pipelines:
-  default:
-    - step:
-        name: CoreFix Security Scan
-        image: docker:24
-        services:
-          - docker
-        script:
-          - mkdir -p scan-results
-          - |
+  corefix-code-scan:
+    machine:
+      image: ubuntu-2204:current
+    steps:
+      - checkout
+      - run:
+          name: Run CoreFix Code Scanner
+          command: |
+            mkdir -p scan-results
             docker run --rm \
               -e ORG_ID=$ORG_ID \
-              -e X_CFIX_API_KEY=$DEEPTRAQ_API_KEY \
-              -v $BITBUCKET_CLONE_DIR:/code \
-              -v $BITBUCKET_CLONE_DIR/scan-results:/output \
-              deeptraq-scanner \
-              --emailids $SCAN_REPORT_EMAILS
-        artifacts:
-          - scan-results/**
+              -e X_CFIX_API_KEY=$X_CFIX_API_KEY \
+              -v $PWD:/code \
+              -v $PWD/scan-results:/output \
+              corefixhq/cfix:latest \
+              --emailids $SCAN_REPORT_EMAILS \
+              --model gpt-4o-mini
+      - store_artifacts:
+          path: scan-results
+          destination: corefix-scan-results
+
+workflows:
+  build-test-scan:
+    jobs:
+      - build
+      - test
+      - corefix-code-scan:
+          requires:
+            - test
 ```
 
-> Add this step to your existing pipeline definition. The `docker` service enables Docker-in-Docker.
+:::
 
 ---
 
-## Common Configuration Reference
-
-Regardless of CI/CD platform, these are the values you configure:
-
-| What | How to store | Variable name suggestion |
-|---|---|---|
-| `X_CFIX_API_KEY` | **Secret / masked** | `DEEPTRAQ_API_KEY` |
-| `ORG_ID` | Plain variable or secret | `ORG_ID` |
-| `X_CFIX_API_URL` | Plain variable | `DEEPTRAQ_API_URL` |
-| `--openai-api-key` value | **Secret / masked** | `OPENAI_API_KEY` |
-| `--emailids` value | Plain variable | `SCAN_REPORT_EMAILS` |
-
----
-
-## Choosing Scanners in a Pipeline
+## Choosing Scanners
 
 Run specific scanners to keep pipeline time down, or run all for a full audit:
 
 ```bash
-# All scanners (default — omit positional arg)
-deeptraq-scanner
+# All scanners (default — omit positional argument)
+corefixhq/cfix:latest
 
 # Dependencies only
-deeptraq-scanner osv
+corefixhq/cfix:latest osv
 
 # Secrets detection + SAST
-deeptraq-scanner secrets,sast
+corefixhq/cfix:latest secrets,sast
 
 # IaC + Kubernetes
-deeptraq-scanner iac,k8s
+corefixhq/cfix:latest iac,k8s
 
 # Full scan, explicit
-deeptraq-scanner osv,iac,secrets,k8s,sast
+corefixhq/cfix:latest osv,iac,secrets,k8s,sast
 ```
 
 ---
 
-## Bring Your Own Model
+## Coming Soon
 
-If you provide your own API key, you must also specify the model. Otherwise CoreFix uses its own SaaS model rotation at no extra configuration.
+Support for the following platforms is in progress:
 
-```bash
-# Using your own key — model is required
-docker run --rm ... deeptraq-scanner \
-  --openai-api-key $OPENAI_API_KEY \
-  --model gpt-4o-mini
-
-# No key provided — CoreFix handles model selection automatically
-docker run --rm ... deeptraq-scanner
-```
-
-Supported models when using your own key: `gpt-4o-mini`, `gpt-5.4-mini`, `minimax-2.5`, `glm-5.1`, `kimi-2.6`, `grok-4.3`
+- **Travis CI**
+- **Bitbucket Pipelines**
+- **Azure DevOps Pipelines**
