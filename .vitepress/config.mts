@@ -96,7 +96,7 @@ export default defineConfig({
       collapsed: false,
       items: [
         { text: "AI Enrichment", link: "/docs/ai-enrichment" },
-        { text: "Supported Models", link: "/docs/modelss" },
+        { text: "Supported Models", link: "/docs/models" },
         { text: "Model Pricing", link: "/docs/models-pricing" },
         { text: "Model Availability Matrix", link: "/docs/models-matrix" },
       ],
