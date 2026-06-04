@@ -3,19 +3,18 @@ title: "Overview"
 sidebar_label: Overview
 ---
 
-# CoreFix Docs Overview
-
 <div class="docs-overview">
+
 
 ## Getting Started
 
 <div class="overview-grid">
-  <a class="overview-card" href="/docs/getting-started">
+  <a class="overview-card" href="/docs/sign-up-and-sign-in">
     <span class="overview-card-title">Sign Up & Setup</span>
     <span class="overview-card-copy">Create your CoreFix account, configure your workspace, and prepare your first project.</span>
   </a>
-  <a class="overview-card" href="/docs/first-scan">
-    <span class="overview-card-title">Your First Scan</span>
+  <a class="overview-card" href="/docs/web-scan-quickstart">
+    <span class="overview-card-title">Your First Web Scan</span>
     <span class="overview-card-copy">Run the first scan and understand the workflow from setup to results.</span>
   </a>
   <a class="overview-card" href="/docs/github-integration">
@@ -28,6 +27,8 @@ sidebar_label: Overview
   </a>
 </div>
 
+---
+
 ## Scan With CoreFix
 
 <div class="overview-grid">
@@ -35,59 +36,59 @@ sidebar_label: Overview
     <span class="overview-card-title">Docker / Local CLI</span>
     <span class="overview-card-copy">Run CoreFix scanners locally or on any server with Docker installed.</span>
   </a>
-  <a class="overview-card" href="/docs/cicd-integration">
-    <span class="overview-card-title">CI/CD Pipelines</span>
-    <span class="overview-card-copy">Add security scanning to GitHub Actions, GitLab CI, Jenkins, and more.</span>
+  <a class="overview-card" href="/docs/code-agent-usage">
+    <span class="overview-card-title">Code Scanning</span>
+    <span class="overview-card-copy">Scan your source code for vulnerabilities, secrets, and misconfigurations directly from your repository.</span>
   </a>
-  <a class="overview-card" href="/docs/web-standalone-usage">
+  <a class="overview-card" href="/docs/web-agent-usage">
     <span class="overview-card-title">Web Scanning</span>
     <span class="overview-card-copy">Scan live web applications with DAST, CVE checks, recon, and TLS analysis.</span>
   </a>
-  <a class="overview-card" href="/docs/web-cicd-integration">
-    <span class="overview-card-title">Web CI/CD Integration</span>
-    <span class="overview-card-copy">Run web scans automatically after deployments in your delivery pipeline.</span>
+  <a class="overview-card" href="/docs/cicd-integration">
+    <span class="overview-card-title">CI/CD Integration</span>
+    <span class="overview-card-copy">Automate security scanning in GitHub Actions, GitLab CI, Jenkins, and more — on every push or deployment.</span>
   </a>
 </div>
+
+---
 
 ## Manage Findings
 
 <div class="overview-grid">
-  <a class="overview-card" href="/docs/projects">
-    <span class="overview-card-title">Projects</span>
-    <span class="overview-card-copy">Organize repositories, applications, scan targets, and project settings.</span>
+  <a class="overview-card" href="/docs/creating-a-project">
+    <span class="overview-card-title">Creating Projects</span>
+    <span class="overview-card-copy">Set up projects to organize your repositories, web targets, and scan configurations in one place.</span>
   </a>
-  <a class="overview-card" href="/docs/findings">
-    <span class="overview-card-title">Findings & Triage</span>
-    <span class="overview-card-copy">Review, prioritize, and act on normalized security findings across scanners.</span>
+  <a class="overview-card" href="/docs/managing-projects">
+    <span class="overview-card-title">Managing Projects</span>
+    <span class="overview-card-copy">Update project settings, manage scan targets, and control access and configurations.</span>
   </a>
   <a class="overview-card" href="/docs/reports">
-    <span class="overview-card-title">Reports</span>
-    <span class="overview-card-copy">Generate shareable security reports for teams, audits, and stakeholders.</span>
-  </a>
-  <a class="overview-card" href="/docs/account-usage">
-    <span class="overview-card-title">Usage & Credits</span>
-    <span class="overview-card-copy">Track scan runtime, AI usage, credits, and account-level consumption.</span>
+    <span class="overview-card-title">Viewing Results</span>
+    <span class="overview-card-copy">Review, prioritize, and act on security findings across all your scans and scanners.</span>
   </a>
 </div>
+
+---
 
 ## AI, Models & Policies
 
 <div class="overview-grid">
   <a class="overview-card" href="/docs/ai-enrichment">
     <span class="overview-card-title">AI Enrichment</span>
-    <span class="overview-card-copy">See how CoreFix deduplicates, prioritizes, and explains scanner findings.</span>
+    <span class="overview-card-copy">See how CoreFix uses AI to deduplicate, prioritize, and explain security findings with actionable context.</span>
   </a>
   <a class="overview-card" href="/docs/models">
     <span class="overview-card-title">Supported Models</span>
-    <span class="overview-card-copy">Review model options, BYOK behavior, and AI provider coverage.</span>
+    <span class="overview-card-copy">Browse available AI models, BYOK support, and provider options for enriching your scan results.</span>
   </a>
-  <a class="overview-card" href="/docs/ai-usage-policy">
-    <span class="overview-card-title">AI Usage Policy</span>
-    <span class="overview-card-copy">Understand what data is sent to AI providers and how AI output should be used.</span>
+  <a class="overview-card" href="/docs/models-matrix">
+    <span class="overview-card-title">Model Availability Matrix</span>
+    <span class="overview-card-copy">Compare model availability across features, scan types, and AI providers at a glance.</span>
   </a>
-  <a class="overview-card" href="/docs/release-logs">
-    <span class="overview-card-title">Release Logs</span>
-    <span class="overview-card-copy">Read the latest CoreFix release notes and product changes.</span>
+  <a class="overview-card" href="/docs/models-pricing">
+    <span class="overview-card-title">Model Pricing</span>
+    <span class="overview-card-copy">Understand AI model costs, credit usage, and how BYOK affects pricing for enrichment features.</span>
   </a>
 </div>
 
