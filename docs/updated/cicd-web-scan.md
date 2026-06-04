@@ -100,7 +100,6 @@ jobs:
             --network host \
             -e ORG_ID=${{ vars.ORG_ID }} \
             -e X_CFIX_API_KEY=${{ secrets.X_CFIX_API_KEY }} \
-            -e X_CFIX_API_URL=https://api.corefix.dev \
             -e GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} \
             -v ${{ github.workspace }}:/web \
             -v ${{ github.workspace }}/scan-results:/output \
@@ -133,7 +132,6 @@ Add the following steps to an existing job, after your deploy step:
             --network host \
             -e ORG_ID=${{ vars.ORG_ID }} \
             -e X_CFIX_API_KEY=${{ secrets.X_CFIX_API_KEY }} \
-            -e X_CFIX_API_URL=https://api.corefix.dev \
             -e GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} \
             -v ${{ github.workspace }}:/web \
             -v ${{ github.workspace }}/scan-results:/output \
@@ -236,7 +234,6 @@ corefix-web-scan:
       docker run --rm \
         -e ORG_ID=$ORG_ID \
         -e X_CFIX_API_KEY=$X_CFIX_API_KEY \
-        -e X_CFIX_API_URL=https://api.corefix.dev \
         -v $CI_PROJECT_DIR:/web \
         -v $CI_PROJECT_DIR/scan-results:/output \
         corefixhq/cfix-web:latest web \
@@ -297,7 +294,6 @@ pipeline {
                           --network host \
                           -e ORG_ID=${ORG_ID} \
                           -e X_CFIX_API_KEY=${X_CFIX_API_KEY} \
-                          -e X_CFIX_API_URL=https://api.corefix.dev \
                           -v ${WORKSPACE}:/web \
                           -v ${WORKSPACE}/scan-results:/output \
                           corefixhq/cfix-web:latest web \
@@ -337,7 +333,6 @@ Add the following stage to your existing `Jenkinsfile` after the deploy stage:
                           --network host \
                           -e ORG_ID=${ORG_ID} \
                           -e X_CFIX_API_KEY=${X_CFIX_API_KEY} \
-                          -e X_CFIX_API_URL=https://api.corefix.dev \
                           -v ${WORKSPACE}:/web \
                           -v ${WORKSPACE}/scan-results:/output \
                           corefixhq/cfix-web:latest web \
@@ -398,7 +393,6 @@ jobs:
               --network host \
               -e ORG_ID=$ORG_ID \
               -e X_CFIX_API_KEY=$X_CFIX_API_KEY \
-              -e X_CFIX_API_URL=https://api.corefix.dev \
               -v $PWD:/web \
               -v $PWD/scan-results:/output \
               corefixhq/cfix-web:latest web \
@@ -443,7 +437,6 @@ jobs:
               --network host \
               -e ORG_ID=$ORG_ID \
               -e X_CFIX_API_KEY=$X_CFIX_API_KEY \
-              -e X_CFIX_API_URL=https://api.corefix.dev \
               -v $PWD:/web \
               -v $PWD/scan-results:/output \
               corefixhq/cfix-web:latest web \
@@ -488,32 +481,63 @@ For bearer token or session cookie, store the value in the `TOKEN` secret and pa
 
 ## Browser in CI/CD
 
-If the scanner needs a browser for authenticated scans or dynamic discovery:
+If the scanner needs a browser for authenticated scans or dynamic discovery, you have three options:
 
-**Cloudflare browser (recommended, no install needed):**
+**Option 1 — Cloudflare browser (recommended, no install needed):**
+
 ```bash
 corefixhq/cfix-web:latest web --target $TARGET --cf-browser true
 ```
 
-**Playwright server as sidecar:**
-```yaml
-- run: npx playwright launch-server --port 9323 &
-- run: |
-    docker run --rm --network host ... \
-      corefixhq/cfix-web:latest web \
-      --target $TARGET \
-      --remote ws://localhost:9323
+
+**Option 2 — Chrome headless as sidecar:**
+
+Install Chromium and its dependencies on the CI runner first:
+
+```bash
+sudo apt update
+sudo apt install -y \
+  chromium-browser \
+  ca-certificates \
+  fonts-liberation \
+  libasound2t64 \
+  libatk-bridge2.0-0 \
+  libatk1.0-0 \
+  libcups2 \
+  libdbus-1-3 \
+  libdrm2 \
+  libgbm1 \
+  libglib2.0-0 \
+  libgtk-3-0 \
+  libnspr4 \
+  libnss3 \
+  libu2f-udev \
+  libvulkan1 \
+  libx11-6 \
+  libx11-xcb1 \
+  libxcb1 \
+  libxcomposite1 \
+  libxdamage1 \
+  libxext6 \
+  libxfixes3 \
+  libxkbcommon0 \
+  libxrandr2 \
+  wget \
+  xdg-utils
 ```
 
-**Chrome headless as sidecar:**
+Then launch it in headless mode and connect the scanner:
+
 ```yaml
-- run: google-chrome --remote-debugging-port=9222 --headless --no-sandbox &
+- run: chromium-browser --remote-debugging-port=9222 --remote-debugging-address=0.0.0.0 --headless --no-sandbox &
 - run: |
     docker run --rm --network host ... \
       corefixhq/cfix-web:latest web \
       --target $TARGET \
-      --remote http://localhost:9222
+      --remote
 ```
+
+> The protocol is auto-detected — `http://` for Chrome CDP. Use `--cf-browser true` for zero-setup browser execution if you don't want to manage Chromium on the runner.
 
 ---
 

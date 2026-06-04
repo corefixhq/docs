@@ -5,20 +5,15 @@ sidebar_label: Web Scan Config Reference
 
 ## Web Scan Config Reference
 
-The web scan configuration file allows you to control the scope, authentication, API scanning, and depth of your web application scans. Place this file in the same directory you mount into the `corefixhq/cfix-web` Docker container.
+The web scan configuration file allows you to control authentication, API scanning, and scan depth for your web application scans. Place this file in the same directory you mount into the `corefixhq/cfix-web` Docker container.
+
+The `--target` URL passed via the CLI is used as the starting point for crawling. CoreFix AI automatically detects backend URLs, builds the proper ZAP context, and excludes pages that could disrupt the scan (logout, setup wizards, etc.) — no manual scope configuration needed.
 
 ---
 
 ## Full Example
 
 ```yaml
-scope:
-  entryUrls:
-    - "https://staging.example.com/"
-  excludePaths:
-    - "https://staging.example.com/logout"
-    - "https://staging.example.com/admin/reset"
-
 authentication:
   loginPageUrl: "https://staging.example.com/login"
 
@@ -34,38 +29,13 @@ options:
 
 ## Configuration Blocks
 
-The config file has four top-level blocks. Not all are required — use only the blocks relevant to your scan type.
+The config file has three top-level blocks. Not all are required — use only the blocks relevant to your scan type.
 
 | Block | Use When |
 |---|---|
-| `scope` | Scanning a website where you want to include or exclude specific URLs |
 | `authentication` | Scanning a website with credentials and you want to specify the login page |
 | `openapi` | Scanning an API using a Swagger/OpenAPI spec file |
 | `options` | Controlling scan depth, coverage level, and advanced checks |
-
----
-
-## `scope`
-
-Defines which URLs the scanner should crawl and which it should skip. **Use this only for website scanning where credentials are provided.** For API-only scanning, skip this block.
-
-```yaml
-scope:
-  entryUrls:
-    - "https://staging.example.com/"
-  excludePaths:
-    - "https://staging.example.com/logout"
-    - "https://staging.example.com/login"
-    - "https://staging.example.com/setup"
-    - "https://staging.example.com/admin/csrf.*"
-```
-
-| Field | Description |
-|---|---|
-| `entryUrls` | List of URLs where the scanner begins crawling. Typically your application's home page or landing page. |
-| `excludePaths` | List of URLs or URL patterns to skip during scanning. Supports regex patterns (e.g. `.*csrf.*`). Use this to prevent the scanner from hitting logout pages, setup wizards, password reset flows, or any endpoint that could disrupt the authenticated session. |
-
-> **Tip:** Always exclude your logout URL when running authenticated scans — otherwise the scanner may log itself out mid-scan and lose coverage.
 
 ---
 
@@ -86,7 +56,7 @@ authentication:
 
 ## `openapi`
 
-Configures API scanning using a Swagger or OpenAPI specification file. **When scanning APIs, ignore the `scope` and `authentication` blocks** — they are meant for website scanning only.
+Configures API scanning using a Swagger or OpenAPI specification file. **When scanning APIs, skip the `authentication` block** — it is meant for website scanning only.
 
 ```yaml
 openapi:
@@ -160,15 +130,9 @@ Coverage also affects **Nuclei template scanning**. Higher coverage levels enabl
 
 ### Website with Authentication
 
-Use `scope`, `authentication`, and `options`. Provide `--username` and `--password` via CLI flags.
+Use `authentication` and `options`. Provide `--username` and `--password` via CLI flags.
 
 ```yaml
-scope:
-  entryUrls:
-    - "https://staging.example.com/"
-  excludePaths:
-    - "https://staging.example.com/logout"
-
 authentication:
   loginPageUrl: "https://staging.example.com/login"
 
@@ -187,13 +151,9 @@ docker run --rm --network host \
 
 ### Website without Authentication
 
-Use `scope` and `options` only. Skip `authentication`.
+Use `options` only. No config file is needed if you only want to set coverage — but you can create one for clarity.
 
 ```yaml
-scope:
-  entryUrls:
-    - "https://public-site.example.com/"
-
 options:
   coverage: "high"
 ```
@@ -208,7 +168,7 @@ docker run --rm --network host \
 
 ### API Scanning with OpenAPI Spec
 
-Use `openapi` and `options` only. Skip `scope` and `authentication`. Place your OpenAPI/Swagger spec file in the same directory.
+Use `openapi` and `options` only. Skip `authentication`. Place your OpenAPI/Swagger spec file in the same directory.
 
 ```yaml
 openapi:
@@ -239,15 +199,9 @@ options:
 
 ### Full Security Audit
 
-Use `options` with `veryHigh` coverage and `advanced_security_checks` enabled:
+Use `authentication` and `options` with `veryHigh` coverage and `advanced_security_checks` enabled:
 
 ```yaml
-scope:
-  entryUrls:
-    - "https://staging.example.com/"
-  excludePaths:
-    - "https://staging.example.com/logout"
-
 authentication:
   loginPageUrl: "https://staging.example.com/login"
 
@@ -257,3 +211,4 @@ options:
 ```
 
 > **Note:** `veryHigh` with `advanced_security_checks: true` provides the most comprehensive scan but can take up to 60+ minutes and requires significant memory. Schedule these for nightly or weekly runs rather than on every commit.
+

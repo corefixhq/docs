@@ -28,15 +28,29 @@ Store sensitive values as **secrets** in your CI/CD platform. `ORG_ID` can be a 
 | Variable | Storage | Description |
 |---|---|---|
 | `X_CFIX_API_KEY` | **Secret** (required) | Your CoreFix API key |
-| `GITHUB_TOKEN` | **Secret** | GitHub Personal Access Token for pushing SARIF to GitHub Code Scanning |
+| `GITHUB_TOKEN` | **Secret** | GitHub token for pushing SARIF to GitHub Code Scanning (see below) |
 | `OPENAI_API_KEY` | **Secret** | Only if bringing your own AI model |
 | `ORG_ID` | Plain variable or secret | Your CoreFix Organization ID |
 
-### GitHub Token Permissions
+### GitHub Token for SARIF Upload
 
-If using GitHub Actions, `GITHUB_TOKEN` is available automatically — ensure your workflow has the `security-events: write` permission for Code Scanning uploads.
+You have two options for providing `GITHUB_TOKEN`:
 
-If using a Personal Access Token (PAT) instead, grant **Code Scanning** with **Read and Write** access under the token's repository permissions.
+**Option 1 — Use the built-in `GITHUB_TOKEN` (GitHub Actions only)**
+
+GitHub Actions automatically exposes a `GITHUB_TOKEN`. Add the following permissions to your workflow so it can upload SARIF results:
+
+```yaml
+permissions:
+  contents: write
+  packages: write
+  security-events: write   # required to upload SARIF results to code scanning
+```
+
+**Option 2 — Use a Personal Access Token (PAT)**
+
+If you are not using GitHub Actions, or prefer a PAT, create one with **Code Scanning — Read and Write** access under the token's repository permissions. Store it as a secret in your CI/CD platform.
+
 
 ---
 
@@ -88,7 +102,6 @@ jobs:
           docker run --rm \
             -e ORG_ID=${{ vars.ORG_ID }} \
             -e X_CFIX_API_KEY=${{ secrets.X_CFIX_API_KEY }} \
-            -e X_CFIX_API_URL=https://api.corefix.dev \
             -e GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} \
             -v ${{ github.workspace }}:/code \
             -v ${{ github.workspace }}/scan-results:/output \
@@ -139,7 +152,7 @@ Ensure your workflow has `permissions: security-events: write` if pushing SARIF 
 
 ## GitLab CI
 
-Add variables in your project under **Settings → CI/CD → Variables**. Mark `X_CFIX_API_KEY` and `GITHUB_TOKEN` as **Masked** and **Protected**. See [GitLab CI/CD variables](https://docs.gitlab.com/ee/ci/variables/) for details.
+Add variables in your project under **Settings → CI/CD → Variables**. Mark `X_CFIX_API_KEY` as **Masked** and **Protected**. See [GitLab CI/CD variables](https://docs.gitlab.com/ee/ci/variables/) for details.
 
 :::tabs
 == Standalone Pipeline File
@@ -164,7 +177,6 @@ corefix-code-scan:
       docker run --rm \
         -e ORG_ID=$ORG_ID \
         -e X_CFIX_API_KEY=$X_CFIX_API_KEY \
-        -e X_CFIX_API_URL=https://api.corefix.dev \
         -v $CI_PROJECT_DIR:/code \
         -v $CI_PROJECT_DIR/scan-results:/output \
         corefixhq/cfix:latest \
@@ -248,16 +260,13 @@ pipeline {
         stage('CoreFix Code Scan') {
             steps {
                 withCredentials([
-                    string(credentialsId: 'corefix-api-key', variable: 'X_CFIX_API_KEY'),
-                    string(credentialsId: 'github-token',    variable: 'GITHUB_TOKEN')
+                    string(credentialsId: 'corefix-api-key', variable: 'X_CFIX_API_KEY')
                 ]) {
                     sh '''
                         mkdir -p scan-results
                         docker run --rm \
                           -e ORG_ID=${ORG_ID} \
                           -e X_CFIX_API_KEY=${X_CFIX_API_KEY} \
-                          -e X_CFIX_API_URL=https://api.corefix.dev \
-                          -e GITHUB_TOKEN=${GITHUB_TOKEN} \
                           -v ${WORKSPACE}:/code \
                           -v ${WORKSPACE}/scan-results:/output \
                           corefixhq/cfix:latest \
@@ -284,16 +293,13 @@ Add the following stage to your existing `Jenkinsfile`:
         stage('CoreFix Code Scan') {
             steps {
                 withCredentials([
-                    string(credentialsId: 'corefix-api-key', variable: 'X_CFIX_API_KEY'),
-                    string(credentialsId: 'github-token',    variable: 'GITHUB_TOKEN')
+                    string(credentialsId: 'corefix-api-key', variable: 'X_CFIX_API_KEY')
                 ]) {
                     sh '''
                         mkdir -p scan-results
                         docker run --rm \
                           -e ORG_ID=${ORG_ID} \
                           -e X_CFIX_API_KEY=${X_CFIX_API_KEY} \
-                          -e X_CFIX_API_URL=https://api.corefix.dev \
-                          -e GITHUB_TOKEN=${GITHUB_TOKEN} \
                           -v ${WORKSPACE}:/code \
                           -v ${WORKSPACE}/scan-results:/output \
                           corefixhq/cfix:latest \
@@ -341,7 +347,6 @@ jobs:
             docker run --rm \
               -e ORG_ID=$ORG_ID \
               -e X_CFIX_API_KEY=$X_CFIX_API_KEY \
-              -e X_CFIX_API_URL=https://api.corefix.dev \
               -v $PWD:/code \
               -v $PWD/scan-results:/output \
               corefixhq/cfix:latest \
@@ -379,7 +384,6 @@ jobs:
             docker run --rm \
               -e ORG_ID=$ORG_ID \
               -e X_CFIX_API_KEY=$X_CFIX_API_KEY \
-              -e X_CFIX_API_URL=https://api.corefix.dev \
               -v $PWD:/code \
               -v $PWD/scan-results:/output \
               corefixhq/cfix:latest \
