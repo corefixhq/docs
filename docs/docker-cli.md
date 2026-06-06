@@ -73,7 +73,6 @@ See [Supported Models](https://docs.corefix.dev/docs/models) for the full refere
 | Flag | Required | Description |
 |---|---|---|
 | `[scanner]` | No | Positional argument. Comma-separated scanner names. Default: `osv,iac,secrets,k8s,sast` |
-| `--emailids` | No | Comma-separated email addresses to notify when scan completes |
 | `--openai-api-key` | No | Your own OpenAI-compatible API key (BYOK) |
 | `--model` | No | AI model to use for enrichment. Required when `--openai-api-key` is provided |
 | `--github-token` | No | GitHub PAT for pushing SARIF to GitHub Code Scanning |
@@ -99,12 +98,10 @@ See [Supported Models](https://docs.corefix.dev/docs/models) for the full refere
 | `--username` | No | Login username for authenticated scans |
 | `--password` | No | Login password for authenticated scans |
 | `--token` | No | Bearer token or session cookie — use for OAuth, SSO, MFA, or API scanning |
-| `--remote` | No | Remote browser endpoint. `ws://HOST:PORT` for Playwright, `http://HOST:PORT` for Chrome CDP |
-| `--cf-browser` | No | Use Cloudflare managed browser. Pass `true` to enable |
-| `--emailids` | No | Comma-separated emails to notify on completion |
 | `--openai-api-key` | No | Your own OpenAI-compatible API key (BYOK) |
 | `--model` | No | AI model to use for enrichment. Required when `--openai-api-key` is provided |
 | `--github-token` | No | GitHub PAT for pushing SARIF to GitHub Code Scanning |
+| `--coverage` | No | Controls scan depth and duration |
 
 **Available scanners:**
 
@@ -120,6 +117,63 @@ See [Supported Models](https://docs.corefix.dev/docs/models) for the full refere
 | SSL/TLS | `web` | SSL/TLS configuration and certificate analysis via testssl.sh, Launches automatically if `https` website |
 
 ---
+
+### `--coverage` (optional)
+
+Controls scan depth and duration. Affects both **Nuclei vulnerability scanning** and **authenticated web scanning**.
+
+- For **Nuclei scanning**, defaults to `normal` if not specified.
+- For **authenticated scans**, CoreFix automatically determines coverage based on application complexity if not specified. If explicitly set, the specified value is used.
+
+```bash
+--coverage moderate
+```
+
+| Value | Expected Coverage | Scan Duration | Best For |
+|---|---|---|---|
+| `quick` | 10–20% | Up to 5 min | CI/CD gating, smoke tests |
+| `normal` | 60–70% | Up to 15 min | Standard pipeline scans |
+| `moderate` | 60–70% | Up to 30 min | Balanced depth, thorough rules |
+| `high` | 90–95% | Up to 45 min | Pre-release audits |
+| `veryHigh` | 95–99% | Up to 60 min | Full security audits, compliance |
+
+
+| Level | Max Alerts / Rule | Rule Duration Limit |
+|---|---|---|
+| `quick` | 1 | 1 min |
+| `normal` | 3 | 2 min |
+| `moderate` | 5 | 3 min |
+| `high` | 5 | 5 min |
+| `veryHigh` | 10 | 10 min |
+
+
+Coverage also determines which Nuclei template categories are enabled:
+
+| Coverage | Nuclei Template Categories |
+|---|---|
+| `quick` / not set | Misconfig, exposure, CVE, takeover, default-login, tech |
+| `normal` / `moderate` | All of above + SSL, TLS |
+| `high` / `veryHigh` | All of above + HTTP, CORS, XSS, SQLi, SSRF, redirect, LFI, RFI, token, secret, WordPress (core, plugins, themes) |
+
+> `veryHigh` with `advanced_security_checks: true` can take 60+ minutes and requires significant memory. Schedule these for nightly or weekly runs.
+
+
+### `advanced_security_checks`
+
+Enabled by default. When set to `true`, the scanner runs ZAP with higher memory allocation (up to 12GB) and installs additional ZAP add-ons for deeper vulnerability detection:
+
+- **Passive scan rules** — Alpha and Beta passive scanning rules, OAST (Out-of-band Application Security Testing)
+- **Active scan rules** — Alpha and Beta active scanning rules, advanced SQL injection plugin
+- **Discovery** — DOM-based XSS detection, parameter discovery (ParamDigger), technology fingerprinting (Wappalyzer), retired JavaScript library detection
+- **Access control** — Access control testing, frontend scanner
+- **Fuzzing** — Built-in ZAP fuzzer
+
+These add-ons significantly increase scan coverage but consume more memory and take longer to complete. Set to `false` if running in memory-constrained environments or when a faster scan is preferred.
+
+> **Note:** `veryHigh` coverage with `advanced_security_checks: true` can take 60+ minutes. Schedule these for nightly or weekly runs rather than on every commit.
+
+
+----
 
 ## Quick Start
 
@@ -157,7 +211,6 @@ After a scan completes, results are available in multiple places:
 
 - **Dashboard** — findings appear automatically at [app.corefix.dev](https://app.corefix.dev) under your project.
 - **Local output** — raw, normalized, and enriched results are written to your mounted output directory.
-- **Email** — if `--emailids` was passed, recipients receive a password-protected report link (no CoreFix account required).
 - **GitHub Code Scanning** — if `GITHUB_TOKEN` was provided, SARIF results are pushed to your repository's Security tab.
 
 ---
