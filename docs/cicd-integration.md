@@ -23,14 +23,13 @@ You can add the CoreFix scan as a **standalone workflow file** or as a **step in
 
 ## Secrets & Permissions
 
-Store sensitive values as **secrets** in your CI/CD platform. `ORG_ID` can be a plain environment variable.
+Store sensitive values as **secrets** in your CI/CD platform. 
 
 | Variable | Storage | Description |
 |---|---|---|
 | `X_CFIX_API_KEY` | **Secret** (required) | Your CoreFix API key |
 | `GITHUB_TOKEN` | **Secret** | GitHub token for pushing SARIF to GitHub Code Scanning (see below) |
 | `OPENAI_API_KEY` | **Secret** | Only if bringing your own AI model |
-| `ORG_ID` | Plain variable or secret | Your CoreFix Organization ID |
 
 ### GitHub Token for SARIF Upload
 
@@ -100,13 +99,11 @@ jobs:
         run: |
           mkdir -p ${{ github.workspace }}/scan-results
           docker run --rm \
-            -e ORG_ID=${{ vars.ORG_ID }} \
             -e X_CFIX_API_KEY=${{ secrets.X_CFIX_API_KEY }} \
             -e GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} \
             -v ${{ github.workspace }}:/code \
             -v ${{ github.workspace }}/scan-results:/output \
             corefixhq/cfix:latest \
-            --emailids ${{ vars.SCAN_REPORT_EMAILS }} \
             --model gpt-4o-mini
 
       - name: Upload scan results
@@ -126,14 +123,11 @@ Add the following step to any existing job in your workflow after the `checkout`
         run: |
           mkdir -p ${{ github.workspace }}/scan-results
           docker run --rm \
-            -e ORG_ID=${{ vars.ORG_ID }} \
             -e X_CFIX_API_KEY=${{ secrets.X_CFIX_API_KEY }} \
-            -e X_CFIX_API_URL=https://api.corefix.dev \
             -e GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} \
             -v ${{ github.workspace }}:/code \
             -v ${{ github.workspace }}/scan-results:/output \
             corefixhq/cfix:latest \
-            --emailids ${{ vars.SCAN_REPORT_EMAILS }} \
             --model gpt-4o-mini
 
       - name: Upload scan results
@@ -175,12 +169,10 @@ corefix-code-scan:
   script:
     - |
       docker run --rm \
-        -e ORG_ID=$ORG_ID \
         -e X_CFIX_API_KEY=$X_CFIX_API_KEY \
         -v $CI_PROJECT_DIR:/code \
         -v $CI_PROJECT_DIR/scan-results:/output \
         corefixhq/cfix:latest \
-        --emailids $SCAN_REPORT_EMAILS \
         --model gpt-4o-mini
   artifacts:
     when: always
@@ -213,13 +205,10 @@ corefix-code-scan:
   script:
     - |
       docker run --rm \
-        -e ORG_ID=$ORG_ID \
         -e X_CFIX_API_KEY=$X_CFIX_API_KEY \
-        -e X_CFIX_API_URL=https://api.corefix.dev \
         -v $CI_PROJECT_DIR:/code \
         -v $CI_PROJECT_DIR/scan-results:/output \
         corefixhq/cfix:latest \
-        --emailids $SCAN_REPORT_EMAILS \
         --model gpt-4o-mini
   artifacts:
     when: always
@@ -245,11 +234,6 @@ Create a `Jenkinsfile` for a dedicated security scan pipeline:
 pipeline {
     agent any
 
-    environment {
-        ORG_ID      = 'YOUR_ORG_ID'
-        SCAN_EMAILS = 'security@example.com'
-    }
-
     stages {
         stage('Checkout') {
             steps {
@@ -265,12 +249,10 @@ pipeline {
                     sh '''
                         mkdir -p scan-results
                         docker run --rm \
-                          -e ORG_ID=${ORG_ID} \
                           -e X_CFIX_API_KEY=${X_CFIX_API_KEY} \
                           -v ${WORKSPACE}:/code \
                           -v ${WORKSPACE}/scan-results:/output \
                           corefixhq/cfix:latest \
-                          --emailids ${SCAN_EMAILS} \
                           --model gpt-4o-mini
                     '''
                 }
@@ -298,12 +280,10 @@ Add the following stage to your existing `Jenkinsfile`:
                     sh '''
                         mkdir -p scan-results
                         docker run --rm \
-                          -e ORG_ID=${ORG_ID} \
                           -e X_CFIX_API_KEY=${X_CFIX_API_KEY} \
                           -v ${WORKSPACE}:/code \
                           -v ${WORKSPACE}/scan-results:/output \
                           corefixhq/cfix:latest \
-                          --emailids ${SCAN_EMAILS} \
                           --model gpt-4o-mini
                     '''
                 }
@@ -315,8 +295,6 @@ Add the following stage to your existing `Jenkinsfile`:
             }
         }
 ```
-
-Ensure `ORG_ID` and `SCAN_EMAILS` are set in your pipeline's `environment` block.
 
 :::
 
@@ -345,12 +323,10 @@ jobs:
           command: |
             mkdir -p scan-results
             docker run --rm \
-              -e ORG_ID=$ORG_ID \
               -e X_CFIX_API_KEY=$X_CFIX_API_KEY \
               -v $PWD:/code \
               -v $PWD/scan-results:/output \
               corefixhq/cfix:latest \
-              --emailids $SCAN_REPORT_EMAILS \
               --model gpt-4o-mini
       - store_artifacts:
           path: scan-results
@@ -382,12 +358,10 @@ jobs:
           command: |
             mkdir -p scan-results
             docker run --rm \
-              -e ORG_ID=$ORG_ID \
               -e X_CFIX_API_KEY=$X_CFIX_API_KEY \
               -v $PWD:/code \
               -v $PWD/scan-results:/output \
               corefixhq/cfix:latest \
-              --emailids $SCAN_REPORT_EMAILS \
               --model gpt-4o-mini
       - store_artifacts:
           path: scan-results

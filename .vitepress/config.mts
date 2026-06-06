@@ -62,14 +62,6 @@ export default defineConfig({
     sidebar: [
       { text: "Corefix Docs", link: "/docs/introduction" },
       {
-        text: "Introduction",
-        collapsed: false,
-        items: [
-          { text: "What is CoreFix?", link: "/docs/what-is-corefix" },
-          { text: "How It Works", link: "/docs/how-it-works" },
-        ],
-      },
-      {
         text: "Getting Started",
         collapsed: false,
         items: [
@@ -79,6 +71,8 @@ export default defineConfig({
             text: "Connect GitHub for Code Scanning",
             link: "/docs/github-integration",
           },
+          { text: "Code Scan via GitHub Actions", link: "/docs/cicd-github-actions.md" },
+
         ],
       },
       {
@@ -117,7 +111,7 @@ export default defineConfig({
         text: "AI & Models",
         collapsed: false,
         items: [
-          { text: "AI Enrichment", link: "/docs/ai-enrichment" },
+          // { text: "AI Enrichment", link: "/docs/ai-enrichment" },
           { text: "Supported Models", link: "/docs/models" },
           { text: "Model Pricing", link: "/docs/models-pricing" },
           { text: "Model Availability Matrix", link: "/docs/models-matrix" },
@@ -132,21 +126,31 @@ export default defineConfig({
         ],
       },
       {
-        text: "Legal & Policies",
+        text: "About CoreFix",
         collapsed: false,
         items: [
-          { text: "Terms of Service", link: "/docs/terms-of-service" },
-          { text: "Privacy Policy", link: "/docs/privacy-protection" },
-          { text: "Cookie Policy", link: "/docs/cookie-policy" },
-          { text: "Refund Policy", link: "/docs/refund-policy" },
-          { text: "Security Policy", link: "/docs/security-policy" },
-          { text: "AI Usage Policy", link: "/docs/ai-policy" },
-          {
-            text: "Open Source Acknowledgements",
-            link: "/docs/acknowledgements",
-          },
+          { text: "What is CoreFix?", link: "/docs/what-is-corefix" },
+          { text: "How It Works", link: "/docs/how-it-works" },
+          { text: "Open Source Acknowledgements", link: "/docs/acknowledgements" },
+
         ],
       },
+      // {
+      //   text: "Legal & Policies",
+      //   collapsed: false,
+      //   items: [
+      //     { text: "Terms of Service", link: "/docs/terms-of-service" },
+      //     { text: "Privacy Policy", link: "/docs/privacy-protection" },
+      //     { text: "Cookie Policy", link: "/docs/cookie-policy" },
+      //     { text: "Refund Policy", link: "/docs/refund-policy" },
+      //     { text: "Security Policy", link: "/docs/security-policy" },
+      //     { text: "AI Usage Policy", link: "/docs/ai-policy" },
+      //     {
+      //       text: "Open Source Acknowledgements",
+      //       link: "/docs/acknowledgements",
+      //     },
+      //   ],
+      // },
       {
         text: "Release Logs",
         collapsed: false,
