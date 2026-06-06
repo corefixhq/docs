@@ -40,7 +40,6 @@ The following environment variables are shared by both the code and web scanning
 
 | Variable | Required | Description |
 |---|---|---|
-| `ORG_ID` | **Yes** | Your CoreFix Organization ID |
 | `X_CFIX_API_KEY` | **Yes** | Your CoreFix API key |
 | `GITHUB_TOKEN` | No | GitHub Personal Access Token for pushing scan results as SARIF to GitHub Code Scanning |
 | `DEBUG` | No | Set to `app:*` to enable verbose debug logging |
@@ -128,7 +127,6 @@ See [Supported Models](https://docs.corefix.dev/docs/models) for the full refere
 
 ```bash
 docker run --rm \
-  -e ORG_ID=<your-org-id> \
   -e X_CFIX_API_KEY=<your-api-key> \
   -v $(pwd):/code \
   -v ~/scan-results:/output \
@@ -142,7 +140,6 @@ For the full CLI reference, scanner flags, examples, and output details, see [Co
 ```bash
 docker run --rm \
   --network host \
-  -e ORG_ID=<your-org-id> \
   -e X_CFIX_API_KEY=<your-api-key> \
   -v $(pwd):/web \
   -v ~/scan-results:/output \

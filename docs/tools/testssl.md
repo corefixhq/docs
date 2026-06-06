@@ -29,9 +29,7 @@ Use the web scanner against an HTTPS endpoint:
 
 ```bash
 docker run --rm \
-  -e ORG_ID=YOUR_ORG_ID \
   -e X_CFIX_API_KEY=cfix_live_YOUR_API_KEY \
-  -e X_CFIX_API_URL=https://api.corefix.dev \
   cfix-web:latest testssl \
   --target https://example.com
 ```

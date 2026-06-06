@@ -35,7 +35,7 @@ docker pull ghcr.io/corefixhq/cfix:26141d48     # specific commit SHA
 
 ```bash
 docker run --rm \
-  -e ORG_ID=<your-org-id> \
+  -e X_CFIX_API_KEY==<your-api-key> \
   -v $(pwd):/code \
   -v ~/scan-results:/output \
   corefixhq/cfix
@@ -49,13 +49,11 @@ docker run --rm \
 
 ```bash
 docker run --rm \
-  -e ORG_ID=<your-org-id> \
   -e X_CFIX_API_KEY=<your-api-key> \
   [-e GITHUB_TOKEN=<github-pat>] \
   -v $(pwd):/code \
   -v <output-dir>:/output \
   corefixhq/cfix [scanners] \
-  [--emailids <email1,email2>] \
   [--openai-api-key <key>] \
   [--model <model-name>] \
   [--github-token <github-pat>]
@@ -71,7 +69,6 @@ The screenshot below shows the command being run from the root folder of a repos
 
 | Variable | Required | Description |
 |---|---|---|
-| `ORG_ID` | **Yes** | Your CoreFix organization ID. Found in [Account & API Keys](https://app.corefix.dev/settings/api-keys) |
 | `X_CFIX_API_KEY` | **Yes** | Your CoreFix API key. Found in [Account & API Keys](https://app.corefix.dev/settings/api-keys) |
 | `GITHUB_TOKEN` | No | GitHub PAT for uploading results as SARIF to GitHub Code Scanning |
 
@@ -162,7 +159,6 @@ GitHub Personal Access Token for uploading scan results as a SARIF file to GitHu
 
 ```bash
 docker run --rm \
-  -e ORG_ID=your-org-id \
   -e X_CFIX_API_KEY=cfix_live_xxxxxxxx \
   -v $(pwd):/code \
   -v ~/scan-results:/output \
@@ -174,7 +170,6 @@ docker run --rm \
 ```bash
 # Secrets and SAST
 docker run --rm \
-  -e ORG_ID=your-org-id \
   -e X_CFIX_API_KEY=cfix_live_xxxxxxxx \
   -v $(pwd):/code \
   -v ~/scan-results:/output \
@@ -182,30 +177,17 @@ docker run --rm \
 
 # Dependencies and IaC only
 docker run --rm \
-  -e ORG_ID=your-org-id \
   -e X_CFIX_API_KEY=cfix_live_xxxxxxxx \
   -v $(pwd):/code \
   -v ~/scan-results:/output \
   corefixhq/cfix osv,iac
 ```
 
-### Email report on completion
-
-```bash
-docker run --rm \
-  -e ORG_ID=your-org-id \
-  -e X_CFIX_API_KEY=cfix_live_xxxxxxxx \
-  -v $(pwd):/code \
-  -v ~/scan-results:/output \
-  corefixhq/cfix \
-  --emailids you@example.com
-```
 
 ### Bring your own API key
 
 ```bash
 docker run --rm \
-  -e ORG_ID=your-org-id \
   -e X_CFIX_API_KEY=cfix_live_xxxxxxxx \
   -v $(pwd):/code \
   -v ~/scan-results:/output \
@@ -218,7 +200,6 @@ docker run --rm \
 
 ```bash
 docker run --rm \
-  -e ORG_ID=your-org-id \
   -e X_CFIX_API_KEY=cfix_live_xxxxxxxx \
   -e GITHUB_TOKEN=ghp_xxxxxxxxxxxx \
   -v $(pwd):/code \
@@ -243,13 +224,11 @@ docker run --rm \
 
 ```bash
 docker run --rm \
-  -e ORG_ID=your-org-id \
   -e X_CFIX_API_KEY=cfix_live_xxxxxxxx \
   -e GITHUB_TOKEN=ghp_xxxxxxxxxxxx \
   -v $(pwd):/code \
   -v ~/scan-results:/output \
   corefixhq/cfix secrets,sast,osv \
-  --emailids you@example.com \
   --openai-api-key sk-proj-xxxxxxxx \
   --model gpt-4o-mini
 ```
@@ -261,7 +240,6 @@ docker run --rm \
 
 ```bash
 docker run --rm \
-  -e ORG_ID=your-org-id \
   -e X_CFIX_API_KEY=cfix_live_xxxxxxxx \
   -v $(pwd):/code \
   -v ~/scan-results:/output \
@@ -271,7 +249,7 @@ docker run --rm \
 ### Detailed Agent logs output.
 
 ```
-ubuntu@ubuntu-dev-vulnscanner-1:~/chef$ docker run --rm -e X_CFIX_API_KEY=cfix_live_f8c5b8e3ce7ddae5ac86a225a528498b53cae927585cf2615a2d0890e4529b920b1e4a98630206de279785b4893efaabca -e ORG_ID=b7a526b4-7f14-46c8-b309-759ecf2d93f6 -e GITHUB_TOKEN=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  -v $(pwd):/code -v ~/scan-results:/output cfix-test --openai-api-key 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 --model gpt-5.4-mini
+ubuntu@ubuntu-dev-vulnscanner-1:~/chef$ docker run --rm -e X_CFIX_API_KEY=cfix_live_f8c5b8e3ce7ddae5ac86a225a528498b53cae927585cf2615a2d0890e4529b920b1e4a98630206de279785b4893efaabca -e GITHUB_TOKEN=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  -v $(pwd):/code -v ~/scan-results:/output cfix-test --openai-api-key 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 --model gpt-5.4-mini
 ◇ injected env (7) from config/.env // tip: ⌁ auth for agents [www.vestauth.com]
 [+] Local scan mode — using mounted /code
 Scanner endpoint:  https://deeptraq-api-test.cloud-e5c.workers.dev

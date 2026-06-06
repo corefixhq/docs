@@ -25,7 +25,7 @@ You can add the CoreFix scan as a **standalone workflow file** or as a **step in
 
 ## Secrets & Permissions
 
-Store sensitive values as **secrets** in your CI/CD platform. `ORG_ID` and `SCAN_TARGET` can be plain variables.
+Store sensitive values as **secrets** in your CI/CD platform. `SCAN_TARGET` can be plain variables.
 
 | Variable | Storage | Description |
 |---|---|---|
@@ -35,7 +35,6 @@ Store sensitive values as **secrets** in your CI/CD platform. `ORG_ID` and `SCAN
 | `PASSWORD` | **Secret** | Login password for authenticated scans |
 | `TOKEN` | **Secret** | Bearer token or session cookie — use for OAuth, SSO, MFA, or API scanning where you want to bypass credentials |
 | `OPENAI_API_KEY` | **Secret** | Only if bringing your own AI model |
-| `ORG_ID` | Plain variable or secret | Your CoreFix Organization ID |
 | `SCAN_TARGET` | Plain variable | Target URL of your staging/test environment |
 
 > For **API scanning** where a bearer token or cookie is needed, pass the token via the `TOKEN` secret rather than `USERNAME` / `PASSWORD`.
@@ -99,7 +98,6 @@ jobs:
           mkdir -p ${{ github.workspace }}/scan-results
           docker run --rm \
             --network host \
-            -e ORG_ID=${{ vars.ORG_ID }} \
             -e X_CFIX_API_KEY=${{ secrets.X_CFIX_API_KEY }} \
             -e GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} \
             -v ${{ github.workspace }}:/web \
@@ -131,7 +129,6 @@ Add the following steps to an existing job, after your deploy step:
           mkdir -p ${{ github.workspace }}/scan-results
           docker run --rm \
             --network host \
-            -e ORG_ID=${{ vars.ORG_ID }} \
             -e X_CFIX_API_KEY=${{ secrets.X_CFIX_API_KEY }} \
             -e GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} \
             -v ${{ github.workspace }}:/web \
@@ -186,16 +183,13 @@ corefix-web-scan:
   script:
     - |
       docker run --rm \
-        -e ORG_ID=$ORG_ID \
         -e X_CFIX_API_KEY=$X_CFIX_API_KEY \
-        -e X_CFIX_API_URL=https://api.corefix.dev \
         -v $CI_PROJECT_DIR:/web \
         -v $CI_PROJECT_DIR/scan-results:/output \
         corefixhq/cfix-web:latest web \
         --target $SCAN_TARGET \
         --username $USERNAME \
         --password $PASSWORD \
-        --emailids $SCAN_REPORT_EMAILS \
         --model gpt-4o-mini
   artifacts:
     when: always
@@ -232,7 +226,6 @@ corefix-web-scan:
   script:
     - |
       docker run --rm \
-        -e ORG_ID=$ORG_ID \
         -e X_CFIX_API_KEY=$X_CFIX_API_KEY \
         -v $CI_PROJECT_DIR:/web \
         -v $CI_PROJECT_DIR/scan-results:/output \
@@ -240,7 +233,6 @@ corefix-web-scan:
         --target $SCAN_TARGET \
         --username $USERNAME \
         --password $PASSWORD \
-        --emailids $SCAN_REPORT_EMAILS \
         --model gpt-4o-mini
   artifacts:
     when: always
@@ -269,9 +261,7 @@ pipeline {
     agent any
 
     environment {
-        ORG_ID      = 'YOUR_ORG_ID'
         SCAN_TARGET = 'https://staging.example.com'
-        SCAN_EMAILS = 'security@example.com'
     }
 
     stages {
@@ -292,7 +282,6 @@ pipeline {
                         mkdir -p scan-results
                         docker run --rm \
                           --network host \
-                          -e ORG_ID=${ORG_ID} \
                           -e X_CFIX_API_KEY=${X_CFIX_API_KEY} \
                           -v ${WORKSPACE}:/web \
                           -v ${WORKSPACE}/scan-results:/output \
@@ -300,7 +289,6 @@ pipeline {
                           --target ${SCAN_TARGET} \
                           --username ${USERNAME} \
                           --password ${PASSWORD} \
-                          --emailids ${SCAN_EMAILS} \
                           --model gpt-4o-mini
                     '''
                 }
@@ -331,7 +319,6 @@ Add the following stage to your existing `Jenkinsfile` after the deploy stage:
                         mkdir -p scan-results
                         docker run --rm \
                           --network host \
-                          -e ORG_ID=${ORG_ID} \
                           -e X_CFIX_API_KEY=${X_CFIX_API_KEY} \
                           -v ${WORKSPACE}:/web \
                           -v ${WORKSPACE}/scan-results:/output \
@@ -339,7 +326,6 @@ Add the following stage to your existing `Jenkinsfile` after the deploy stage:
                           --target ${SCAN_TARGET} \
                           --username ${USERNAME} \
                           --password ${PASSWORD} \
-                          --emailids ${SCAN_EMAILS} \
                           --model gpt-4o-mini
                     '''
                 }
@@ -352,7 +338,7 @@ Add the following stage to your existing `Jenkinsfile` after the deploy stage:
         }
 ```
 
-Ensure `ORG_ID`, `SCAN_TARGET`, and `SCAN_EMAILS` are set in your pipeline's `environment` block. For token-based auth, replace `app-username` and `app-password` credentials with a single `app-token` credential and use `--token` instead.
+Ensure `SCAN_TARGET` is set in your pipeline's `environment` block. For token-based auth, replace `app-username` and `app-password` credentials with a single `app-token` credential and use `--token` instead.
 
 :::
 
@@ -391,7 +377,6 @@ jobs:
             mkdir -p scan-results
             docker run --rm \
               --network host \
-              -e ORG_ID=$ORG_ID \
               -e X_CFIX_API_KEY=$X_CFIX_API_KEY \
               -v $PWD:/web \
               -v $PWD/scan-results:/output \
@@ -399,7 +384,6 @@ jobs:
               --target $SCAN_TARGET \
               --username $USERNAME \
               --password $PASSWORD \
-              --emailids $SCAN_REPORT_EMAILS \
               --model gpt-4o-mini
       - store_artifacts:
           path: scan-results
@@ -435,7 +419,6 @@ jobs:
             mkdir -p scan-results
             docker run --rm \
               --network host \
-              -e ORG_ID=$ORG_ID \
               -e X_CFIX_API_KEY=$X_CFIX_API_KEY \
               -v $PWD:/web \
               -v $PWD/scan-results:/output \
@@ -443,7 +426,6 @@ jobs:
               --target $SCAN_TARGET \
               --username $USERNAME \
               --password $PASSWORD \
-              --emailids $SCAN_REPORT_EMAILS \
               --model gpt-4o-mini
       - store_artifacts:
           path: scan-results

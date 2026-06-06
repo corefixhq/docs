@@ -178,7 +178,7 @@ Use these when your `--openai-api-key` is a Bedrock API key generated from the A
 
 ```bash
 docker run --rm \
-  -e ORG_ID=... -e X_CFIX_API_KEY=... \
+  -e X_CFIX_API_KEY=... \
   -v $(pwd):/code -v ~/scan-results:/output \
   corefixhq/cfix:latest
 ```
@@ -187,7 +187,7 @@ docker run --rm \
 
 ```bash
 docker run --rm \
-  -e ORG_ID=... -e X_CFIX_API_KEY=... \
+  -e X_CFIX_API_KEY=... \
   -v $(pwd):/code -v ~/scan-results:/output \
   corefixhq/cfix:latest \
   --model gpt-5.4
@@ -197,7 +197,7 @@ docker run --rm \
 
 ```bash
 docker run --rm \
-  -e ORG_ID=... -e X_CFIX_API_KEY=... \
+  -e X_CFIX_API_KEY=... \
   -v $(pwd):/code -v ~/scan-results:/output \
   corefixhq/cfix:latest \
   --openai-api-key sk-proj-xxxxxxxx \
@@ -208,7 +208,7 @@ docker run --rm \
 
 ```bash
 docker run --rm \
-  -e ORG_ID=... -e X_CFIX_API_KEY=... \
+  -e X_CFIX_API_KEY=... \
   -v $(pwd):/code -v ~/scan-results:/output \
   corefixhq/cfix:latest \
   --openai-api-key sk-ant-xxxxxxxx \
@@ -219,7 +219,7 @@ docker run --rm \
 
 ```bash
 docker run --rm \
-  -e ORG_ID=... -e X_CFIX_API_KEY=... \
+  -e X_CFIX_API_KEY=... \
   -v $(pwd):/code -v ~/scan-results:/output \
   corefixhq/cfix:latest \
   --openai-api-key <bedrock-api-key> \

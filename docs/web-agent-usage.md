@@ -33,11 +33,10 @@ docker pull ghcr.io/corefixhq/cfix-web:26141d48     # specific commit SHA
 
 ## Quick Start
 
-Both `ORG_ID` and `X_CFIX_API_KEY` are required. Get them from your [Account & API Keys](https://app.corefix.dev/settings/api-keys) page.
+`X_CFIX_API_KEY` are required. Get them from your [Account & API Keys](https://app.corefix.dev/settings/api-keys) page.
 
 ```bash
 docker run --rm \
-  -e ORG_ID=<your-org-id> \
   -e X_CFIX_API_KEY=<your-api-key> \
   -v $(pwd):/web \
   -v ~/scan-results:/output \
@@ -53,8 +52,7 @@ docker run --rm \
 
 ```bash
 docker run --rm \
-  [--add-host=host.docker.internal:host-gateway] \
-  -e ORG_ID=<your-org-id> \
+  [--network host] \
   -e X_CFIX_API_KEY=<your-api-key> \
   [-e USERNAME=<username>] \
   [-e PASSWORD=<password>] \
@@ -69,13 +67,12 @@ docker run --rm \
   [--token <bearer-token>] \
   [--remote <browser-endpoint>] \
   [--cf-browser] \
-  [--emailids <email1,email2>] \
   [--openai-api-key <key>] \
   [--model <model-name>] \
   [--github-token <github-pat>]
 ```
 
-> Add `--add-host=host.docker.internal:host-gateway` only when using `--remote` to connect to a browser running on your host machine.
+> Add `--network host` only when using `--remote` to connect to a browser running on your host machine.
 
 ---
 
@@ -83,7 +80,6 @@ docker run --rm \
 
 | Variable | Required | Description |
 |---|---|---|
-| `ORG_ID` | **Yes** | Your CoreFix organization ID. Found in [Account & API Keys](https://app.corefix.dev/settings/api-keys) |
 | `X_CFIX_API_KEY` | **Yes** | Your CoreFix API key. Found in [Account & API Keys](https://app.corefix.dev/settings/api-keys) |
 | `USERNAME` | No | Alternative to `--username` flag |
 | `PASSWORD` | No | Alternative to `--password` flag |
@@ -229,8 +225,7 @@ chromium-browser \
 
 ```bash
 docker run --rm \
-  --add-host=host.docker.internal:host-gateway \
-  -e ORG_ID=your-org-id \
+  --network host \
   -e X_CFIX_API_KEY=cfix_live_xxxxxxxx \
   -v $(pwd):/web \
   -v ~/scan-results:/output \
@@ -249,8 +244,7 @@ npx playwright launch-server --port 9323
 
 # Run the scanner
 docker run --rm \
-  --add-host=host.docker.internal:host-gateway \
-  -e ORG_ID=your-org-id \
+  --network host \
   -e X_CFIX_API_KEY=cfix_live_xxxxxxxx \
   -v $(pwd):/web \
   -v ~/scan-results:/output \
@@ -307,7 +301,6 @@ Upload scan results as a SARIF file to GitHub Code Scanning. Can also be passed 
 
 ```bash
 docker run --rm \
-  -e ORG_ID=your-org-id \
   -e X_CFIX_API_KEY=cfix_live_xxxxxxxx \
   -v $(pwd):/web \
   -v ~/scan-results:/output \
@@ -319,7 +312,6 @@ docker run --rm \
 
 ```bash
 docker run --rm \
-  -e ORG_ID=your-org-id \
   -e X_CFIX_API_KEY=cfix_live_xxxxxxxx \
   -v $(pwd):/web \
   -v ~/scan-results:/output \
@@ -334,7 +326,6 @@ docker run --rm \
 
 ```bash
 docker run --rm \
-  -e ORG_ID=your-org-id \
   -e X_CFIX_API_KEY=cfix_live_xxxxxxxx \
   -v $(pwd):/web \
   -v ~/scan-results:/output \
@@ -356,8 +347,7 @@ chromium-browser \
 
 # Step 2 — run the scanner
 docker run --rm \
-  --add-host=host.docker.internal:host-gateway \
-  -e ORG_ID=your-org-id \
+  --network host \
   -e X_CFIX_API_KEY=cfix_live_xxxxxxxx \
   -v $(pwd):/web \
   -v ~/scan-results:/output \
@@ -373,7 +363,6 @@ docker run --rm \
 ```bash
 # SSL check only
 docker run --rm \
-  -e ORG_ID=your-org-id \
   -e X_CFIX_API_KEY=cfix_live_xxxxxxxx \
   -v $(pwd):/web \
   -v ~/scan-results:/output \
@@ -382,7 +371,6 @@ docker run --rm \
 
 # Port scan + CVEs only
 docker run --rm \
-  -e ORG_ID=your-org-id \
   -e X_CFIX_API_KEY=cfix_live_xxxxxxxx \
   -v $(pwd):/web \
   -v ~/scan-results:/output \
@@ -394,7 +382,6 @@ docker run --rm \
 
 ```bash
 docker run --rm \
-  -e ORG_ID=your-org-id \
   -e X_CFIX_API_KEY=cfix_live_xxxxxxxx \
   -v $(pwd):/web \
   -v ~/scan-results:/output \
@@ -409,7 +396,6 @@ docker run --rm \
 
 ```bash
 docker run --rm \
-  -e ORG_ID=your-org-id \
   -e X_CFIX_API_KEY=cfix_live_xxxxxxxx \
   -e GITHUB_TOKEN=ghp_xxxxxxxxxxxx \
   -v $(pwd):/web \

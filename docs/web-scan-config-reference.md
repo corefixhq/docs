@@ -142,7 +142,7 @@ options:
 
 ```bash
 docker run --rm --network host \
-  -e X_CFIX_API_KEY=... -e ORG_ID=... -e X_CFIX_API_URL=https://api.corefix.dev \
+  -e X_CFIX_API_KEY=cfix_live_xxxx \
   -v $(pwd):/web -v ~/scan-results:/output \
   corefixhq/cfix-web:latest web \
   --target https://staging.example.com \
@@ -160,7 +160,7 @@ options:
 
 ```bash
 docker run --rm --network host \
-  -e X_CFIX_API_KEY=... -e ORG_ID=... -e X_CFIX_API_URL=https://api.corefix.dev \
+  -e X_CFIX_API_KEY=cfix_live_xxxx \
   -v $(pwd):/web -v ~/scan-results:/output \
   corefixhq/cfix-web:latest web \
   --target https://public-site.example.com
@@ -181,7 +181,7 @@ options:
 ```bash
 # Place openapi.json or swagger.yaml in the current directory
 docker run --rm --network host \
-  -e X_CFIX_API_KEY=... -e ORG_ID=... -e X_CFIX_API_URL=https://api.corefix.dev \
+  -e X_CFIX_API_KEY=cfix_live_xxxx \
   -v $(pwd):/web -v ~/scan-results:/output \
   corefixhq/cfix-web:latest web \
   --target https://api.example.com \
