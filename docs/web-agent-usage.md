@@ -65,14 +65,13 @@ docker run --rm \
   [--username <user>] \
   [--password <pass>] \
   [--token <bearer-token>] \
-  [--remote <browser-endpoint>] \
-  [--cf-browser] \
   [--openai-api-key <key>] \
   [--model <model-name>] \
   [--github-token <github-pat>]
+  [--coverage <quick|normal|moderate|high|veryhigh>]
 ```
 
-> Add `--network host` only when using `--remote` to connect to a browser running on your host machine.
+> Add `--network host` only when using `credentials` for authenticated scans and to connect to a browser running on your host machine.
 
 ---
 
@@ -155,27 +154,54 @@ A valid bearer token or session cookie. Use this for complex auth flows (OAuth, 
 -e TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 ```
 
----
+### `--coverage` (optional)
 
-## Browser Setup for Authenticated Scans
+Controls scan depth and duration.
 
-::: warning Browser required for authenticated scanning
-When `--username`, `--password`, or `--token` is provided, the scanner uses a real browser to handle login flows, JavaScript rendering, and session management. You must either launch a remote browser or use `--cf-browser`.
-:::
-
-### Option 1 — Cloudflare Browser (recommended, zero setup)
-
-No browser installation needed. CoreFix launches a managed browser on Cloudflare Workers and connects via an encrypted WebSocket.
+- For **authenticated scans**, CoreFix automatically determines coverage based on application complexity if not specified. If explicitly set, the specified value is used.
 
 ```bash
---cf-browser true
+--coverage moderate
 ```
 
-Use this when you don't want to install Chromium or manage a browser process.
+| Value | Expected Coverage | Scan Duration | Best For |
+|---|---|---|---|
+| `quick` | 10–20% | Up to 5 min | CI/CD gating, smoke tests |
+| `normal` | 60–70% | Up to 15 min | Standard pipeline scans |
+| `moderate` | 60–70% | Up to 30 min | Balanced depth, thorough rules |
+| `high` | 90–95% | Up to 45 min | Pre-release audits |
+| `veryHigh` | 95–99% | Up to 60 min | Full security audits, compliance |
 
-### Option 2 — Remote Chromium on your machine
 
-Install Chromium, launch it in headless mode, then connect the scanner to it via `--remote`.
+---
+
+## Browser for Authenticated Scans
+
+When credentials or a token are provided, the scanner uses a real browser to handle login flows, JavaScript rendering, and session management.
+
+The scanner automatically detects the browser setup — no flags needed:
+
+1. If Chromium is running locally on port `9222`, the scanner connects to it automatically.
+2. If no local browser is detected, the scanner falls back to a **Cloudflare managed browser** with zero setup required.
+
+### Using the Cloudflare Browser (Default)
+
+No installation or configuration needed. If you don't launch Chromium locally, the scanner automatically uses a managed browser on Cloudflare Workers. Just run your scan as normal:
+
+```bash
+docker run --rm \
+  -e X_CFIX_API_KEY=cfix_live_xxxxxxxx \
+  -v $(pwd):/web \
+  -v ~/scan-results:/output \
+  corefixhq/cfix-web \
+  --target https://your-app.com \
+  --username admin \
+  --password s3cr3t
+```
+
+### Using a Local Chromium Browser (Optional)
+
+If you prefer to use a local browser for performance or network reasons, install Chromium and its dependencies, then launch it in headless mode before running the scan.
 
 **Install Chromium on Ubuntu:**
 
@@ -211,7 +237,7 @@ sudo apt install -y \
   xdg-utils
 ```
 
-**Launch Chromium in headless mode:**
+**Launch Chromium in headless mode on port 9222:**
 
 ```bash
 chromium-browser \
@@ -221,7 +247,7 @@ chromium-browser \
   --no-sandbox
 ```
 
-**Run the scanner connected to it:**
+**Run the scanner with `--network host` so it can reach the local browser:**
 
 ```bash
 docker run --rm \
@@ -232,32 +258,11 @@ docker run --rm \
   corefixhq/cfix-web \
   --target https://your-app.com \
   --username admin \
-  --password s3cr3t \
-  --remote http://host.docker.internal:9222
+  --password s3cr3t
 ```
 
-### Option 3 — Remote Playwright Server
+> **Note:** `--network host` is required when using a local Chromium browser so the container can reach port 9222 on the host.
 
-```bash
-# On your host
-npx playwright launch-server --port 9323
-
-# Run the scanner
-docker run --rm \
-  --network host \
-  -e X_CFIX_API_KEY=cfix_live_xxxxxxxx \
-  -v $(pwd):/web \
-  -v ~/scan-results:/output \
-  corefixhq/cfix-web \
-  --target https://your-app.com \
-  --remote ws://host.docker.internal:9323
-```
-
-The protocol is auto-detected: `ws://` for Playwright, `http://` for Chrome CDP.
-
-::: tip CI/CD environments
-In headless CI pipelines (GitHub Actions, GitLab CI), you must install Chromium before running the scanner if using `--remote`. Alternatively, use `--cf-browser true` for zero-setup browser execution.
-:::
 
 ---
 
@@ -272,14 +277,6 @@ Same behaviour as the code scanner — see [AI Models](./code-agent-usage#ai-mod
 
 ```bash
 --openai-api-key sk-proj-xxxxxxxx --model gpt-4o-mini
-```
-
-### `--emailids` (optional)
-
-Send the scan report to one or more email addresses on completion. Recipients receive a password-protected report link — no CoreFix account required.
-
-```bash
---emailids you@example.com,security@yourcompany.com
 ```
 
 ### `--github-token` (optional)
@@ -318,8 +315,7 @@ docker run --rm \
   corefixhq/cfix-web \
   --target https://your-app.com \
   --username admin \
-  --password s3cr3t \
-  --cf-browser true
+  --password s3cr3t
 ```
 
 ### Authenticated scan with bearer token
@@ -331,8 +327,7 @@ docker run --rm \
   -v ~/scan-results:/output \
   corefixhq/cfix-web \
   --target https://your-app.com \
-  --token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
-  --cf-browser true
+  --token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 ```
 
 ### Authenticated scan with remote Chromium on host
@@ -388,8 +383,7 @@ docker run --rm \
   corefixhq/cfix-web \
   --target https://your-app.com \
   --openai-api-key sk-proj-xxxxxxxx \
-  --model gpt-4o-mini \
-  --emailids security@yourcompany.com
+  --model gpt-4o-mini
 ```
 
 ### Upload results to GitHub Code Scanning

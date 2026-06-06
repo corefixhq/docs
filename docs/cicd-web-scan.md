@@ -7,9 +7,9 @@ sidebar_label: Web Scan — CI/CD
 
 Add CoreFix DAST (Dynamic Application Security Testing) to your pipeline with a single step. The web scanner runs as a Docker container (`corefixhq/cfix-web`) and targets a live, deployed URL — so the step runs **after** your app is deployed, not during the build.
 
-For detailed CLI options, browser modes, and BYOK model configuration, refer to [Docker / Local CLI](/docs/docker-cli).
+For detailed CLI options and BYOK model configuration, refer to [Docker / Local CLI](/docs/docker-cli).
 
-For advanced scan configuration (scope, authentication, coverage), refer to [Web Scan Config Reference](./web-scan-config-reference.md).
+For advanced scan configuration (authentication, coverage), refer to [Web Scan Config Reference](./web-scan-config-reference.md).
 
 ---
 
@@ -23,27 +23,92 @@ You can add the CoreFix scan as a **standalone workflow file** or as a **step in
 
 ---
 
+## Authentication Options
+
+Choose the appropriate approach based on your application's auth mechanism. Pass credentials via CI/CD secrets.
+
+| Scenario | Flags |
+|---|---|
+| **Unauthenticated scan** | Omit `--username`, `--password`, and `--token` |
+| **Username + Password** | `--username $USERNAME --password $PASSWORD` |
+| **Bearer token / Cookie** | `--token $TOKEN` — for OAuth, SSO, MFA, or API scanning |
+
+For bearer token or session cookie, store the value in the `TOKEN` secret and pass it via `--token`. This bypasses the credential login flow and uses the provided session directly.
+
+> **Tip:** The pipeline examples below include `--username` and `--password` for reference. Remove them for unauthenticated scans, or replace with `--token` for token-based auth.
+
+
+---
+
+## Browser — Zero Configuration
+
+The web scanner automatically handles browser setup with no extra flags:
+
+1. If a Chromium instance is running on `localhost:9222`, the scanner connects to it automatically.
+2. If no local browser is detected, the scanner falls back to a **Cloudflare managed browser** — no installation needed.
+
+This means your pipeline works out of the box without installing Chromium. However, if you prefer to use a local browser for performance or network reasons, install Chromium on the runner and launch it before the scan step:
+
+```bash
+# Install Chromium (Ubuntu)
+sudo apt update
+sudo apt install -y \
+  chromium-browser \
+  ca-certificates \
+  fonts-liberation \
+  libasound2t64 \
+  libatk-bridge2.0-0 \
+  libatk1.0-0 \
+  libcups2 \
+  libdbus-1-3 \
+  libdrm2 \
+  libgbm1 \
+  libglib2.0-0 \
+  libgtk-3-0 \
+  libnspr4 \
+  libnss3 \
+  libu2f-udev \
+  libvulkan1 \
+  libx11-6 \
+  libx11-xcb1 \
+  libxcb1 \
+  libxcomposite1 \
+  libxdamage1 \
+  libxext6 \
+  libxfixes3 \
+  libxkbcommon0 \
+  libxrandr2 \
+  wget \
+  xdg-utils
+
+# Launch in headless mode
+chromium-browser --remote-debugging-port=9222 --remote-debugging-address=0.0.0.0 --headless --no-sandbox &
+```
+
+The scanner will detect it automatically on the next run.
+
+---
+
 ## Secrets & Permissions
 
-Store sensitive values as **secrets** in your CI/CD platform. `SCAN_TARGET` can be plain variables.
+Store sensitive values as **secrets** in your CI/CD platform. `SCAN_TARGET` can be a plain variable.
 
 | Variable | Storage | Description |
 |---|---|---|
 | `X_CFIX_API_KEY` | **Secret** (required) | Your CoreFix API key |
-| `GITHUB_TOKEN` | **Secret** | GitHub PAT for pushing SARIF to GitHub Code Scanning |
+| `GITHUB_TOKEN` | **Secret** | GitHub token for pushing SARIF to GitHub Code Scanning (see below) |
 | `USERNAME` | **Secret** | Login username for authenticated scans |
 | `PASSWORD` | **Secret** | Login password for authenticated scans |
-| `TOKEN` | **Secret** | Bearer token or session cookie — use for OAuth, SSO, MFA, or API scanning where you want to bypass credentials |
+| `TOKEN` | **Secret** | Bearer token or session cookie — use for OAuth, SSO, MFA, or API scanning |
 | `OPENAI_API_KEY` | **Secret** | Only if bringing your own AI model |
 | `SCAN_TARGET` | Plain variable | Target URL of your staging/test environment |
 
 > For **API scanning** where a bearer token or cookie is needed, pass the token via the `TOKEN` secret rather than `USERNAME` / `PASSWORD`.
 
-### GitHub Token Permissions
+### GitHub SARIF Upload (replace the current GitHub Token section)
 
-If using GitHub Actions, `GITHUB_TOKEN` is available automatically — ensure your workflow has the `security-events: write` permission.
+> **Pushing results to GitHub Code Scanning:** Web scan findings can be pushed as SARIF to a relevant source code repository. When run in a pipeline where the code is checked out, results are pushed to the same repository's GitHub Code Scanning tab. Refer to [Code Scanning — CI/CD Integration](./cicd-integration#github-token-for-sarif-upload) for details on configuring SARIF uploads and GitHub token permissions.
 
-If using a Personal Access Token (PAT), grant **Code Scanning** with **Read and Write** access under the token's repository permissions.
 
 ---
 
@@ -70,7 +135,6 @@ Add secrets in your repository under **Settings → Secrets and variables → Ac
 
 Create `.github/workflows/corefix-web-scan.yml`:
 
-
 ```yaml
 name: CoreFix Web Security Scan
 
@@ -82,6 +146,8 @@ on:
     types: [completed]
 
 permissions:
+  contents: write
+  packages: write
   security-events: write
 
 jobs:
@@ -106,7 +172,6 @@ jobs:
             --target ${{ vars.SCAN_TARGET }} \
             --username ${{ secrets.USERNAME }} \
             --password ${{ secrets.PASSWORD }} \
-            --emailids ${{ vars.SCAN_REPORT_EMAILS }} \
             --model gpt-4o-mini
 
       - name: Upload scan results
@@ -135,7 +200,6 @@ Add the following steps to an existing job, after your deploy step:
             -v ${{ github.workspace }}/scan-results:/output \
             corefixhq/cfix-web:latest web \
             --target ${{ vars.SCAN_TARGET }} \
-            --emailids ${{ vars.SCAN_REPORT_EMAILS }} \
             --model gpt-4o-mini
 
       - name: Upload scan results
@@ -145,6 +209,7 @@ Add the following steps to an existing job, after your deploy step:
           name: corefix-web-scan-results
           path: scan-results/
 ```
+
 Ensure the web scan step runs **after** your application is deployed and accessible at the target URL.
 
 :::
@@ -447,79 +512,35 @@ workflows:
 
 ---
 
-## Authentication Options
+## Scan Coverage
 
-Depending on your application's auth mechanism, choose the appropriate approach:
-
-| Scenario | Flags |
-|---|---|
-| **Unauthenticated scan** | Omit `--username`, `--password`, and `--token` |
-| **Username + Password** | `--username $USERNAME --password $PASSWORD` |
-| **Bearer token / Cookie** | `--token $TOKEN` — for OAuth, SSO, MFA, or API scanning |
-
-For bearer token or session cookie, store the value in the `TOKEN` secret and pass it via `--token`. This bypasses the credential login flow and uses the provided session directly.
-
----
-
-## Browser in CI/CD
-
-If the scanner needs a browser for authenticated scans or dynamic discovery, you have three options:
-
-**Option 1 — Cloudflare browser (recommended, no install needed):**
+Use `--coverage` to control scan depth and duration. If not specified, CoreFix automatically determines the appropriate coverage level based on the complexity of your application. Overrides the `coverage` value in `.cfix.web.yaml` if both are set.
 
 ```bash
-corefixhq/cfix-web:latest web --target $TARGET --cf-browser true
+--coverage moderate
 ```
 
+| Value | Expected Coverage | Scan Duration | Best For |
+|---|---|---|---|
+| `quick` | 10–20% | Up to 5 min | CI/CD gating, smoke tests |
+| `normal` | 60–70% | Up to 15 min | Standard pipeline scans |
+| `moderate` | 60–70% | Up to 30 min | Balanced depth, thorough rules |
+| `high` | 90–95% | Up to 45 min | Pre-release audits |
+| `veryHigh` | 95–99% | Up to 60 min | Full security audits, compliance |
 
-**Option 2 — Chrome headless as sidecar:**
-
-Install Chromium and its dependencies on the CI runner first:
+To use in your pipeline, add `--coverage <level>` to the `docker run` command:
 
 ```bash
-sudo apt update
-sudo apt install -y \
-  chromium-browser \
-  ca-certificates \
-  fonts-liberation \
-  libasound2t64 \
-  libatk-bridge2.0-0 \
-  libatk1.0-0 \
-  libcups2 \
-  libdbus-1-3 \
-  libdrm2 \
-  libgbm1 \
-  libglib2.0-0 \
-  libgtk-3-0 \
-  libnspr4 \
-  libnss3 \
-  libu2f-udev \
-  libvulkan1 \
-  libx11-6 \
-  libx11-xcb1 \
-  libxcb1 \
-  libxcomposite1 \
-  libxdamage1 \
-  libxext6 \
-  libxfixes3 \
-  libxkbcommon0 \
-  libxrandr2 \
-  wget \
-  xdg-utils
+docker run --rm --network host \
+  -e X_CFIX_API_KEY=$X_CFIX_API_KEY \
+  -v $(pwd):/web \
+  -v $(pwd)/scan-results:/output \
+  corefixhq/cfix-web:latest web \
+  --target $SCAN_TARGET \
+  --coverage moderate
 ```
 
-Then launch it in headless mode and connect the scanner:
-
-```yaml
-- run: chromium-browser --remote-debugging-port=9222 --remote-debugging-address=0.0.0.0 --headless --no-sandbox &
-- run: |
-    docker run --rm --network host ... \
-      corefixhq/cfix-web:latest web \
-      --target $TARGET \
-      --remote
-```
-
-> The protocol is auto-detected — `http://` for Chrome CDP. Use `--cf-browser true` for zero-setup browser execution if you don't want to manage Chromium on the runner.
+See [Web Scan Config Reference](./web-scan-config-reference) for detailed coverage behavior including Nuclei template categories.
 
 ---
 

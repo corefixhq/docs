@@ -62,14 +62,6 @@ export default defineConfig({
     sidebar: [
       { text: "Corefix Docs", link: "/docs/introduction" },
       {
-        text: "Introduction",
-        collapsed: false,
-        items: [
-          { text: "What is CoreFix?", link: "/docs/what-is-corefix" },
-          { text: "How It Works", link: "/docs/how-it-works" },
-        ],
-      },
-      {
         text: "Getting Started",
         collapsed: false,
         items: [
@@ -79,6 +71,8 @@ export default defineConfig({
             text: "Connect GitHub for Code Scanning",
             link: "/docs/github-integration",
           },
+          { text: "Code Scan via GitHub Actions", link: "/docs/cicd-github-actions.md" },
+
         ],
       },
       {
@@ -129,6 +123,14 @@ export default defineConfig({
         items: [
           { text: "Usage & Credits", link: "/docs/account-usage" },
           { text: "Pricing", link: "/docs/pricing-and-usage" },
+        ],
+      },
+      {
+        text: "About CoreFix",
+        collapsed: false,
+        items: [
+          { text: "What is CoreFix?", link: "/docs/what-is-corefix" },
+          { text: "How It Works", link: "/docs/how-it-works" },
         ],
       },
       {

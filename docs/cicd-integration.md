@@ -104,7 +104,6 @@ jobs:
             -v ${{ github.workspace }}:/code \
             -v ${{ github.workspace }}/scan-results:/output \
             corefixhq/cfix:latest \
-            --emailids ${{ vars.SCAN_REPORT_EMAILS }} \
             --model gpt-4o-mini
 
       - name: Upload scan results
@@ -129,7 +128,6 @@ Add the following step to any existing job in your workflow after the `checkout`
             -v ${{ github.workspace }}:/code \
             -v ${{ github.workspace }}/scan-results:/output \
             corefixhq/cfix:latest \
-            --emailids ${{ vars.SCAN_REPORT_EMAILS }} \
             --model gpt-4o-mini
 
       - name: Upload scan results
@@ -175,7 +173,6 @@ corefix-code-scan:
         -v $CI_PROJECT_DIR:/code \
         -v $CI_PROJECT_DIR/scan-results:/output \
         corefixhq/cfix:latest \
-        --emailids $SCAN_REPORT_EMAILS \
         --model gpt-4o-mini
   artifacts:
     when: always
@@ -212,7 +209,6 @@ corefix-code-scan:
         -v $CI_PROJECT_DIR:/code \
         -v $CI_PROJECT_DIR/scan-results:/output \
         corefixhq/cfix:latest \
-        --emailids $SCAN_REPORT_EMAILS \
         --model gpt-4o-mini
   artifacts:
     when: always

@@ -123,14 +123,6 @@ CoreFix automatically selects an AI model for enrichment based on your account. 
 
 ## CLI Options
 
-### `--emailids` (optional)
-
-Send the scan report to one or more email addresses on completion. Recipients receive a password-protected report link — no CoreFix account required.
-
-```bash
---emailids you@example.com,security@yourcompany.com
-```
-
 ### `--openai-api-key` (optional)
 
 Your own OpenAI-compatible API key. Requires `--model`. See [AI Models](#ai-models) above.
