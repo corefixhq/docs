@@ -14,6 +14,10 @@ CoreFix provides two Docker images for running security scans locally or on any 
 
 Both images are available on [Docker Hub](https://hub.docker.com/u/corefixhq) and [GitHub Container Registry (GHCR)](https://github.com/orgs/corefixhq/packages).
 
+::: warning Limitation
+For the web scanner, `--token` is reserved for future API testing and complex web application testing where CoreFix bypasses username/password credentials and asks ZAP to inject the token into every request. This is not available yet, so the flag will not be reflected in scans today.
+:::
+
 ---
 
 ## When to Use Docker / CLI
@@ -97,7 +101,7 @@ See [Supported Models](https://docs.corefix.dev/docs/models) for the full refere
 | `--target` | Yes | Target URL. Accepts `https://app.com`, `http://IP:8080`, or bare domain |
 | `--username` | No | Login username for authenticated scans |
 | `--password` | No | Login password for authenticated scans |
-| `--token` | No | Bearer token or session cookie — use for OAuth, SSO, MFA, or API scanning |
+| `--token` | No | Reserved for future API testing and complex web app token injection. Currently has no effect and will not be reflected in scans |
 | `--openai-api-key` | No | Your own OpenAI-compatible API key (BYOK) |
 | `--model` | No | AI model to use for enrichment. Required when `--openai-api-key` is provided |
 | `--github-token` | No | GitHub PAT for pushing SARIF to GitHub Code Scanning |
@@ -111,8 +115,8 @@ See [Supported Models](https://docs.corefix.dev/docs/models) for the full refere
 | CVE scan | `vuln` | Known CVEs, misconfigs, exposed panels via Nuclei |
 | Web scan | `web` | Smart shorthand — auto-selects sub-scanners based on config |
 | DAST (unauth) | `web` | Unauthenticated web crawl and active scan via OWASP ZAP |
-| DAST (auth) | `web` | Authenticated web scan using credentials or token via OWASP ZAP. Configure `.cfix.web.yaml` |
-| API fuzzing | `web` | API fuzzing against OpenAPI/Swagger spec. Launches automatically (Coming Soon) |
+| DAST (auth) | `web` | Authenticated web scan using credentials via OWASP ZAP. Configure `.cfix.web.yaml` |
+| API fuzzing | `web` | API fuzzing against OpenAPI/Swagger spec. Will launch automatically when available (Coming Soon) |
 | ZAP API fuzzing | `web` | ZAP-based API fuzzing  (Coming Soon) |
 | SSL/TLS | `web` | SSL/TLS configuration and certificate analysis via testssl.sh, Launches automatically if `https` website |
 

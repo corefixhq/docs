@@ -5,7 +5,11 @@ sidebar_label: Web Scan Config Reference
 
 ## Web Scan Config Reference
 
-The `.cfix.web.yaml` file controls how CoreFix scans your web application. The scanner operates in one of two modes depending on the blocks present — **Web App Scanning** or **API Scanning**. This page documents what each field does, which fields are required per mode, and example configs for common scenarios.
+::: warning Limitation
+This reference documents how API testing will be performed with the `openapi` block. API testing is not currently available, so the `openapi` block has no effect today.
+:::
+
+The `.cfix.web.yaml` file controls how CoreFix scans your web application. The scanner operates in one of two modes depending on the blocks present — **Web App Scanning** or planned **API Scanning**. This page documents what each field does, which fields are required per mode, and example configs for common scenarios.
 
 Place this file in the directory you mount into the `corefixhq/cfix-web` Docker container at `/web`.
 
@@ -16,7 +20,7 @@ Place this file in the directory you mount into the `corefixhq/cfix-web` Docker 
 | Mode | When It Applies | `scope` | `headers` | `authentication` | `openapi` |
 |---|---|---|---|---|---|
 | **Web App Scanning** | No `openapi` block, or `openapi` + `authentication` together | Required | Required (except `browser` type) | Required | Optional |
-| **API Scanning** | `openapi` present + no `authentication` block | Not required | `Authorization` required | Not required | Required |
+| **API Scanning** | Planned for `openapi` present + no `authentication` block. Currently unavailable | Not required | `Authorization` required | Not required | Required, but currently has no effect |
 
 ---
 
@@ -413,6 +417,10 @@ extractRegex: '"csrf_token"\s*:\s*"([^"]+)"'
 
 ### `openapi`
 
+::: warning Limitation
+The `openapi` block is documented for upcoming API testing. It currently has no effect.
+:::
+
 Imports API endpoint definitions from an OpenAPI/Swagger spec. Gives ZAP complete knowledge of all documented endpoints — including POST/PUT/DELETE with exact request body schemas — without relying on the spider to discover them. Combined with HAR files, this enables shadow API detection.
 
 Supported formats: OpenAPI 2.0 (Swagger), OpenAPI 3.0, YAML or JSON.
@@ -521,7 +529,7 @@ authentication:
   loggedOutRegex: "Invalid"
 ```
 
-### API Scanning with OpenAPI Spec
+### API Scanning with OpenAPI Spec (Not Currently Available)
 
 ```yaml
 developer: true
@@ -534,9 +542,9 @@ openapi:
   apiUrl: "https://api.example.com/v3/api-docs"
 ```
 
-### API Scanning + Web App Scanning Combined
+### API Scanning + Web App Scanning Combined (Not Currently Available)
 
-When both `openapi` and `authentication` blocks are present, the scanner runs both web app auth scanning and OpenAPI-based endpoint discovery.
+When API testing becomes available, both `openapi` and `authentication` blocks together will run both web app auth scanning and OpenAPI-based endpoint discovery. Today, the `openapi` block has no effect.
 
 ```yaml
 developer: true

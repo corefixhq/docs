@@ -1,5 +1,9 @@
 # CoreFix Chrome Extension - User Guide
 
+::: warning Limitation
+The CoreFix Chrome Extension is currently under Chrome Web Store review and is expected to be available in the upcoming week. Until the listing is approved, Chrome Web Store installation is not available.
+:::
+
 ## Overview
 
 The CoreFix Chrome Extension records an authorized browser workflow and uploads HAR (HTTP Archive) chunks to CoreFix secure object storage. A recording helps CoreFix web scanning understand real application traffic, including authenticated and JavaScript-driven flows that a basic crawl may miss.
@@ -30,7 +34,7 @@ The extension uses the hostname from your active tab to find the matching CoreFi
 
 ### Install an unpacked package
 
-Until the Chrome Web Store listing is available, install the extension package manually:
+Until the Chrome Web Store review is complete, install the extension package manually:
 
 1. Obtain the CoreFix extension package from your CoreFix administrator or release channel.
 2. Unzip the package to a local folder.
@@ -42,7 +46,7 @@ Until the Chrome Web Store listing is available, install the extension package m
 
 ### Chrome Web Store installation
 
-When the extension is published, you will be able to install it from the Chrome Web Store by selecting **Add to Chrome** and then **Add Extension**.
+The extension is currently under review. When the extension is published, you will be able to install it from the Chrome Web Store by selecting **Add to Chrome** and then **Add Extension**.
 
 ---
 

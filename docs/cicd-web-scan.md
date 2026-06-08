@@ -7,6 +7,10 @@ sidebar_label: Web Scan — CI/CD
 
 Add CoreFix DAST (Dynamic Application Security Testing) to your pipeline with a single step. The web scanner runs as a Docker container (`corefixhq/cfix-web`) and targets a live, deployed URL — so the step runs **after** your app is deployed, not during the build.
 
+::: warning Limitation
+Token-based authentication for CI/CD web scans is reserved for upcoming API scanning and complex web applications. The planned behavior is for CoreFix to ask ZAP to inject the provided token into every request, bypassing username/password credentials. This is under development and not currently available, so `--token` and `TOKEN` have no effect today.
+:::
+
 For detailed CLI options and BYOK model configuration, refer to [Docker / Local CLI](/docs/docker-cli).
 
 For advanced scan configuration (authentication, coverage), refer to [Web Scan Config Reference](./web-scan-config-reference.md).
@@ -31,11 +35,11 @@ Choose the appropriate approach based on your application's auth mechanism. Pass
 |---|---|
 | **Unauthenticated scan** | Omit `--username`, `--password`, and `--token` |
 | **Username + Password** | `--username $USERNAME --password $PASSWORD` |
-| **Bearer token / Cookie** | `--token $TOKEN` — for OAuth, SSO, MFA, or API scanning |
+| **Bearer token / Cookie** | Planned for API scanning and complex web app auth. `--token $TOKEN` currently has no effect |
 
-For bearer token or session cookie, store the value in the `TOKEN` secret and pass it via `--token`. This bypasses the credential login flow and uses the provided session directly.
+For bearer token or session cookie workflows, CoreFix will support token injection in a future release. Today, the scanner does not bypass the credential login flow with `--token`.
 
-> **Tip:** The pipeline examples below include `--username` and `--password` for reference. Remove them for unauthenticated scans, or replace with `--token` for token-based auth.
+> **Tip:** The pipeline examples below include `--username` and `--password` for reference. Remove them for unauthenticated scans. Token-based auth is under development, so `--token` currently has no effect.
 
 
 ---
@@ -99,11 +103,11 @@ Store sensitive values as **secrets** in your CI/CD platform. `SCAN_TARGET` can 
 | `GITHUB_TOKEN` | **Secret** | GitHub token for pushing SARIF to GitHub Code Scanning (see below) |
 | `USERNAME` | **Secret** | Login username for authenticated scans |
 | `PASSWORD` | **Secret** | Login password for authenticated scans |
-| `TOKEN` | **Secret** | Bearer token or session cookie — use for OAuth, SSO, MFA, or API scanning |
+| `TOKEN` | **Secret** | Reserved for planned API scanning and complex web app token injection. Currently has no effect |
 | `OPENAI_API_KEY` | **Secret** | Only if bringing your own AI model |
 | `SCAN_TARGET` | Plain variable | Target URL of your staging/test environment |
 
-> For **API scanning** where a bearer token or cookie is needed, pass the token via the `TOKEN` secret rather than `USERNAME` / `PASSWORD`.
+> API scanning and token injection are documented as planned behavior. Until they are available, use `USERNAME` / `PASSWORD` for authenticated web scans and do not rely on `TOKEN`.
 
 ### GitHub SARIF Upload (replace the current GitHub Token section)
 
@@ -182,7 +186,7 @@ jobs:
           path: scan-results/
 ```
 
-> Remove `--username` and `--password` for unauthenticated scans. For token-based auth, replace them with <code v-pre>--token ${{ secrets.TOKEN }}</code>.
+> Remove `--username` and `--password` for unauthenticated scans. Token-based auth is under development, so <code v-pre>--token ${{ secrets.TOKEN }}</code> currently has no effect.
 
 == Add as Step
 
@@ -403,7 +407,7 @@ Add the following stage to your existing `Jenkinsfile` after the deploy stage:
         }
 ```
 
-Ensure `SCAN_TARGET` is set in your pipeline's `environment` block. For token-based auth, replace `app-username` and `app-password` credentials with a single `app-token` credential and use `--token` instead.
+Ensure `SCAN_TARGET` is set in your pipeline's `environment` block. Token-based auth is planned for future API and complex web app scans, but `--token` currently has no effect.
 
 :::
 

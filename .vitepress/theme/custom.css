@@ -139,12 +139,12 @@
 }
 
 .VPSidebarNav {
-  padding: 1rem 0;
+  padding: 0.5rem 0 0.75rem;
 }
 
 .VPSidebarNav .group {
-  margin-bottom: 10px;
-  padding-bottom: 10px;
+  margin-bottom: 6px;
+  padding-bottom: 6px;
   border-bottom: 1px solid var(--vp-c-divider);
 }
 

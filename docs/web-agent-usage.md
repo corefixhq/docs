@@ -2,6 +2,10 @@
 
 Run the CoreFix web security scanner against any live URL. Performs DAST (Dynamic Application Security Testing) — no source code required.
 
+::: warning Limitation
+`--token` is reserved for upcoming API scanning and complex web application authentication. In that mode, CoreFix will ask ZAP to inject the provided token into every request instead of using username/password credentials. This capability is under development and is not currently available, so passing `--token` or `TOKEN` has no effect today.
+:::
+
 **Current version:** `v1.0.0` · **Commit:** `26141d48`
 
 ---
@@ -82,7 +86,7 @@ docker run --rm \
 | `X_CFIX_API_KEY` | **Yes** | Your CoreFix API key. Found in [Account & API Keys](https://app.corefix.dev/settings/api-keys) |
 | `USERNAME` | No | Alternative to `--username` flag |
 | `PASSWORD` | No | Alternative to `--password` flag |
-| `TOKEN` | No | Alternative to `--token` flag |
+| `TOKEN` | No | Reserved for planned API scanning and complex web app token injection. Currently has no effect |
 | `GITHUB_TOKEN` | No | GitHub PAT for uploading results as SARIF to GitHub Code Scanning |
 
 ---
@@ -106,16 +110,16 @@ Pass a comma-separated list as the first argument. Defaults to `nmap,vuln,web` i
 | `vuln` | Nuclei | CVEs, misconfigurations, exposed admin panels |
 | `web` | ZAP / testssl | Smart shorthand — auto-selects sub-scanners (see below) |
 | `zap` | OWASP ZAP | Unauthenticated web crawl and active scan |
-| `zap-auth` | OWASP ZAP | Authenticated web scan using credentials or token |
-| `fuzzer` | openapi-fuzzer | API fuzzing against an OpenAPI/Swagger spec |
-| `zap-fuzzer` | ZAP | ZAP-based API fuzzing |
+| `zap-auth` | OWASP ZAP | Authenticated web scan using credentials |
+| `fuzzer` | openapi-fuzzer | API fuzzing against an OpenAPI/Swagger spec (coming soon) |
+| `zap-fuzzer` | ZAP | ZAP-based API fuzzing (coming soon) |
 | `testssl` | testssl.sh | SSL/TLS configuration and certificate analysis |
 
 ### How `web` expands automatically
 
 - Target is `https://` → `testssl` is added
-- `.cfix.web.yaml` has an `openapi` key → uses `fuzzer` + `zap-fuzzer`
-- Credentials or token provided → uses `zap-auth`
+- `.cfix.web.yaml` has an `openapi` key → planned to use `fuzzer` + `zap-fuzzer`; currently the `openapi` block has no effect
+- Credentials provided → uses `zap-auth`
 - No credentials → uses `zap` (unauthenticated)
 
 ---
@@ -145,7 +149,7 @@ Login credentials for authenticated scanning. Can also be passed as `USERNAME` /
 
 ### `--token` (optional)
 
-A valid bearer token or session cookie. Use this for complex auth flows (OAuth, SSO, MFA) where username/password login is impractical — the scanner uses the session directly. Can also be passed as the `TOKEN` environment variable.
+Reserved for future API scanning and complex web application testing where username/password login is impractical. The planned behavior is to ask ZAP to inject the supplied token into every request. This is under development and not currently available, so `--token` and the `TOKEN` environment variable have no effect today.
 
 ```bash
 --token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
@@ -177,7 +181,7 @@ Controls scan depth and duration.
 
 ## Browser for Authenticated Scans
 
-When credentials or a token are provided, the scanner uses a real browser to handle login flows, JavaScript rendering, and session management.
+When credentials are provided, the scanner uses a real browser to handle login flows, JavaScript rendering, and session management.
 
 The scanner automatically detects the browser setup — no flags needed:
 
@@ -318,7 +322,9 @@ docker run --rm \
   --password s3cr3t
 ```
 
-### Authenticated scan with bearer token
+### Planned token-based scan (not currently available)
+
+`--token` is documented for future API scanning and complex web app auth. It does not affect scans today.
 
 ```bash
 docker run --rm \
@@ -419,14 +425,14 @@ scope:
 
 ### OpenAPI / API fuzzing
 
-If your config has an `openapi` key, the scanner switches to API fuzzing mode automatically.
+The `openapi` key documents the planned API fuzzing workflow. API testing is not currently available, so the `openapi` block has no effect today.
 
 ```yaml
 openapi:
   url: https://your-app.com/api/openapi.json
 ```
 
-You can also drop a `.yaml`, `.yml`, or `.json` OpenAPI/Swagger spec file directly into the mounted `/web` directory — CoreFix detects it automatically.
+When API testing becomes available, you will also be able to drop a `.yaml`, `.yml`, or `.json` OpenAPI/Swagger spec file directly into the mounted `/web` directory for CoreFix to detect automatically.
 
 ---
 
