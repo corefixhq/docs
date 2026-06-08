@@ -1,47 +1,64 @@
+---
+hide_title: true
+sidebar_label: What is CoreFix?
+---
+
 # What is CoreFix?
 
-> **Find it at runtime. Fix it in code.**
+CoreFix is a security scanning platform that scans your source code, attacks your live web applications, and uses AI to surface the vulnerabilities that actually matter — not hundreds of noisy alerts across five dashboards.
 
-CoreFix is a security scanning platform that attacks your web applications and scans your source code — then surfaces the vulnerabilities that actually matter, not hundreds of noisy alerts across five dashboards.
+**Free for open source.** All scanners, AI enrichment, unlimited scans. No credit card required.
+
+→ [Sign up](https://app.corefix.dev/signup) · [Schedule a demo](https://cal.com/corefix.dev/30min) · [Join us on X](https://x.com/corefixhq)
 
 ---
 
-## The Problem
+## Why We Built CoreFix
 
-Security tooling today is fragmented and reactive.
+Security tooling today is fragmented. Code scanners flag theoretical vulnerabilities. Web scanners find real bugs but have no idea which file caused them. Teams juggle 3–5 separate tools, manually triage hundreds of duplicate alerts, and fix almost nothing because there's no clear path from finding to fix.
 
-Code scanners read your source code and flag theoretical vulnerabilities. Web scanners attack your running app and find real bugs — but have no idea which file or line caused them. Teams juggle 3-5 separate tools, manually triage hundreds of duplicate alerts, and fix almost nothing because there's no automated path from finding to fix.
+Traditional pentesting happens quarterly. Security backlogs grow. Developers treat alerts as noise.
 
-Traditional pentesting happens quarterly. Observability tools only catch issues *after* they've already hit production users. Security backlogs grow. Developers treat alerts as noise.
+We built CoreFix to fix this — one platform that scans code and web applications together, deduplicates across scanners, prioritizes by real exploitability, and runs on every commit.
 
 ---
 
 ## What CoreFix Does
 
-### Scans your code with 10+ open source scanners
+**Scans your code with 10+ open source scanners** — SAST, secrets detection, dependency vulnerabilities, infrastructure-as-code misconfigurations, and Kubernetes security checks run in parallel. Findings are normalized and deduplicated across scanners automatically.
 
-SAST (OpenGrep), secrets (Gitleaks), dependencies (OSV-Scanner), infrastructure-as-code (KICS), and Kubernetes manifests (Kubescape) run in parallel against your repository. Every finding is normalized into a common format and deduplicated across scanners. Instead of 400 raw alerts across four dashboards, you see the findings that actually matter.
+**Attacks your web application with real payloads** — SQL injection, XSS, SSRF, authentication bypass, TLS misconfigurations, exposed admin panels. If CoreFix says your endpoint is vulnerable, it's because a real payload confirmed it. Not theoretical. Not pattern-matched. Confirmed.
 
-### Attacks your web application with real payloads
+**AI-prioritizes by real exploitability** — every finding passes through a four-stage AI pipeline that scores by actual exploitability, reachability, and data exposure — not just CVSS. Attack chains are discovered, compliance gaps are mapped, and remediation steps are generated.
 
-CoreFix sends real attack payloads to your running web application — SQL injection, XSS, SSRF, authentication bypass, TLS misconfigurations, exposed admin panels. If CoreFix says your `/api/auth/login` is vulnerable to SQL injection, it's because a real payload confirmed it on your staging environment. Not theoretical. Not pattern-matched. Confirmed.
+**Runs on every commit** — scans trigger automatically on every PR, push, or release via the GitHub App, Docker CLI, or CI/CD pipeline. Security runs before code ships.
 
-### AI-prioritizes by real exploitability
+---
 
-Every finding is enriched by an AI pipeline that scores by actual exploitability, reachability, and data exposure — not just CVSS. Your team sees what needs attention, ranked correctly.
+## Our Philosophy
 
-### Runs in your CI/CD pipeline — on every push
+**Zero setup to start** — create an account, enter a URL or connect a repo, hit Run. Your first scan results are ready in minutes.
 
-Scans trigger automatically on every PR, push, or release via the GitHub App or Docker CLI. Security runs in the test environment before code ships. Not quarterly. Not after an incident. Every commit.
+**Works where you work** — GitHub App, Docker CLI, GitHub Actions, GitLab CI, Jenkins, CircleCI. No new tools to learn.
+
+**Open source at the core** — CoreFix is built on top of world-class open source security tools. We contribute back and acknowledge every project we use.
+
+**AI that helps, not hypes** — AI enrichment deduplicates noise, maps compliance, and generates actionable remediation. It doesn't replace your judgment — it saves you the hours of triage so you can focus on fixing.
+
+---
+
+## Our Vision
+
+Every team — from a solo developer shipping a side project to an enterprise with dozens of repositories — should have access to the same quality of security scanning that Fortune 500 companies pay six figures for.
+
+CoreFix is building toward a world where a confirmed runtime vulnerability is automatically traced to the exact line of code that caused it, and a production-ready fix is opened as a pull request for your team to review and merge.
 
 ---
 
 ## Coming Soon
 
-CoreFix is actively building the runtime-to-code fix loop:
-
-- **Trace runtime findings to source code** — a confirmed web vulnerability mapped to the exact file, function, and line that caused it
-- **Auto-fix PRs** — production-ready code patches generated with full codebase context, opened as pull requests for your team to review and merge
+- **Runtime-to-code tracing** — map a confirmed web vulnerability to the exact file, function, and line in your source code
+- **Auto-fix PRs** — AI-generated code patches opened as pull requests with full codebase context
 - **Shadow API detection** — HAR traffic vs OpenAPI spec to surface undocumented endpoints
 - **Runtime observability correlation** — application logs correlated with attack payloads during scanning
 
@@ -49,13 +66,13 @@ Full roadmap: [corefix.dev/roadmap](https://corefix.dev/roadmap)
 
 ---
 
-## Pricing
+## What to Read Next
 
-**Free for open source.** All scanners, AI enrichment, unlimited scans. No credit card required.
-
-**Pay as you go for private repos.** Runtime at $0.03/min + LLM usage. No seats, no monthly fees. Credits never expire.
-
-[See full pricing →](https://corefix.dev/pricing)
+- [Sign Up & Setup](/docs/sign-up-and-sign-in) — create your account and get started
+- [Web Scan in 2 Minutes](/docs/web-scan-quickstart) — run your first web scan
+- [Connect GitHub for Code Scanning](/docs/github-integration) — one-click GitHub integration
+- [Ways to Scan](/docs/ways-to-scan) — choose the right scanning method for your workflow
+- [Use Cases](/docs/use-cases) — see how teams use CoreFix
 
 ---
 

@@ -65,6 +65,7 @@ export default defineConfig({
         text: "Getting Started",
         collapsed: false,
         items: [
+          { text: "Introduction", link: "/docs/what-is-corefix" },
           { text: "Sign Up & Setup", link: "/docs/sign-up-and-sign-in" },
           { text: "Web Scan in 2 Minutes", link: "/docs/web-scan-quickstart" },
           {
@@ -72,6 +73,7 @@ export default defineConfig({
             link: "/docs/github-integration",
           },
           { text: "Code Scan via GitHub Actions", link: "/docs/cicd-github-actions" },
+          { text: "Use Cases", link: "/docs/use-cases" },
 
         ],
       },

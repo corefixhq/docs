@@ -19,7 +19,7 @@ Set up automated code scanning in your GitHub repository using GitHub Actions. T
 
 Click the link below to create a new GitHub Actions pipeline in CoreFix:
 
-**→ [Create GitHub Actions Pipeline](https://app.corefix.dev/projects/create?type=cicd&provider=github-actions)**
+**→ [Create GitHub Actions Pipeline](https://app.corefix.dev/mahidhars-workspace/projects?drawer=cicd&platform=github-actions)**
 
 Copy the generated **API key** — you'll need it in the next step.
 
