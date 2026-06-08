@@ -43,7 +43,7 @@ export default defineConfig({
     nav: [
       {
         text: "Overview",
-        link: "/docs/introduction",
+        link: "/docs/overview",
       },
       {
         text: "Schedule Demo",
