@@ -65,7 +65,7 @@ export default defineConfig({
         text: "Getting Started",
         collapsed: false,
         items: [
-          { text: "Introduction", link: "/docs/what-is-corefix" },
+          { text: "Introduction", link: "/docs/introduction" },
           { text: "Sign Up & Setup", link: "/docs/sign-up-and-sign-in" },
           { text: "Web Scan in 2 Minutes", link: "/docs/web-scan-quickstart" },
           {
