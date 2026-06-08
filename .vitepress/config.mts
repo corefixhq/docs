@@ -43,7 +43,7 @@ export default defineConfig({
     nav: [
       {
         text: "Overview",
-        link: "/docs/introduction",
+        link: "/docs/overview",
       },
       {
         text: "Schedule Demo",
@@ -60,11 +60,12 @@ export default defineConfig({
     ],
 
     sidebar: [
-      { text: "Corefix Docs", link: "/docs/introduction" },
+      // { text: "Corefix Docs", link: "/docs/introduction" },
       {
         text: "Getting Started",
         collapsed: false,
         items: [
+          { text: "Introduction", link: "/docs/introduction" },
           { text: "Sign Up & Setup", link: "/docs/sign-up-and-sign-in" },
           { text: "Web Scan in 2 Minutes", link: "/docs/web-scan-quickstart" },
           {
@@ -72,6 +73,7 @@ export default defineConfig({
             link: "/docs/github-integration",
           },
           { text: "Code Scan via GitHub Actions", link: "/docs/cicd-github-actions" },
+          { text: "Use Cases", link: "/docs/use-cases" },
 
         ],
       },

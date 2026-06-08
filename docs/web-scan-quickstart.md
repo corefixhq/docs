@@ -1,87 +1,52 @@
 ---
 hide_title: true
-sidebar_label: Quick Start
+sidebar_label: Web Scan in 2 Minutes
 ---
 
-## Overview
+## Web Scan in 2 Minutes
 
-This quick start guide walks you through running your **first web application vulnerability scan in CoreFix**.
+Run your first web application vulnerability scan. No configuration, no credentials, no setup.
 
-The example uses an **unauthenticated scan**, which is the fastest way to evaluate the platform because it does not require authentication scripts or credential configuration.
+---
 
-By the end of this guide, you will:
+## Step 1 — Create a Web Scan Project
 
-- Create a new web application scan
-- Launch the vulnerability scan
-- Monitor scan progress
-- Review detected vulnerabilities
+Click the link below to open the project creation drawer directly:
 
-This example uses a public demo application for testing.
+**→ [Create Web Scan Project](https://app.corefix.dev/projects?drawer=web)**
 
-**Example target used in this guide:**
+Enter a target URL and click **Create Project**. Everything else is optional.
+
+**Example target for testing:**
 
 ```
 http://demo.testfire.net/
 ```
 
-You may also use any of these intentionally vulnerable demo apps:
+Other intentionally vulnerable demo apps you can use:
 
 ```
 http://zero.webappsecurity.com/
 http://testasp.vulnweb.com
-http://testaspnet.vulnweb.com/
-http://google-gruyere.appspot.com/
 https://demo.owasp-juice.shop/#/
 ```
 
 ---
 
-## Create Your First Web Scan
+## Step 2 — Hit Run
 
-1. After signing in, go to **Projects**.
-2. Click the **+ (Plus) icon** in the top toolbar beside the other icons.
-3. Select **Website Scan** from the options.
-4. Enter your **target URL** (e.g. `http://demo.testfire.net/`).
-5. **Credentials are optional** — leave them blank to perform an unauthenticated scan.
-6. **Chrome extension is optional** — this is only needed for network traffic recording to enable deep authenticated scans. You can skip this for now.
-7. Select the **Application Type** that matches your target:
-   - **SPA** — Single Page Application (React, Vue, Angular, etc.)
-   - **HTML** — Traditional server-rendered application
-   - **Complex Application** — Multi-page apps with heavy JavaScript or mixed rendering
-8. Add a **Description** (optional).
-9. Click **Create Project**.
+Click the green **Run** icon on the project row. CoreFix launches all web scanners in parallel — OWASP ZAP, Nuclei, Nmap, testssl.sh, and SSLyze. Results are ready in a few minutes.
 
 ---
 
-## Run the Scan
+## Step 3 — View Results
 
-Once your project is created, click the **Run** button on the project card.
-
-CoreFix launches all web scanners simultaneously against your target. Results will be ready in a few minutes.
+Once complete, findings appear in your **CoreFix dashboard** under the project. An email notification with the HTML report link is also sent.
 
 ---
 
-## What Gets Scanned
+## What's Next
 
-CoreFix runs the following open source scanners against your web application in parallel:
-
-| Scanner | What It Finds |
-|---|---|
-| **OWASP ZAP** | OWASP Top 10 — SQL injection, XSS, SSRF, authentication bypass (DAST) |
-| **Nuclei** | Known CVEs, exposed admin panels, default credentials, misconfigurations (8,000+ templates) |
-| **Nmap** | Open ports, service versions, OS fingerprints, network attack surface |
-| **testssl.sh** | TLS protocol support, cipher strength, certificate issues, Heartbleed, POODLE, BEAST |
-| **SSLyze** | Certificate chain, key strength, cipher ordering, compliance |
-
-All findings are passed through an AI enrichment layer that deduplicates, enriches, correlates across scanners, and prioritizes results before surfacing them to you.
-
----
-
-## Viewing Results
-
-Once the scan completes:
-
-- Results are available directly in the **CoreFix dashboard** under your project.
-- An **email notification** is sent with a link to the HTML report.
-- The HTML report is publicly accessible for **1 hour** via a time-limited link.
-- Your project's full results are available at a **password-protected project link** any time.
+- [Web Scan Config Reference](/docs/web-scan-config-reference) — configure authenticated scans, API scanning, and coverage
+- [Web Scanning CI/CD](/docs/cicd-web-scan) — add web scanning to your pipeline
+- [Chrome Extension](/docs/chrome-extension-guide) — record network traffic for deep authenticated scans
