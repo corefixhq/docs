@@ -41,10 +41,10 @@ export default defineConfig({
     siteTitle: false,
 
     nav: [
-      {
-        text: "Overview",
-        link: "/docs/introduction",
-      },
+      // {
+      //   text: "Overview",
+      //   link: "/docs/introduction",
+      // },
       {
         text: "Schedule Demo",
         link: "https://cal.com/corefix.dev/30min",
