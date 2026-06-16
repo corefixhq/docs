@@ -79,7 +79,7 @@ The AI's job is to identify:
 - Hidden form fields that aren't CSRF or credentials (some apps send additional body parameters)
 - Whether a modal, cookie banner, or welcome overlay is blocking the form
 
-That last point — the **overlay selector** — turns out to be surprisingly important in practice.
+That last point (the **overlay selector**) turns out to be surprisingly important in practice.
 
 For static HTML, the AI works from server-rendered markup and produces reliable results. For SPAs, the selectors and form action are at best educated guesses at this stage, because the actual DOM doesn't exist yet. The AI knows this: it marks its confidence accordingly, and the system triggers a second pass.
 
@@ -97,7 +97,7 @@ After rendering, we re-run the AI analysis on the live DOM. Now the selectors ar
 
 ## Step 5: Dismissing Overlays Before Interacting
 
-Modern web applications have a habit of greeting first-time visitors with things that block the page: cookie consent banners, welcome dialogs, promotional modals. To a headless browser trying to find and fill a login form, these are invisible walls — clicks on the email field get intercepted by the overlay, or the form itself never renders until the banner is acknowledged.
+Modern web applications have a habit of greeting first-time visitors with things that block the page: cookie consent banners, welcome dialogs, promotional modals. To a headless browser trying to find and fill a login form, these are invisible walls. Clicks on the email field get intercepted by the overlay, or the form itself never renders until the banner is acknowledged.
 
 The AI identifies the dismiss selector for any overlay it detects. Our dismissal logic then tries to close it before attempting any form interaction, with a layered fallback strategy:
 

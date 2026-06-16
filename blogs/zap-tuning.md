@@ -1,6 +1,6 @@
 ---
 title: "We Spent 3 Days Tuning OWASP ZAP So You Don't Have To"
-description: "How a controlled DVWA experiment exposed DAST configuration complexity—and how policy tuning alone produced a 700% improvement in SQL injection detection."
+description: "How a controlled DVWA experiment exposed DAST configuration complexity, and how policy tuning alone produced a 700% improvement in SQL injection detection."
 author:
   name: Corefix Team
   role: Security Engineering
@@ -21,25 +21,25 @@ cover: /covers/zap-tuning.png
 
 ---
 
-Every security team knows the promise of DAST tools: point a scanner at your app, hit run, get vulnerabilities. The reality? We recently ran a controlled experiment against DVWA (Damn Vulnerable Web Application) using OWASP ZAP's automation framework — a deliberately vulnerable app where SQL injection should be trivially detectable. What we found was a masterclass in how configuration complexity silently kills scan quality.
+Every security team knows the promise of DAST tools: point a scanner at your app, hit run, get vulnerabilities. The reality? We recently ran a controlled experiment against DVWA (Damn Vulnerable Web Application) using OWASP ZAP's automation framework, a deliberately vulnerable app where SQL injection should be trivially detectable. What we found was a masterclass in how configuration complexity silently kills scan quality.
 
-This is the story of three days, five scan iterations, and a 700% improvement in vulnerability detection — all from config changes alone. No new tools. No new plugins. Just YAML.
+This is the story of three days, five scan iterations, and a 700% improvement in vulnerability detection, all from config changes alone. No new tools. No new plugins. Just YAML.
 
 ## The Setup
 
-Our target was DVWA running on a remote server at security level "low" — the easiest difficulty setting, where every vulnerability category should be wide open. We configured ZAP's automation framework with authenticated scanning: form-based login, PHPSESSID cookie management, anti-CSRF token handling, HAR file imports from prior crawls, and a full suite of active and passive scan plugins.
+Our target was DVWA running on a remote server at security level "low" (the easiest difficulty setting, where every vulnerability category should be wide open). We configured ZAP's automation framework with authenticated scanning: form-based login, PHPSESSID cookie management, anti-CSRF token handling, HAR file imports from prior crawls, and a full suite of active and passive scan plugins.
 
 On paper, this should have been straightforward. In practice, it was anything but.
 
 ## Run 1: The False Confidence Problem
 
-Our first scan completed in 9 minutes with 41 vulnerabilities. For a deliberately vulnerable application with known SQL injection, XSS, command injection, file inclusion, and file upload flaws — 41 findings felt suspiciously low. More importantly, SQL injection was barely represented.
+Our first scan completed in 9 minutes with 41 vulnerabilities. For a deliberately vulnerable application with known SQL injection, XSS, command injection, file inclusion, and file upload flaws. 41 findings felt suspiciously low. More importantly, SQL injection was barely represented.
 
-The scan *looked* successful. Authentication reported as working. The spider found 592 URLs. The automation plan reported "succeeded." But the active scanner finished in a fraction of the allocated 45-minute window — a red flag we almost missed.
+The scan *looked* successful. Authentication reported as working. The spider found 592 URLs. The automation plan reported "succeeded." But the active scanner finished in a fraction of the allocated 45-minute window, a red flag we almost missed.
 
 **What went wrong:**
 
-The first issue was subtle — a `maxAlertsPerRule: 5` setting that capped each scan rule at just 5 findings before skipping remaining URLs. When a rule like SQL Injection finds its fifth alert on the third URL, it silently stops testing the remaining 840+ URLs. The scan "completes successfully" while leaving the vast majority of the attack surface untested.
+The first issue was subtle: a `maxAlertsPerRule: 5` setting that capped each scan rule at just 5 findings before skipping remaining URLs. When a rule like SQL Injection finds its fifth alert on the third URL, it silently stops testing the remaining 840+ URLs. The scan "completes successfully" while leaving the vast majority of the attack surface untested.
 
 The second issue was more insidious. We had excluded `login.php` from the scan scope — a reasonable-sounding decision to avoid scanning the login page itself. But ZAP *needs* `login.php` in scope to perform re-authentication when sessions expire mid-scan. Without it, session drops during active scanning left the scanner hitting unauthenticated redirects instead of vulnerable pages.
 
@@ -55,7 +55,7 @@ We increased `maxAlertsPerRule` from 5 to 50. The results shifted immediately:
 
 But core SQL Injection (rule 40018) stubbornly stayed at 3 alerts. The cap wasn't the only bottleneck.
 
-## Run 3: Policy Tuning — Where the Real Gains Live
+## Run 3: Policy Tuning
 
 This is where things got interesting. ZAP's default scan policy uses "medium" strength and threshold for all rules. For a deliberately vulnerable application, this means the scanner sends a moderate number of payloads per parameter and requires moderate confidence before flagging an issue.
 
@@ -90,13 +90,13 @@ The impact was dramatic:
 | Total active scan URLs | 14,527 | **29,470** | 103% |
 | Total network requests | 16,762 | **32,755** | 95% |
 
-The scan still completed in 14 minutes — well within the 45-minute cap — but with more than double the coverage and 700% more SQL injection findings. Same application. Same ZAP version. Same plugins. Just different YAML.
+The scan still completed in 14 minutes, well within the 45-minute cap, but with more than double the coverage and 700% more SQL injection findings. Same application. Same ZAP version. Same plugins. Just different YAML.
 
 ## The Hidden Bottleneck We Almost Missed
 
-Even after three iterations, there was still a problem lurking. The `sqliplugin` add-on (rule 40019) was generating 144 warnings in the logs and hitting the `maxRuleDurationInMins: 5` ceiling — spending all 5 minutes but only managing to test 30 URLs before being forcibly terminated. Meanwhile, it was throwing `ZapSocketTimeoutException` errors, suggesting that time-based SQL injection tests were consuming the entire rule budget on network timeouts rather than actual vulnerability testing.
+Even after three iterations, there was still a problem lurking. The `sqliplugin` add-on (rule 40019) was generating 144 warnings in the logs and hitting the `maxRuleDurationInMins: 5` ceiling, spending all 5 minutes but only managing to test 30 URLs before being forcibly terminated. Meanwhile, it was throwing `ZapSocketTimeoutException` errors, suggesting that time-based SQL injection tests were consuming the entire rule budget on network timeouts rather than actual vulnerability testing.
 
-This is the kind of issue that requires reading raw statistics JSON, cross-referencing rule IDs with plugin documentation, and understanding the interaction between timeout configurations, rule duration caps, and network latency. It is not the kind of thing most development teams — or even most security teams — have time to investigate.
+This is the kind of issue that requires reading raw statistics JSON, cross-referencing rule IDs with plugin documentation, and understanding the interaction between timeout configurations, rule duration caps, and network latency. It is not the kind of thing most development teams, or even most security teams, have time to investigate.
 
 ## What This Means for Real-World Scanning
 
@@ -111,7 +111,7 @@ DVWA is a toy application with a handful of pages. A production application with
 - **Plugin selection**: choosing from dozens of add-ons (and discovering that some like `frontendscanner` no longer exist)
 - **Result interpretation**: reading raw statistics JSON to identify silent failures that the "succeeded" status hides
 
-Each of these is a potential point of failure that produces no error message — just silently degraded results.
+Each of these is a potential point of failure that produces no error message. Results just silently degrade.
 
 ## Why We Built Corefix
 
@@ -125,7 +125,7 @@ Corefix eliminates this gap. Instead of days of YAML tuning, iterative test runs
 - **Complete coverage by default**: no silent alert caps, no premature rule termination, no scope misconfigurations
 - **Results in minutes**: what took us 3 days and 5 iterations to achieve with ZAP, Corefix delivers in under 2 minutes
 
-The vulnerabilities don't change based on your scanner configuration. SQL injection is SQL injection whether your YAML has `strength: insane` or `strength: medium`. The only question is whether your tool finds it — and whether you have days to spend making sure it does.
+The vulnerabilities don't change based on your scanner configuration. SQL injection is SQL injection whether your YAML has `strength: insane` or `strength: medium`. The only question is whether your tool finds it, and whether you have days to spend making sure it does.
 
 **Corefix makes sure it does. Every time. Without the YAML.**
 

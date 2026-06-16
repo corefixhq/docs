@@ -21,11 +21,11 @@ cover: /covers/beyond-yaml.png
 
 ---
 
-In our [previous post](/zap-tuning), we documented how five iterations of YAML tuning took ZAP's SQL injection detection from 3 alerts to 26 against DVWA — a 700% improvement from configuration changes alone. We thought we were done.
+In our [previous post](/zap-tuning), we documented how five iterations of YAML tuning took ZAP's SQL injection detection from 3 alerts to 26 against DVWA - a 700% improvement from configuration changes alone. We thought we were done.
 
 We were not done.
 
-After shipping those policy improvements, we turned our attention to real-world applications: single-page apps with JWT authentication, multi-origin architectures, CSRF-protected forms, and HAR-based crawl seeding. What we found was an entirely new category of silent scan failures — problems that exist *beneath* the scan policy layer, in the plumbing that connects your scanner to your application.
+After shipping those policy improvements, we turned our attention to real-world applications: single-page apps with JWT authentication, multi-origin architectures, CSRF-protected forms, and HAR-based crawl seeding. What we found was an entirely new category of silent scan failures, problems that exist *beneath* the scan policy layer, in the plumbing that connects your scanner to your application.
 
 This is the story of six configuration layers we had to build, debug, and automate before ZAP could reliably scan a modern web application.
 
@@ -37,7 +37,7 @@ The solution is HAR (HTTP Archive) file imports. Record a user session in Chrome
 
 The problem? HAR files from real browser sessions contain *everything*: Google Analytics beacons, Sentry error reporting, CDN asset requests, CloudFront distribution URLs, third-party authentication endpoints. In one HAR from a production SPA session, we counted 50+ unique URLs — but only 14 belonged to the target application.
 
-Without filtering, ZAP's requestor job fires authenticated requests at every URL in the HAR. That means your scan cookies, session tokens, and authentication headers get sent to `google-analytics.com`, `sentry.io`, and every third-party service your frontend calls. It's not just wasteful — it's a potential credential leak.
+Without filtering, ZAP's requestor job fires authenticated requests at every URL in the HAR. That means your scan cookies, session tokens, and authentication headers get sent to `google-analytics.com`, `sentry.io`, and every third-party service your frontend calls. It's not just wasteful. It's a potential credential leak.
 
 We built a two-stage filter: first, AI analysis of the HAR URLs to identify which origins are in-scope for the target application; second, a host-matching filter that strips static assets (`.js`, `.css`, `.png`, `.woff2`) and anything not matching the target host. What started as a simple HAR import became a URL intelligence pipeline.
 
