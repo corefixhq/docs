@@ -35,12 +35,12 @@ function resolveAuthor(raw: unknown): Author {
   if (raw && typeof raw === "object") {
     const o = raw as Record<string, string>;
     return {
-      name: o.name ?? "CoreFix Team",
+      name: o.name ?? "Corefix Team",
       avatar: o.avatar ?? null,
       role: o.role ?? null,
     };
   }
-  return { name: "CoreFix Team", avatar: null, role: null };
+  return { name: "Corefix Team", avatar: null, role: null };
 }
 
 function formatDate(raw: string): string {

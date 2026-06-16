@@ -22,7 +22,7 @@ const filtered = computed<Post[]>(() =>
   <section class="blog-grid-section" id="articles">
     <div class="blog-grid-inner">
       <div class="blog-grid-header">
-        <h2 class="blog-grid-heading">Latest Research</h2>
+        <h2 class="blog-grid-heading">LATEST RESEARCH</h2>
         <CategoryFilter
           v-if="allCategories.length > 0"
           :categories="allCategories"

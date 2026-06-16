@@ -2,7 +2,7 @@
 title: "We Spent 3 Days Tuning OWASP ZAP So You Don't Have To"
 description: "How a controlled DVWA experiment exposed DAST configuration complexity—and how policy tuning alone produced a 700% improvement in SQL injection detection."
 author:
-  name: CoreFix Team
+  name: Corefix Team
   role: Security Engineering
 date: 2026-05-27
 category: DAST
@@ -17,7 +17,7 @@ readingTime: 8
 cover: /covers/zap-tuning.png
 ---
 
-**How a simple DVWA scan exposed the hidden complexity of DAST — and why we built CoreFix to eliminate it.**
+**How a simple DVWA scan exposed the hidden complexity of DAST and why we built Corefix to eliminate it.**
 
 ---
 
@@ -113,22 +113,22 @@ DVWA is a toy application with a handful of pages. A production application with
 
 Each of these is a potential point of failure that produces no error message — just silently degraded results.
 
-## Why We Built CoreFix
+## Why We Built Corefix
 
 This experiment crystallized what we had long suspected: the gap between "running a DAST scan" and "running an effective DAST scan" is enormous, and it is almost entirely a configuration problem.
 
-CoreFix eliminates this gap. Instead of days of YAML tuning, iterative test runs, and statistics analysis, CoreFix delivers comprehensive authenticated scanning with:
+Corefix eliminates this gap. Instead of days of YAML tuning, iterative test runs, and statistics analysis, Corefix delivers comprehensive authenticated scanning with:
 
 - **Zero configuration**: no YAML files, no policy tuning, no rule-by-rule strength adjustments
 - **Automatic authentication handling**: session management, token extraction, and re-authentication handled out of the box
 - **Intelligent scan policies**: dynamic adjustment of scan depth and payload selection based on the application's technology fingerprint
 - **Complete coverage by default**: no silent alert caps, no premature rule termination, no scope misconfigurations
-- **Results in minutes**: what took us 3 days and 5 iterations to achieve with ZAP, CoreFix delivers in under 2 minutes
+- **Results in minutes**: what took us 3 days and 5 iterations to achieve with ZAP, Corefix delivers in under 2 minutes
 
 The vulnerabilities don't change based on your scanner configuration. SQL injection is SQL injection whether your YAML has `strength: insane` or `strength: medium`. The only question is whether your tool finds it — and whether you have days to spend making sure it does.
 
-**CoreFix makes sure it does. Every time. Without the YAML.**
+**Corefix makes sure it does. Every time. Without the YAML.**
 
 ---
 
-*CoreFix is built for security engineers who want results, not configuration files, and for development teams who need DAST coverage without becoming DAST experts. [Try CoreFix today →](https://app.corefix.dev)*
+*Corefix is built for security engineers who want results, not configuration files, and for development teams who need DAST coverage without becoming DAST experts. [Try Corefix today →](https://app.corefix.dev)*

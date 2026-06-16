@@ -11,9 +11,9 @@ const appUrl = env.VITE_APP_URL || "https://app.corefix.dev";
 const siteUrl = "https://blogs.corefix.dev";
 
 export default defineConfig({
-  title: "CoreFix Blog",
+  title: "Corefix Blog",
   description:
-    "Security insights, product updates, and engineering deep-dives from the CoreFix team.",
+    "Security insights, product updates, and engineering deep-dives from the Corefix team.",
   base: "/",
   cleanUrls: true,
   appearance: true,
@@ -30,7 +30,7 @@ export default defineConfig({
       {
         rel: "alternate",
         type: "application/rss+xml",
-        title: "CoreFix Blog RSS Feed",
+        title: "Corefix Blog RSS Feed",
         href: `${siteUrl}/feed.xml`,
       },
     ],
@@ -50,7 +50,7 @@ export default defineConfig({
         media: "(prefers-color-scheme: dark)",
       },
     ],
-    ["meta", { property: "og:site_name", content: "CoreFix Blog" }],
+    ["meta", { property: "og:site_name", content: "Corefix Blog" }],
     ["meta", { name: "twitter:site", content: "@corefixhq" }],
   ],
 
@@ -58,7 +58,7 @@ export default defineConfig({
     logo: {
       light: "/light/corefix-logo-light.svg",
       dark: "/dark/corefix-logo-dark.svg",
-      alt: "CoreFix",
+      alt: "Corefix",
     },
     logoLink: "https://corefix.dev",
     siteTitle: false,
@@ -157,15 +157,15 @@ export default defineConfig({
   // Generate RSS feed at build time. Outputs to blogs/.vitepress/dist/feed.xml
   buildEnd: async (siteConfig) => {
     const feed = new Feed({
-      title: "CoreFix Blog",
+      title: "Corefix Blog",
       description:
-        "Security insights, product updates, and engineering deep-dives from the CoreFix team.",
+        "Security insights, product updates, and engineering deep-dives from the Corefix team.",
       id: `${siteUrl}/`,
       link: `${siteUrl}/`,
       language: "en",
       image: `${siteUrl}/light/corefix-logo-light.svg`,
       favicon: `${siteUrl}/light/cf-on-light.svg`,
-      copyright: `© ${new Date().getFullYear()} CoreFix. All rights reserved.`,
+      copyright: `© ${new Date().getFullYear()} Corefix. All rights reserved.`,
     });
 
     const loader = createContentLoader("*.md", { excerpt: true, render: true });
@@ -184,7 +184,7 @@ export default defineConfig({
         const authorName =
           typeof authorRaw === "string"
             ? authorRaw
-            : (authorRaw?.name ?? "CoreFix Team");
+            : (authorRaw?.name ?? "Corefix Team");
 
         feed.addItem({
           title: post.frontmatter.title ?? "Untitled",

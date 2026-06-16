@@ -1,8 +1,8 @@
 ---
-title: "Smart ZAP Context: Authenticated Scanning Without the Configuration Hell"
-description: "How CoreFix automates OWASP ZAP context creation for authenticated scans—eliminating hours of manual setup and dramatically improving scan coverage."
+title: "How We Teach a Security Scanner to Understand Your App Before It Tests It"
+description: "The engineering behind intelligent ZAP context building — from raw HTML to authenticated scans, automatically. No manual setup required."
 author:
-  name: CoreFix Team
+  name: Corefix Team
   role: Security Engineering
 date: 2026-06-07
 category: Engineering
@@ -13,149 +13,131 @@ tags:
   - Engineering
   - Web Scanning
 featured: false
-readingTime: 9
+readingTime: 10
 cover: /covers/smart-zap-context.png
 ---
 
-**Authenticated scanning is where DAST tools earn their keep — and where most teams give up on configuration.**
+**Most security scanners are blunt instruments. We built the layer that makes them intelligent.**
 
 ---
 
-The single biggest gap between a DAST scan that finds real vulnerabilities and one that misses them is authentication. An unauthenticated scan of a modern web application is like running a security audit on a bank lobby and calling it done without checking the vault. The interesting attack surface — the transactions, the account data, the administrative functions — all sits behind login.
+Point a scanner at a URL and it floods your app with requests, misses half the attack surface because it couldn't log in, and produces reports full of noise. The configuration burden falls entirely on you — write the auth scripts, specify the CSRF fields, identify the login selectors, handle the cookie banners. Do it wrong and the scanner never gets past the landing page.
 
-OWASP ZAP supports authenticated scanning through its concept of "contexts": configuration objects that define how to authenticate, which URLs require authentication, which cookies or tokens carry session state, and how to detect when a session has expired. Building a ZAP context correctly is one of the most involved configuration tasks in the tool — and getting it wrong means running hours of scans against unauthenticated redirects.
+We built a smarter layer that sits in front of ZAP. Before a single probe fires, our system reads your application the way a developer would — understands its architecture, identifies how authentication works, handles the quirks — and hands ZAP a complete, accurate context. The result is broader coverage, real authenticated scanning, and no manual setup.
 
-This post describes how CoreFix's Smart ZAP Context system automates the entire process.
+This is the engineering story behind that layer.
 
-## What a ZAP Context Actually Does
+## The Problem with Naive Scanning
 
-Before diving into automation, it helps to understand what ZAP contexts contain. A context is a named scope that tells ZAP:
+Web applications today aren't what they were a decade ago. A large and growing share are **Single Page Applications** — Angular, React, Vue — that serve an essentially empty HTML shell and build the entire UI in the browser via JavaScript. When a scanner fetches `https://app.example.com/#/login`, the server responds with a few hundred bytes of boilerplate. There's no login form. There are no input fields. There's nothing to scan.
 
-1. **Which URLs are in scope**: defined by inclusion and exclusion regex patterns. Only URLs matching included patterns and not excluded patterns receive active testing.
+Traditional scanners — and naive automation — treat this as either a blank page or silently proceed with wrong assumptions. They submit requests to nonexistent endpoints. They can't find the password field. They never authenticate, so they never see the parts of your app that actually need testing.
 
-2. **How to authenticate**: ZAP supports several authentication methods — form-based, HTTP/NTLM, JSON body, script-based, and manual (HAR import). Each method requires different configuration: which field is the username, which is the password, where is the form action URL, what are the additional fixed parameters.
+The right approach is to understand what kind of application you're dealing with before you do anything else.
 
-3. **How to detect authentication failures**: ZAP needs to know what an unauthenticated response looks like so it can re-authenticate when a session expires during scanning. This is typically a regex matching the login page content, a specific response header, or an HTTP status code.
+## Step 1: Recognising the Application Architecture
 
-4. **Session management**: which request mechanism carries the session (cookies, headers, HTTP auth), and whether ZAP should manage the session itself or rely on the application's session handling.
+The first thing our system does after fetching a login page is determine whether it's a classic server-rendered app or a JavaScript SPA. This matters for every decision that follows.
 
-5. **Users**: the credentials (username, password) to use for the scan.
+A naive check — looking for `<form>` tags and `<input>` elements — fails immediately for SPAs. Angular applications, for example, use custom element tags like `<app-root>` rather than standard HTML containers with known IDs.
 
-6. **Anti-CSRF tokens**: if the login form includes CSRF protection, ZAP needs to know the token field name so it can extract and include the current token in each authentication request.
+The reliable signals are different:
 
-Setting all of this up manually through ZAP's GUI or YAML automation framework requires understanding each of these concepts in depth, reading documentation for every application-specific variation, and iterative testing to verify that sessions are being maintained correctly.
+- **Custom root elements** like `<app-root>`, `<div id="root">`, `<div id="__next">`
+- **SPA script bundles** — `main.js`, `polyfills.js`, chunked JS files with hashed names
+- **Minimal body content** — once scripts and link tags are stripped, almost nothing is left
 
-## The Smart Context Approach
+When these signals align, we know we're dealing with a SPA and everything downstream changes accordingly: selector discovery, CSRF detection, authentication flow — all need a different approach.
 
-CoreFix's Smart ZAP Context system takes a different approach: instead of asking users to configure authentication, it observes authentication happening and learns from it.
+## Step 2: CSRF Detection Without Guessing
 
-### Phase 1: Browser Observation
+CSRF protection is one of the most varied aspects of web authentication. Getting it wrong means the scanner submits requests that the server rejects as forgeries — and the scan never actually tests anything.
 
-When you add a target to CoreFix, the platform launches a browser session and asks you to perform your normal login flow. During this session, CoreFix captures a complete HAR (HTTP Archive) file — the same format used by browser developer tools — containing every request and response, including authentication flows.
+We detect CSRF mechanisms in priority order, deterministically, before any AI analysis runs. This gives downstream components high-confidence ground truth rather than inferences.
 
-The observation phase captures:
-- The exact URL, method, and headers of the login request
-- The form field names for username, password, and any additional parameters
-- The response cookies set after successful authentication
-- Anti-CSRF token field names (identified by looking for fields with values that change between page loads)
-- The URL of pages that require authentication (to populate the include patterns)
-- The URL of the logout endpoint (to add to the exclude list)
+**Priority 1 — Response headers.** Some frameworks send a fresh CSRF token directly in a response header (`X-CSRF-Token`, `X-XSRF-TOKEN`, etc.). If this header is present, the mechanism is unambiguous.
 
-### Phase 2: Context Generation
+**Priority 2 — Double submit cookies.** Angular's built-in CSRF protection sets an `XSRF-TOKEN` cookie that JavaScript reads and echoes as an `X-XSRF-TOKEN` request header. We detect this from the `Set-Cookie` response header and derive the correct header name from the cookie name, rather than hardcoding assumptions.
 
-From the captured HAR, CoreFix generates a complete ZAP context configuration. This involves several analytical steps:
+One subtlety that matters here: if the CSRF cookie is flagged `HttpOnly`, JavaScript cannot read it, so the double-submit pattern breaks. We surface this as a warning rather than silently proceeding.
 
-**Authentication method detection**: CoreFix examines the login request to determine which authentication method applies. A `Content-Type: application/x-www-form-urlencoded` login POST → form-based authentication. A `Content-Type: application/json` POST with `{"username": ..., "password": ...}` → JSON body authentication. HTTP `Authorization` header present → HTTP auth.
+**Priority 3 — HTML hidden fields.** Classic server-rendered apps embed tokens like `_csrf` or `authenticity_token` directly in form markup. We extract these with purpose-built regex that handles both attribute orderings (`name` before `value` and `value` before `name`) and generate the ZAP-compatible extraction regex for each field automatically.
 
-**Scope construction**: CoreFix analyzes which URLs in the HAR required authenticated cookies to return non-redirect responses, and constructs inclusion patterns from these. Standard logout URLs, static assets, and URLs that returned the same content both authenticated and unauthenticated are identified and handled appropriately.
+**Priority 4 — Meta tags.** Laravel, Rails, and Django commonly inject CSRF tokens into `<meta name="csrf-token">` tags, bypassing form fields entirely.
 
-**Verification regex generation**: CoreFix looks at the login page content and extracts a phrase that is present on the login page but absent from authenticated pages — typically a heading like "Sign In" or "Log in to your account". This becomes the authentication verification regex.
+For SPAs, the honest answer is often that CSRF fields won't be present in the initial HTML at all — the token only appears after JavaScript runs and the first authenticated API call fires. Our system accounts for this by re-running detection after the browser has rendered the page.
 
-**Anti-CSRF configuration**: If any form submissions in the HAR contain tokens that vary between requests, CoreFix identifies the field names and configures ZAP to extract and include the current token value.
+## Step 3: AI Analysis of the Login Page
 
-The output is a complete ZAP automation YAML with context configuration that would have taken hours to produce manually:
+With architecture detected and CSRF ground truth established, we pass the page to an AI analysis step. The AI receives the HTML (or rendered DOM for SPAs), response headers, URLs extracted from script references and fetch calls, and the deterministic CSRF findings.
 
-```yaml
-contexts:
-  - name: "target-app-authenticated"
-    urls:
-      - "https://app.example.com"
-    includePaths:
-      - "https://app.example.com/.*"
-    excludePaths:
-      - "https://app.example.com/logout.*"
-      - "https://app.example.com/auth/sign-out.*"
-    authentication:
-      method: form
-      parameters:
-        loginPageUrl: "https://app.example.com/login"
-        loginRequestUrl: "https://app.example.com/auth/session"
-        loginRequestBody: "email={%username%}&password={%password%}&_csrf={%csrf_token%}"
-      verificationUrl: "https://app.example.com/dashboard"
-      pollFrequency: 60
-      pollUnits: REQUESTS
-    sessionManagement:
-      method: cookie
-    users:
-      - name: "scan-user"
-        credentials:
-          username: "${SCAN_USERNAME}"
-          password: "${SCAN_PASSWORD}"
-    technology:
-      - Language.JavaScript
-      - Db.MySQL
-    antiCsrfTokens:
-      - _csrf
-```
+The AI's job is to identify:
 
-### Phase 3: Verification and Scan
+- CSS selectors for the username field, password field, and submit button
+- The backend endpoint the login form submits to (`formAction`) and its method and content type
+- Any CAPTCHA presence and type
+- Hidden form fields that aren't CSRF or credentials (some apps send additional body parameters)
+- Whether a modal, cookie banner, or welcome overlay is blocking the form
 
-Before running the full active scan, CoreFix validates the generated context by running a lightweight authentication check: it authenticates using the generated configuration, requests a known authenticated URL, and verifies the response. If authentication fails, CoreFix reports the specific failure point — wrong login URL, incorrect field name, missing CSRF token — before spending time on a full scan.
+That last point — the **overlay selector** — turns out to be surprisingly important in practice.
 
-Once verified, the scan runs against the authenticated context with appropriate active scan policies.
+For static HTML, the AI works from server-rendered markup and produces reliable results. For SPAs, the selectors and form action are at best educated guesses at this stage, because the actual DOM doesn't exist yet. The AI knows this: it marks its confidence accordingly, and the system triggers a second pass.
 
-## What This Eliminates
+## Step 4: Headless Browser Rendering for SPAs
 
-The complexity of ZAP context configuration is not just the initial setup. It is the iterative debugging cycle that consumes hours:
+When the application is a SPA and the AI couldn't confidently identify selectors, we launch a headless Chromium browser, navigate to the login URL, and wait for the JavaScript to fully execute.
 
-**Session drop detection**: Without proper authentication failure detection, ZAP silently scans unauthenticated pages when sessions expire. There is no error — just degraded results that look like a complete scan. With Smart ZAP Context, authentication failures are detected and re-authentication happens automatically.
+This gives us things the static fetch never could:
 
-**CSRF token mishandling**: A missing anti-CSRF token field means every authentication attempt after the first one fails (the first succeeds because it extracts a token from the initial page load; subsequent attempts use a stale token). This is particularly insidious because the first authenticated request may succeed, making it appear that authentication is working.
+- The **real rendered DOM** with actual input elements present
+- **Intercepted XHR and fetch calls** — when we later simulate a login, we'll see exactly what endpoint the app posts to and what headers and body it sends
+- **Runtime cookies** — Angular sets `XSRF-TOKEN` after page load, not in the initial response, so this is often the only way to detect it
 
-**Scope misconfigurations**: Including the logout URL in scope causes ZAP to actively scan it, which logs the session out mid-scan. Excluding the login URL prevents re-authentication. Smart ZAP Context handles both automatically.
+After rendering, we re-run the AI analysis on the live DOM. Now the selectors are real. The form action comes from intercepted network traffic, not inference. The CSRF cookie is present in the browser's cookie jar.
 
-**Method detection failures**: Using form-based authentication configuration against a JSON API login (or vice versa) produces authentication failures that can be mistaken for network issues or application errors. Automatic method detection eliminates this class of error entirely.
+## Step 5: Dismissing Overlays Before Interacting
 
-## Real Impact: A Case Study
+Modern web applications have a habit of greeting first-time visitors with things that block the page: cookie consent banners, welcome dialogs, promotional modals. To a headless browser trying to find and fill a login form, these are invisible walls — clicks on the email field get intercepted by the overlay, or the form itself never renders until the banner is acknowledged.
 
-A CoreFix customer running DAST on their SaaS product had been using ZAP directly for quarterly security assessments. Their manual ZAP setup took 2-3 hours to configure correctly for each new application version, and they regularly discovered mid-analysis that sessions had dropped and the scan had continued unauthenticated.
+The AI identifies the dismiss selector for any overlay it detects. Our dismissal logic then tries to close it before attempting any form interaction, with a layered fallback strategy:
 
-After switching to CoreFix with Smart ZAP Context:
+1. Click the AI-identified dismiss button (most specific, most likely to be correct)
+2. Try a library of framework-specific generic selectors — Angular Material dialogs, Bootstrap modals, common cookie consent classes
+3. Send an Escape key press, which closes many CDK and Bootstrap modals that have no obvious button
+4. As a last resort, remove the overlay elements from the DOM entirely and clear any pointer-blocking CSS the framework left behind
 
-- **Setup time**: reduced from 2-3 hours to 8 minutes (the time to complete the observed login flow)
-- **Authenticated coverage**: increased from approximately 60% of URLs (40% were hit unauthenticated due to session management issues) to 98%
-- **Vulnerabilities found**: 3.2x increase in authenticated-only findings, including two critical IDOR vulnerabilities that had been missed in previous unauthenticated scans
+Multiple attempts are necessary because overlay animations introduce timing: a button click may register before the dismiss handler is attached, or one overlay's dismissal reveals another underneath it.
 
-The IDOR findings are particularly significant: these vulnerabilities exist only in authenticated application logic, making them completely invisible to unauthenticated scans. They are also among the most commonly exploited web vulnerabilities in production breaches.
+## Step 6: Detecting OAuth Redirects
 
-## Technical Implementation Notes
+One more edge case that breaks naive automation: some SPAs don't have a login form at all. Navigating to their `#/login` route triggers a client-side redirect to an external OAuth or SSO provider — Google, Microsoft, Okta.
 
-For teams interested in the technical details of the context generation:
+This redirect is invisible at the HTTP layer. The server returns a 200 with the app shell. Then JavaScript runs, the router fires, and `window.location` gets set to `https://accounts.google.com/...`. To a traditional scanner this looks like a successful page load.
 
-**HAR analysis** uses a streaming parser to handle large session recordings without loading the entire archive into memory. Requests are categorized by response characteristics: requests returning Set-Cookie headers with session tokens are candidates for session management configuration; requests with 302 redirects to the login URL are candidates for authentication verification.
+We detect it by comparing the browser's current domain after JavaScript has fully executed against the original login domain. If they differ, the application is using external OAuth and we signal this explicitly — triggering a different handling path — rather than proceeding with broken selector assumptions.
 
-**Token variability detection** works by comparing form field values across multiple requests to the same endpoint. Fields with values that change between requests are treated as dynamic tokens (CSRF or nonce values); fields with constant values are treated as fixed parameters.
+## What ZAP Gets at the End
 
-**URL pattern generation** uses a frequency-based approach: URL components that appear across many authenticated requests are generalized to patterns; components that appear in only one or two URLs are kept literal. This prevents both overly broad patterns (which would include unrelated URLs) and overly specific patterns (which would miss URL variations).
+By the time we hand off to ZAP, the context is complete:
 
-**Re-authentication polling** is configured conservatively by default — every 60 requests — because the cost of an unnecessary authentication check is much lower than the cost of a session drop that goes undetected.
+- Authentication endpoint, method, and content type
+- Input field selectors resolved against the real rendered DOM
+- CSRF mechanism identified and the correct extraction regex generated
+- Session tokens and cookies from a successful login
+- Scope correctly bounded to the application's domain
 
-## Conclusion
+ZAP doesn't need to figure any of this out. It doesn't need to handle the SPA rendering, the overlay dismissal, the CSRF detection, or the OAuth detection. It receives a fully configured context and can focus entirely on what it's good at: systematic vulnerability testing across an authenticated, properly scoped session.
 
-Authenticated DAST scanning should not require deep expertise in ZAP context configuration. The authentication knowledge that ZAP needs — login URL, field names, session cookies, CSRF tokens — is observable from normal login behavior. Smart ZAP Context makes that observation automatic, turning hours of configuration into minutes of browser interaction.
+## Why We Built Corefix
 
-The result is comprehensive authenticated scanning that finds the vulnerabilities that matter: those in the parts of your application that actually handle user data, financial transactions, and sensitive operations. Behind the login page is where the real attack surface lives.
+The gap between "running a scanner" and "running a scanner that actually tests your application" is larger than most people realise. An unauthenticated scan misses every endpoint behind a login wall — which is typically most of the interesting attack surface. A scan that can't handle CSRF will fail silently. A scan pointed at a SPA that doesn't understand SPAs will test the empty shell and report clean.
+
+Corefix implements all six steps automatically. Architecture detection, CSRF identification, AI selector analysis, headless rendering, overlay dismissal, and OAuth detection all happen before the first active scan request fires. There is no YAML to write, no selectors to specify, no CSRF field names to register.
+
+Security coverage reflects what your application actually exposes — not just what a 2005-era scanner could reach.
+
+**The scanner should understand your app. Yours doesn't have to understand the scanner.**
 
 ---
 
-*CoreFix handles the full DAST configuration lifecycle automatically. [Schedule a demo](https://cal.com/corefix.dev/30min) to see authenticated scanning in action on your application.*
+*Corefix automates the full ZAP context pipeline — from architecture detection to authenticated scan. [Try Corefix today →](https://app.corefix.dev)*

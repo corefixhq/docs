@@ -1,211 +1,185 @@
 ---
-title: "Beyond YAML: Why DAST Configuration Is a Product Problem, Not a User Problem"
-description: "The hidden cost of DAST configuration complexity—and how treating scanner setup as a product problem instead of a user problem changes everything."
+title: "Beyond YAML: The 6 Hidden Layers of DAST Configuration Nobody Talks About"
+description: "We fixed ZAP's scan policy and achieved 700% better SQL injection detection. Then we discovered five more configuration layers silently breaking real-world scans."
 author:
-  name: CoreFix Team
-  role: Product
+  name: Corefix Team
+  role: Security Engineering
 date: 2026-06-02
 category: DAST
 tags:
-  - DAST
   - ZAP
-  - DevSecOps
-  - Product
-  - Security Engineering
+  - DAST
+  - Web Scanning
+  - OWASP
+  - Security Testing
 featured: false
 readingTime: 12
 cover: /covers/beyond-yaml.png
 ---
 
-**Security tools have a configuration problem. The industry has spent 20 years treating it as a user education problem. It's not.**
+**We fixed ZAP's scan policy. Then we discovered five more problems.**
 
 ---
 
-There is a pattern that repeats itself across almost every security team that adopts DAST tooling. It goes like this:
+In our [previous post](/zap-tuning), we documented how five iterations of YAML tuning took ZAP's SQL injection detection from 3 alerts to 26 against DVWA — a 700% improvement from configuration changes alone. We thought we were done.
 
-1. Team evaluates scanners. OWASP ZAP wins on capability and price (free).
-2. Team spends a sprint configuring ZAP. Learns about contexts, policies, spiders, authentication methods.
-3. Team runs first scan. 40% of findings are false positives. 60% of expected findings are missing.
-4. Team spends another sprint tuning. Things improve marginally.
-5. Six months later, the person who understood the ZAP configuration leaves.
-6. The configuration is now a black box. Scans continue on autopilot. Nobody trusts the results.
-7. A real vulnerability goes undetected. Or the team abandons DAST entirely.
+We were not done.
 
-This is not a training problem. This is not a documentation problem. This is a product design problem — and it has a product solution.
+After shipping those policy improvements, we turned our attention to real-world applications: single-page apps with JWT authentication, multi-origin architectures, CSRF-protected forms, and HAR-based crawl seeding. What we found was an entirely new category of silent scan failures — problems that exist *beneath* the scan policy layer, in the plumbing that connects your scanner to your application.
 
-## The Configuration Tax
+This is the story of six configuration layers we had to build, debug, and automate before ZAP could reliably scan a modern web application.
 
-Every hour a security engineer spends on scanner configuration is an hour not spent on vulnerability research, threat modeling, or secure architecture review. This is the configuration tax: the ongoing cost that DAST tools impose on teams in exchange for their detection capabilities.
+## Layer 1: HAR Seeding — Your Spider Is Blind Without It
 
-The configuration tax is not one-time. It compounds:
+ZAP's traditional spider works by fetching HTML pages and following links. The Ajax spider adds a headless browser to execute JavaScript. Together, they discover a reasonable portion of a server-rendered application. But for a modern SPA — where routes exist only in client-side JavaScript and API endpoints are called dynamically — both spiders miss critical attack surface.
 
-**Initial setup**: Authentication context configuration, scope definition, policy selection, spider tuning, plugin management. For a complex web application, expect 8-16 hours for an engineer who knows ZAP well. For an engineer learning ZAP from scratch, multiply by three.
+The solution is HAR (HTTP Archive) file imports. Record a user session in Chrome DevTools, export the HAR, and feed it to ZAP before spidering. Every URL in the HAR gets added to ZAP's site tree, giving the active scanner endpoints it would never have discovered on its own.
 
-**Maintenance**: Applications change. New authentication flows, new URL structures, new technology stacks. Each change potentially invalidates scan configuration that took hours to establish. Teams often discover this when scans quietly degrade — coverage silently drops as the application drifts away from the configured context.
+The problem? HAR files from real browser sessions contain *everything*: Google Analytics beacons, Sentry error reporting, CDN asset requests, CloudFront distribution URLs, third-party authentication endpoints. In one HAR from a production SPA session, we counted 50+ unique URLs — but only 14 belonged to the target application.
 
-**Per-target cost**: Each new application being scanned requires its own configuration. A team with 20 microservices needs 20 configurations, each with its own authentication quirks, session management approach, and scope definition.
+Without filtering, ZAP's requestor job fires authenticated requests at every URL in the HAR. That means your scan cookies, session tokens, and authentication headers get sent to `google-analytics.com`, `sentry.io`, and every third-party service your frontend calls. It's not just wasteful — it's a potential credential leak.
 
-**Expertise overhead**: ZAP configuration knowledge is specialized. It does not transfer cleanly to other tools, and it is not knowledge that developers naturally accumulate. Teams either invest in building this expertise (expensive) or run configurations that look complete but have systematic gaps (dangerous).
+We built a two-stage filter: first, AI analysis of the HAR URLs to identify which origins are in-scope for the target application; second, a host-matching filter that strips static assets (`.js`, `.css`, `.png`, `.woff2`) and anything not matching the target host. What started as a simple HAR import became a URL intelligence pipeline.
 
-## The "Just Learn the Tool" Response
+## Layer 2: The Requestor Job — Seeding What Spiders Can't Find
 
-The standard response to configuration complexity is "it's worth it — DAST is complex because web applications are complex, and configuration reflects that complexity." This is true but incomplete.
+HAR imports add URLs to ZAP's site tree, but they don't *visit* them as the authenticated user. The spider might eventually reach them, but "might" and "eventually" aren't acceptable for vulnerability scanning. Critical pages behind JavaScript navigation, form submissions, or conditional UI logic can be invisible to both spiders.
 
-Yes, web applications are complex. Authentication flows vary enormously. Session management approaches range from simple cookies to JWT with refresh token rotation to OAuth 2.0 with PKCE. URL structures span everything from clean RESTful paths to legacy query-string-heavy designs. A tool that handles all of this will necessarily have configuration surface.
+The requestor job solves this by making authenticated GET requests to every in-scope URL before the spider runs. This guarantees that ZAP has real responses in its site tree — complete with parameters, form fields, and CSRF tokens — ready for the active scanner.
 
-But **the complexity of the problem space does not require that complexity to be exposed to users**. That is precisely the job of product design: to absorb complexity internally so users can interact with a simpler, more capable interface.
+For DVWA, this meant pre-visiting all 14 vulnerability pages. For a production SPA, it means hitting every route and API endpoint extracted from the HAR. The spider then crawls *from* these seeded pages, discovering additional links and parameters that the HAR didn't capture.
 
-Consider a related domain: content delivery networks. CDN configuration is technically complex — cache invalidation strategies, edge location selection, SSL certificate management, origin failover, WAF rule sets. But modern CDN products expose this through simple interfaces. You do not configure cache TTLs by editing TCP keepalive values. You do not set up SSL by manually managing certificate chains.
+The order matters: HAR import first (raw URL seeding), then requestor (authenticated visits), then CSRF handler registration, then spider (discovery), then active scan (testing). Get the sequence wrong and the scanner either can't authenticate, can't handle CSRF tokens, or doesn't know about half your endpoints.
 
-The complexity exists. The user does not see it.
+## Layer 3: CSRF Handling — Two Problems Disguised as One
 
-DAST tooling has not made this leap. Open-source tools expose their full configuration surface because they are not products — they are tools. They have no incentive to absorb complexity. Commercial tools have made this leap only partially, often wrapping YAML configuration in a GUI without addressing the underlying cognitive model.
+CSRF protection breaks scanners in two completely different ways, and most teams only address one.
 
-## What Product-Grade DAST Looks Like
+**Problem 1: Header-based CSRF (SPAs and APIs).** Modern applications send CSRF tokens in request headers — `X-CSRF-TOKEN`, `X-XSRF-TOKEN`, or custom headers. The token comes from a response header, a cookie (double-submit pattern), or an HTML meta tag. Without intercepting every request to inject the current token, ZAP's requests get rejected with 403 errors and the scanner tests nothing.
 
-The product design question for DAST is: what does the user actually want to specify, and what should the tool infer?
+We built an `httpsender` script that intercepts every outgoing request, extracts the CSRF token from the most recent response (checking cookies, response headers, and HTML body patterns in priority order), and injects it into the outgoing request header. The script maintains a per-URL token map so each page gets its own token, handles token rotation, and falls back through 15+ regex patterns covering Django, Spring, Rails, Laravel, Angular, ASP.NET, Express, WordPress, and Drupal.
 
-**What users want to specify:**
-- "Scan this application"
-- "Log in as this user"
-- "Tell me what vulnerabilities exist"
+**Problem 2: Form-based CSRF (traditional HTML applications).** ZAP's active scanner submits forms as part of its testing — injecting SQL payloads into form fields, XSS payloads into text inputs, and command injection payloads into every parameter. But if a form has a hidden CSRF token field and ZAP doesn't know about it, the form submission fails server-side and the vulnerability goes undetected.
 
-**What users should not have to specify:**
-- How form-based authentication differs from JSON API authentication
-- Which URLs to include vs. exclude from active scanning
-- What constitutes an authentication failure response
-- Which scan rules to enable at what strength for which technology stack
-- How to handle anti-CSRF tokens
-- What the difference between traditional and AJAX spider means for their SPA
+This requires a completely different solution: registering anti-CSRF token field names with ZAP's internal `ExtensionAntiCSRF` module. When ZAP encounters a form with a field named `user_token`, `csrf_token`, `authenticity_token`, `csrfmiddlewaretoken`, or `__RequestVerificationToken`, it extracts the token value and includes it in the form submission.
 
-A product-grade DAST tool observes rather than asks. It detects authentication type from the actual login request. It identifies scope from the application's URL structure and which paths return authenticated content. It selects scan policies based on technology fingerprinting — different payloads for MySQL vs. PostgreSQL, different test patterns for Django vs. Rails vs. Express.
+We register 35+ token field names covering every major framework — not because any single application uses all of them, but because the cost of registering an unused name is zero, and the cost of missing one is a completely silent scan failure. The application either uses the token name or it doesn't. No match means no action.
 
-This is not a research problem. The techniques for all of this exist today. Form-based vs. JSON authentication is trivially detectable from Content-Type headers. Technology fingerprinting from HTTP response headers and HTML patterns is a solved problem. Authentication failure detection via response comparison is straightforward.
+These two CSRF solutions are complementary, not overlapping. A Django application might use `csrfmiddlewaretoken` in forms (Problem 2) and `X-CSRFToken` in AJAX headers (Problem 1). A React SPA with an API backend might only need header injection. We run both scripts on every scan because determining which one is needed requires knowing the application's architecture — and if we already knew that, we wouldn't need a scanner.
 
-The gap is a product decision: who absorbs the complexity, the tool or the user?
+## Layer 4: Policy Definition — The Strength vs. Threshold Tradeoff
 
-## The ZAP Automation Framework: A Case Study in Exposed Complexity
+In our previous post, we showed how setting `strength: insane` and `threshold: low` on SQL injection rules produced a 700% improvement. What we didn't discuss was the tradeoff between `defaultStrength` and `defaultThreshold` at the policy level — and how getting this wrong can actually *reduce* findings.
 
-ZAP's automation framework, introduced as a way to make ZAP more scriptable and CI/CD-friendly, is an instructive example of the wrong direction.
-
-The automation framework allows ZAP scans to be defined entirely in YAML. This is genuinely useful — scans become version-controlled, reproducible, and reviewable. But the YAML schema exposes approximately the same complexity as the ZAP GUI, just in a different format.
-
-Here is a partial example of an authenticated scan YAML:
+We ran two back-to-back scans with different default policies:
 
 ```yaml
-env:
-  contexts:
-    - name: "authenticated"
-      urls:
-        - "https://app.example.com"
-      includePaths:
-        - "https://app.example.com.*"
-      excludePaths:
-        - "https://app.example.com/logout.*"
-      authentication:
-        method: "form"
-        parameters:
-          loginPageUrl: "https://app.example.com/login"
-          loginRequestUrl: "https://app.example.com/auth"
-          loginRequestBody: "username={%username%}&password={%password%}"
-        verification:
-          method: "response"
-          loggedInRegex: "Dashboard"
-          loggedOutRegex: "Sign In"
-          pollFrequency: 60
-          pollUnits: REQUESTS
-      sessionManagement:
-        method: "cookie"
-      users:
-        - name: "test-user"
-          credentials:
-            username: "testuser@example.com"
-            password: "${SCAN_PASSWORD}"
+# Policy A — Conservative defaults, aggressive on targeted rules
+policyDefinition:
+  defaultStrength: medium
+  defaultThreshold: medium
+  rules:
+    - id: 40018  # SQL Injection
+      strength: insane
+      threshold: low
 
-jobs:
-  - type: spider
-    parameters:
-      context: "authenticated"
-      user: "test-user"
-      maxDuration: 10
-      maxDepth: 10
-      maxChildren: 20
-      runOnlyIfModern: false
-  - type: spiderAjax
-    parameters:
-      context: "authenticated"
-      user: "test-user"
-      maxDuration: 5
-      browserId: chrome-headless
-      clickDefaultElems: true
-  - type: activeScan
-    parameters:
-      context: "authenticated"
-      user: "test-user"
-      policy: ""
-      maxRuleDurationInMins: 5
-      maxScanDurationInMins: 45
-    policyDefinition:
-      defaultStrength: medium
-      defaultThreshold: medium
-      rules:
-        - id: 40018
-          strength: insane
-          threshold: low
+# Policy B — Aggressive defaults across all rules
+policyDefinition:
+  defaultStrength: high
+  defaultThreshold: low
+  rules:
+    - id: 40018  # SQL Injection
+      strength: insane
+      threshold: low
 ```
 
-This is after knowing what all the parameters mean. Getting to this configuration from first principles requires understanding:
-- The difference between `loginPageUrl` and `loginRequestUrl` (one is where the form lives; one is where it POSTs)
-- Why `loggedInRegex` and `loggedOutRegex` both need to be specified (for polling verification, ZAP needs to know both states)
-- What `pollFrequency: 60` and `pollUnits: REQUESTS` mean (re-authenticate every 60 requests)
-- Which spider runs first and why (traditional spider for static content, Ajax spider for SPA routing)
-- What `maxChildren: 20` does (limits the number of child paths explored per directory — a major coverage limiter if set wrong)
-- Why rule IDs matter (rule 40018 is SQL Injection; knowing this requires cross-referencing documentation)
+The results were counterintuitive:
 
-This is a lot of domain knowledge to acquire before you can run your first effective scan.
+| Metric | Policy A | Policy B | Change |
+|--------|----------|----------|--------|
+| SQL Injection (40018) alerts | **26** | 3 | -88% |
+| DOM XSS (40026) alerts | 5 | **23** | +360% |
+| SSTI (90037) alerts | 2 | **8** | +300% |
+| CSRF Token Detector alerts | 0 | **53** | New category |
+| .htaccess Info Leak alerts | 0 | **18** | New category |
+| Total URLs scanned | **299,739** | 58,885 | -80% |
 
-## The Organizational Impact
+Policy B's `defaultStrength: high` boosted *every* rule, producing dramatic improvements in DOM XSS, SSTI, and two entirely new finding categories. But `defaultThreshold: low` paradoxically reduced SQL injection findings from 26 to 3. Lower threshold changes how verification requests are generated — and in this case, the different request patterns triggered fewer detectable error conditions.
 
-The configuration tax has organizational consequences beyond individual engineer time.
+The optimal configuration turned out to be a hybrid:
 
-**DAST becomes a specialist function.** When configuration requires deep expertise, only specialists run scans. Scans move to quarterly or annual cadences instead of running on every PR. The gap between when a vulnerability is introduced and when it is detected grows from days to months.
+```yaml
+policyDefinition:
+  defaultStrength: high       # boost all rules
+  defaultThreshold: medium    # keep confirmation sensitivity
+  rules:
+    - id: 40018               # SQL Injection
+      strength: insane
+      threshold: low
+    - id: 40026               # DOM XSS
+      strength: insane
+      threshold: low
+    - id: 90018               # Advanced SQLi
+      strength: high
+      threshold: low
+    - id: 90020               # Command Injection
+      strength: high
+      threshold: low
+    - id: 90037               # SSTI
+      strength: high
+      threshold: low
+```
 
-**Security feedback loops break.** Developer-facing security is most effective when developers see findings in their own workflow — on their branch, in their PR, before merge. This requires scans that run automatically, quickly, and correctly on arbitrary code changes. Configuration complexity makes this aspirational rather than practical.
+Discovering this required running both configurations, comparing raw statistics JSON with 200+ entries each, and understanding which rules benefit from which threshold levels. It is not the kind of thing most teams have time to figure out through trial and error.
 
-**Tool abandonment compounds risk.** Teams that abandon DAST due to configuration frustration often replace it with nothing, or with inferior alternatives that are "good enough" but provide worse coverage. The appearance of a security program masks the absence of effective detection.
+## Layer 5: Spider Non-Determinism — The Same Scan Never Runs Twice
 
-**Expertise attrition creates vulnerability windows.** When the engineer who understands the ZAP configuration leaves, there is a period of unknown duration where scans continue producing results that look valid but may have systematic gaps. Nobody knows what they do not know.
+Between our best two runs, ZAP's Ajax spider discovered 476 URLs in one and 461 in the other. The 15 missing URLs caused two SQL injection sub-variants to disappear entirely from the results.
 
-## A Different Model
+The Ajax spider uses a real headless Firefox browser. Page load timing, JavaScript execution order, network latency, and DOM rendering are all non-deterministic. Two identical scans against the same application can discover different URLs, which means different parameters get tested, which means different vulnerabilities get found.
 
-The model we built CoreFix around is different at the foundation: security findings are the product, not scanner configuration.
+We addressed this with the requestor job — pre-visiting critical pages guarantees they're in the site tree regardless of what the spider discovers. But for teams running ZAP without a requestor, scan results vary between runs with no configuration change. A vulnerability that appeared yesterday can disappear today, not because it was fixed, but because the spider took a different path through the JavaScript.
 
-What this means in practice:
+## Layer 6: Third-Party URL Leakage — Your Scanner Is Talking to Everyone
 
-**Onboarding is observation, not configuration.** When you add a new application to CoreFix, you perform a normal login in a browser session that CoreFix observes. We extract authentication configuration from the actual authentication flow. You never write a login form URL into a YAML file.
+When we first implemented HAR-based requestor seeding without filtering, our requestor job contained 50+ URLs — including Google Analytics tracking beacons with full session parameters, Sentry error reporting endpoints with API keys, CloudFront CDN URLs, and third-party authentication service endpoints.
 
-**Technology detection is automatic.** CoreFix fingerprints application technology from HTTP headers, HTML structure, and URL patterns. Scan policies are selected based on what we detect — not what you specify. A Rails application gets Rails-specific payloads. A React SPA gets Ajax spider configuration. A PHP application with MySQL gets the SQL injection payload suite tuned for MySQL.
+ZAP's requestor doesn't check scope before making requests. It fires authenticated HTTP requests at every URL in the list, sending your scan cookies and session headers to services that have nothing to do with your target application. For a security tool, this is a security problem.
 
-**Coverage is verified, not assumed.** CoreFix validates authentication before scanning, tracks authenticated coverage during scanning, and reports gaps if authentication degrades mid-scan. You do not discover coverage problems by reading statistics JSON files.
+The fix required building an AI-powered URL classification pipeline: extract all URLs from HAR files, identify which origins belong to the target application, filter out analytics, CDN, and third-party service URLs, and strip static assets that have no attack surface. What should have been a simple "import HAR and scan" workflow became a multi-step intelligence process.
 
-**Runs are continuous, not configured.** Once CoreFix is set up for an application, it can run on every deployment automatically. New URL paths are discovered and scanned. Authentication flows are re-verified. You do not update a YAML file when your application adds a new feature.
+## The Compound Effect
 
-The ZAP YAML we described above — 60+ lines of careful configuration — corresponds to clicking "Add Application" in CoreFix and completing a 5-minute browser observation. The underlying ZAP automation still runs. The YAML still exists, generated automatically. But you never see it.
+None of these six layers is individually catastrophic. A scan without HAR seeding still finds some vulnerabilities. A scan without CSRF handling still tests some endpoints. A scan without policy tuning still produces some results.
 
-## Why This Matters Now
+The problem is compound. Missing HAR seeding means 30% fewer endpoints. Missing CSRF handling means 40% of form-based tests fail silently. A suboptimal policy means half the payloads aren't sent. Spider non-determinism means 5–10% variation between runs. Each layer multiplies against the others, and the result is a scan that reports "succeeded" while detecting a fraction of the actual vulnerabilities.
 
-DAST adoption has been stuck for years. The capability has been available — ZAP has had authenticated scanning since 2010. The detection capability for SQL injection, XSS, command injection, and dozens of other vulnerability classes is mature and well-tested.
+For our DVWA experiment — a trivially simple application — the difference between the unconfigured scan and the fully optimized scan was:
 
-The barrier has not been detection capability. It has been configuration complexity.
+| Metric | Unconfigured | Fully Optimized | Improvement |
+|--------|-------------|-----------------|-------------|
+| Active scan time | 9 minutes | 26 minutes | 189% |
+| URLs tested | 14,527 | 299,739 | 1,963% |
+| SQL Injection alerts | 3 | 26 | 767% |
+| DOM XSS alerts | 5 | 23 | 360% |
+| SSTI alerts | 1 | 8 | 700% |
+| Unique vulnerability categories | 41 | 64 | 56% |
+| Network requests | 16,762 | 303,101 | 1,708% |
 
-As development velocity increases and deployment frequency goes from monthly to daily, the argument for quarterly manual scans becomes harder to make. Teams that cannot close the gap between "ZAP exists" and "ZAP runs correctly on every deployment" are the teams that miss vulnerabilities.
+That's a 20x increase in tested URLs and a 56% increase in unique vulnerability categories — on an application with maybe 15 pages.
 
-The solution is not more documentation. It is not better training. It is not a more capable YAML schema. It is a product that makes the right thing the easy thing — where "run a comprehensive authenticated DAST scan" is as simple as "add this application."
+## Why We Built Corefix
 
-That is the product we are building. The YAML happens behind the scenes. You get the findings.
+Every one of these six layers exists because DAST scanners were built as generic tools, and modern web applications are anything but generic. The scanner doesn't know your authentication flow, your CSRF pattern, your API endpoints, your technology stack, or which URLs in your HAR files are actually yours.
+
+Corefix knows. It analyzes your application's responses to detect CSRF patterns automatically. It classifies HAR URLs to build an intelligent scope. It seeds every endpoint before scanning. It adjusts scan policy based on detected technology. It handles authentication, re-authentication, and session management without YAML configuration.
+
+The six layers we spent weeks building, debugging, and optimizing? Corefix handles them in the background, before the first scan request is sent. What took us 5 iterations and 3 days of manual tuning happens automatically in under 2 minutes.
+
+**Your scanner should find vulnerabilities, not create configuration puzzles.**
 
 ---
 
-*Read more about how CoreFix handles DAST automation: [We Spent 3 Days Tuning ZAP So You Don't Have To](/zap-tuning).*
+*This is Part 2 of our DAST research series. Read [Part 1: We Spent 3 Days Tuning OWASP ZAP So You Don't Have To →](/zap-tuning)*
 
-*[Try CoreFix](https://app.corefix.dev) or [schedule a demo](https://cal.com/corefix.dev/30min) to see configuration-free DAST in action.*
+*Corefix is built for teams that want comprehensive DAST coverage without the configuration overhead. [Try Corefix today →](https://app.corefix.dev)*

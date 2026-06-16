@@ -1,8 +1,8 @@
 ---
-title: "Benchmarking LLMs for Security Vulnerability Remediation"
-description: "We tested leading LLMs on real-world security vulnerability remediation tasks. Here's what we found about accuracy, context handling, and which models to trust."
+title: "We Benchmarked 21 LLMs on Security Analysis. Here's What We Found."
+description: "Processing time, task completion, and reliability data from running 247 real-world security findings through 21 LLMs — from Claude and GPT-5 to Bedrock and open-source models."
 author:
-  name: CoreFix Team
+  name: Corefix Team
   role: AI Research
 date: 2026-06-12
 category: AI & Automation
@@ -10,88 +10,103 @@ tags:
   - LLM
   - AI
   - Benchmarking
-  - Vulnerability Management
   - Security Research
+  - Vulnerability Management
 featured: false
-readingTime: 5
+readingTime: 6
 cover: /covers/llm-benchmark.png
 ---
 
-**Not all LLMs are equal when it comes to security. We ran the numbers.**
+**Not all LLMs are equal when it comes to security analysis. We ran the numbers.**
 
 ---
 
-AI-assisted vulnerability remediation is only as good as the model doing the assisting. As CoreFix integrates LLM capabilities into our vulnerability management platform, we needed to know: which models actually produce correct, safe fixes for real security findings?
+As Corefix integrates AI into its vulnerability management pipeline, we needed to answer a deceptively simple question: which models actually perform well on real-world security analysis tasks?
 
-We built a benchmark of 150 real-world vulnerability remediation tasks drawn from actual scanner findings — SQL injection, XSS, SSRF, insecure deserialization, hardcoded secrets, and more — and evaluated the leading models on three criteria: fix correctness, security completeness, and contextual accuracy.
+We ran a systematic benchmark against the [chef repository](https://github.com/mai1x9/chef) — a forked version of the original Chef project, approximately 2000 commits behind upstream — producing 247 findings across secrets, dependency vulnerabilities, Semgrep findings, and IaC findings. We fed these through our full AI enrichment pipeline across 21 models and measured what happened.
 
-## What We Measured
+The results were not what we expected.
 
-**Fix correctness**: Does the suggested fix actually resolve the vulnerability without breaking the surrounding code?
+## What We Tested
 
-**Security completeness**: Does the fix address only the surface finding, or does it reason about related attack vectors? A SQL injection fix that parameterizes the query but leaves a second injection point in the same function scores lower than one that addresses both.
+Every model ran the same four-task pipeline against the complete 247-finding dataset:
 
-**Contextual accuracy**: Does the model use the surrounding code context correctly? A fix that imports a library not present in the project, or uses an API that doesn't match the framework version, fails this criterion even if the security logic is sound.
+- **Deduplication**: collapsing duplicate findings across scanners
+- **Enrichment**: adding context, severity reasoning, and remediation guidance to each finding
+- **Cross-scanner correlation**: linking related findings from different tools — for example, a secret finding correlating with a dependency vulnerability in the same service
+- **Attack chain identification**: identifying sequences of findings that could be chained into an exploitable attack path
 
-## Results
+Processing time reflects how long each model took to complete the full pipeline on the 247-finding dataset. This is initial benchmarking — results will vary as prompts and pipeline logic are refined.
 
-| Model | Fix Correctness | Security Completeness | Contextual Accuracy |
-|-------|----------------|----------------------|---------------------|
-| Claude Opus 4.8 | 91% | 88% | 85% |
-| GPT-4o | 87% | 79% | 81% |
-| Gemini 1.5 Pro | 83% | 74% | 78% |
-| Claude Sonnet 4.6 | 89% | 84% | 83% |
-| Llama 3.1 70B | 71% | 65% | 69% |
-| Mistral Large | 74% | 68% | 71% |
+## Processing Time Results
 
-These numbers represent averages across all 150 tasks. Performance varied significantly by vulnerability class.
+| Model | Provider | Processing Time | Notes |
+|-------|----------|----------------:|-------|
+| Haiku | Claude | 108s | — |
+| Sonnet 4.6 | Claude | 410s | Slowest Claude variant tested |
+| GLM 4.7 | Zhihu AI | 153s | — |
+| Grok 4.3 | xAI | 122s | — |
+| Bedrock Minimax 2.5 | AWS Bedrock | 168s | — |
+| Bedrock Kimi K2.5 | AWS Bedrock | 143s | — |
+| Bedrock GLM-4.7-Flash | AWS Bedrock | 143s | Faster flash variant |
+| Bedrock GLM 5 | AWS Bedrock | 503s | Slowest overall |
+| Bedrock DeepSeek 3.2 | AWS Bedrock | 248s | — |
+| Bedrock Qwen 230B | AWS Bedrock | 63s | Fastest; attack chains not found |
+| Bedrock GPT OSS 120B | AWS Bedrock | 68s | Worked well |
+| GPT-5.4 | OpenAI | 226s | — |
+| GPT-5.4 Mini | OpenAI | 87s | Good speed |
+| GPT-5.4 Nano | OpenAI | 117s | — |
+| GPT-4.1 Mini | OpenAI | 118s | — |
+| GPT-4o Nano | OpenAI | 80s | Very fast |
+| GPT-5 Mini | OpenAI | 460s | Unexpectedly slow |
+| GPT-5 Nano | OpenAI | 380s | Slow for nano tier |
+| GPT-5 | OpenAI | 410s | — |
+| GPT-5.1 | OpenAI | 140s | Balanced |
+| GPT-5.2 | OpenAI | 248s | — |
 
-## Where Models Excel and Fail
+## Key Observations
 
-**SQL Injection**: All frontier models (Claude, GPT-4o, Gemini) performed well — correctness rates above 90%. This is unsurprising; SQL injection is heavily represented in training data and parameterized queries are a well-established pattern.
+The spread is wider than expected across all tiers:
 
-**SSRF**: Performance dropped sharply across all models. The challenge is that correct SSRF remediation requires understanding the application's threat model — whether the fix should be a URL allowlist, DNS rebinding protection, metadata service blocking, or a combination — and models struggle with this context-dependent reasoning. Even Claude Opus 4.8 dropped to 74% correctness on SSRF tasks.
+- **Fastest overall**: Bedrock Qwen 230B at 63 seconds — but attack chain identification was absent from results
+- **Best speed and quality balance**: Bedrock GPT OSS 120B at 68 seconds, with strong overall task completion
+- **Fast OpenAI options**: GPT-4o Nano at 80 seconds, GPT-5.4 Mini at 87 seconds
+- **Slowest models**: Bedrock GLM 5 at 503 seconds, GPT-5 Mini at 460 seconds, Claude Sonnet 4.6 at 410 seconds
 
-**Insecure Deserialization**: The most variable category. The correct fix depends entirely on the programming language, the serialization library in use, and the available alternatives. Models that correctly identified the library and its safe alternatives performed well; models that suggested generic serialization advice without library-specific guidance scored poorly.
+The counterintuitive finding: model size does not predict processing time. GPT-5 Mini (460s) is nearly as slow as full GPT-5 (410s) and significantly slower than GPT-5.4 (226s). Nano tiers cluster between 80–380 seconds — a 4x range that reflects rate limiting and infrastructure variance as much as model capability.
 
-**Hardcoded Secrets**: Near-perfect performance across all frontier models — 95%+ correctness. Removing a hardcoded credential and recommending environment variable or secrets manager usage is a pattern models handle reliably. The contextual accuracy metric was most useful here: models that suggested AWS Secrets Manager when the codebase used Vault, or vice versa, lost points.
+## Recommendations and Known Issues
 
-## The Context Window Effect
+Based on testing across all providers, here is what we found:
 
-One of the clearest findings was the impact of context window size on contextual accuracy. When we provided only the vulnerable function in isolation, contextual accuracy dropped significantly — models made reasonable suggestions that didn't fit the actual codebase. When we provided the full file (and for smaller codebases, the dependency manifest and framework configuration), accuracy improved substantially.
+**Kimi**
+Do not use `kimi-k2.5` or `kimi-2.6` directly via their API — they are being overloaded or rate-limited despite Tier 1 access. Use `k2.5` via AWS Bedrock instead.
 
-This has direct implications for how AI-assisted remediation should be implemented. Sending only the vulnerability finding and the affected line to a model is not enough. Effective LLM-assisted remediation requires:
+**GLM Models**
+All direct GLM model calls are resulting in `429` or `524` errors. Avoid calling GLM models directly. Use Bedrock for GLM 5, GLM 4.7, and GLM 4.7-Flash. Note that GLM 4.7 can be used for coding tasks but concurrency is limited to 1.
 
-- The full file containing the vulnerable code
-- Import statements and dependency context
-- Framework version and available library versions
-- Adjacent functions that interact with the vulnerable code
-- The original vulnerability description and scanner evidence
+**Claude on Bedrock**
+Bedrock Anthropic Haiku is working, but the model must be activated via AWS with a support ticket specifying your use case before it can be used.
 
-CoreFix assembles this context automatically before calling any LLM, which is why our in-product AI suggestions consistently outperform the same models used with minimal context.
+**JSON Response Format**
+GPT OSS 120B and Claude APIs do not support `type: json_object` as a response format. If `jsonFormat=false`, add explicit JSON formatting rules to the system prompt. The custom JSON parser will handle extracting structured output from the model response.
 
-## Model Selection for Production Use
+**GPT Models**
+All GPT models including nano and mini variants are working. Previous issues with `nano` and `mini` variants are resolved.
 
-Based on our benchmark, our recommendations for security remediation use cases:
+**Context and Token Limits**
+No context-related issues or max token errors observed — everything appears stable on this front.
 
-**For highest accuracy**: Claude Opus 4.8. Leads on both fix correctness and security completeness, particularly on complex vulnerability classes like SSRF and deserialization.
+## Why We Built Corefix
 
-**For speed/cost balance**: Claude Sonnet 4.6. Within 2-3 percentage points of Opus on most metrics, significantly faster response times. The right choice for high-volume use cases.
+AI-assisted security analysis is only as good as the pipeline surrounding the model. Raw processing time is one dimension — but attack chain identification, cross-scanner correlation, and enrichment quality all depend on how findings are assembled and presented before the model ever sees them.
 
-**For self-hosted or privacy-constrained deployments**: Llama 3.1 70B. Performance gap is real (roughly 20 percentage points below frontier on complex vulnerability classes), but acceptable for simple, well-understood vulnerability categories. Not recommended for production security use without human review.
+Corefix wraps model selection with full context assembly. Every finding gets the surrounding code, dependency context, framework version, and scanner evidence before the LLM processes it. We run this pipeline across all major providers — Bedrock, OpenAI, Anthropic direct — and select the optimal model per task type based on benchmarks like these.
 
-## What This Means for AI-Assisted Security
+The practical result: you don't choose a model or write prompt templates. Corefix handles selection, context assembly, and quality control. You get enriched findings with remediation guidance, deduplicated across scanners, with attack chains identified automatically.
 
-The benchmark results confirm something we suspected: the variance between models on security tasks is significantly larger than on general coding tasks. A model that scores 90% on HumanEval might score 65% on SSRF remediation. General coding benchmarks do not predict security remediation performance.
-
-For teams evaluating AI security tooling, we recommend:
-1. **Test on your actual vulnerability classes**, not general benchmarks
-2. **Measure contextual accuracy**, not just whether the suggested fix looks plausible
-3. **Always include human review** for complex vulnerability classes (SSRF, deserialization, business logic flaws)
-4. **Evaluate the context assembly** as much as the model — how the tool provides context to the model matters as much as model selection
-
-AI-assisted remediation is genuinely useful today. The models are good enough that they meaningfully reduce the time-to-fix for common vulnerability classes. But "good enough" means 87-91% on the categories where they excel — with real failure modes on the hard cases. The best implementations pair AI suggestions with developer review, not AI suggestions as a replacement for review.
+**What took us weeks of benchmarking to determine, Corefix handles on every scan.**
 
 ---
 
-*CoreFix integrates LLM-assisted remediation with full codebase context assembly across all major models. [Try a free scan](https://app.corefix.dev) to see AI-assisted remediation on your actual vulnerabilities.*
+*Corefix integrates AI enrichment across all major models and providers. [Try a free scan →](https://app.corefix.dev) to see AI-powered security analysis on your actual findings.*
