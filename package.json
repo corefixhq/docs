@@ -9,12 +9,18 @@
   "scripts": {
     "docs:dev": "vitepress dev",
     "docs:build": "vitepress build",
-    "docs:preview": "vitepress preview"
+    "docs:preview": "vitepress preview",
+    "blog:dev": "vitepress dev blogs",
+    "blog:build": "vitepress build blogs",
+    "blog:preview": "vitepress preview blogs"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/node": "^25.9.3",
+    "feed": "^5.2.1",
+    "gray-matter": "^4.0.3",
     "vitepress": "^1.6.4",
     "vitepress-plugin-tabs": "^0.9.0",
     "vue": "^3.5.35"

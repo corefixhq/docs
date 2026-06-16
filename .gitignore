@@ -4,6 +4,9 @@ dist/
 .vitepress/dist/
 .vitepress/.temp/
 .vitepress/cache/
+blogs/.vitepress/dist/
+blogs/.vitepress/.temp/
+blogs/.vitepress/cache/
 .idea/
 *.log
 *.swp
