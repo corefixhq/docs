@@ -216,6 +216,28 @@ The expanded traffic volume also dramatically increased passive scan findings:
 | Modern web app issues (10109) | 7 | 3,765 | 538× |
 | Application error disclosure (90022) | 0 | 19 | **New** |
 
+### Visual comparison: passive scan growth
+
+![Passive scan alert volume — baseline vs HAR-augmented](/images/Har-Compare.png)
+
+The increase in URL discovery directly translated into dramatically broader passive scan coverage. Once HAR traffic seeded authenticated routes, API endpoints, and application workflows that traditional crawling could not reach, ZAP began observing significantly more responses across the application.
+
+Several passive scan categories experienced substantial growth. Security header findings increased from 2,356 to 17,844 alerts. Timestamp disclosures grew from 242 to 7,770. Missing Content Security Policy findings expanded from just 22 alerts to 3,806. Site isolation observations increased from 44 to 7,639, while modern web application detections grew from 7 to 3,765.
+
+Most importantly, entirely new finding categories appeared. Application Error Disclosure (90022), which was absent in the baseline scan, surfaced 19 findings after HAR replay expanded the scanner's visibility into deeper application functionality.
+
+The chart above illustrates how additional application context translates directly into broader passive security coverage. While passive findings do not always indicate exploitable vulnerabilities, they provide valuable visibility into security posture, misconfigurations, information disclosure risks, and missing defensive controls that would otherwise remain hidden.
+
+### Key observation
+
+The growth in passive scan volume was not caused by more aggressive scanning. It was caused by better discovery. The scanner simply had access to a much larger portion of the application after importing 77 authenticated HAR entries and replaying critical workflows through the requestor job.
+
+This reinforces a core lesson from the experiment:
+
+**Coverage quality is often more important than scanner aggressiveness.**
+
+A scanner cannot analyze endpoints it never discovers. HAR augmentation dramatically expands that visibility.
+
 ### New content types discovered
 
 The HAR-augmented scan also discovered content types that the baseline scan never encountered:

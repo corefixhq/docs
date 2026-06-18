@@ -21,7 +21,7 @@ cover: /covers/beyond-yaml.png
 
 ---
 
-In our [previous post](./zap-tuning), we documented how five iterations of YAML tuning took ZAP's SQL injection detection from 3 alerts to 26 against DVWA - a 700% improvement from configuration changes alone. We thought we were done.
+In our [previous post](./corefix-blog-zap-tuning), we documented how five iterations of YAML tuning took ZAP's SQL injection detection from 3 alerts to 26 against DVWA - a 700% improvement from configuration changes alone. We thought we were done.
 
 We were not done.
 
@@ -180,6 +180,6 @@ The six layers we spent weeks building, debugging, and optimizing? Corefix handl
 
 ---
 
-*This is Part 2 of our DAST research series. Read [Part 1: We Spent 3 Days Tuning OWASP ZAP So You Don't Have To →](./zap-tuning)*
+*This is Part 2 of our DAST research series. Read [Part 1: We Spent 3 Days Tuning OWASP ZAP So You Don't Have To →](./corefix-blog-zap-tuning)*
 
 *Corefix is built for teams that want comprehensive DAST coverage without the configuration overhead. [Try Corefix today →](https://app.corefix.dev)*
