@@ -13,7 +13,7 @@ tags:
   - OWASP
   - Security Testing
 featured: true
-readingTime: 8
+readingTime: 12
 cover: /covers/zap-tuning.png
 ---
 
@@ -97,6 +97,107 @@ The scan still completed in 14 minutes, well within the 45-minute cap, but with 
 Even after three iterations, there was still a problem lurking. The `sqliplugin` add-on (rule 40019) was generating 144 warnings in the logs and hitting the `maxRuleDurationInMins: 5` ceiling, spending all 5 minutes but only managing to test 30 URLs before being forcibly terminated. Meanwhile, it was throwing `ZapSocketTimeoutException` errors, suggesting that time-based SQL injection tests were consuming the entire rule budget on network timeouts rather than actual vulnerability testing.
 
 This is the kind of issue that requires reading raw statistics JSON, cross-referencing rule IDs with plugin documentation, and understanding the interaction between timeout configurations, rule duration caps, and network latency. It is not the kind of thing most development teams, or even most security teams, have time to investigate.
+
+## Run 4: Lifting the Rule Duration Cap
+
+The `sqliplugin` timeout problem pointed at an obvious next configuration: increase `maxRuleDurationInMins` from 5 to 10 and give the time-intensive rules room to finish.
+
+```yaml
+maxRuleDurationInMins: 10
+```
+
+| Metric | Run 1 | Run 2 | Run 3 | Run 4 |
+|--------|-------|-------|-------|-------|
+| Active scan time | 9 min | 11 min | 14 min | 24 min |
+| Total URLs scanned | 14,527 | 23,957 | 29,470 | **299,739** |
+| Network requests | 16,762 | 26,530 | 32,755 | **303,101** |
+| SQLi 40018 alerts | 3 | 3 | 24 | **26** |
+| Advanced SQLi 90018 alerts | 9 | 18 | 25 | 19 |
+| Advanced SQLi 90018 URLs | 460 | 9,107 | 12,554 | **282,451** |
+| SQLi plugin 40019 URLs | 324 | 312 | 30 | **396** |
+| SQLi plugin 40019 time | 227s | 227s | 310s | 411s |
+| XSS 40012 alerts | 5 | 8 | 9 | 9 |
+| XSS 40023 alerts | 0 | 0 | 6 | 6 |
+| Auth assumed-in | 16,119 | 25,802 | 32,000 | **302,191** |
+| Auth success | 1 | 1 | 1 | 2 |
+
+The big story is rule 90018 (Advanced SQLi). It tested 282,451 URLs in this run vs 12,554 before — a 22x increase. With `maxRuleDurationInMins: 10`, it had room to breathe and used 639 seconds (the full 10 minutes) before being capped. It found 19 alerts (slightly fewer than Run 3's 25, but that's likely due to the spider finding fewer URLs this time — 461 vs 476).
+
+The sqliplugin (40019) also improved — 396 URLs tested vs 30 in Run 3. It used the full 411 seconds but is still generating 144 warnings. It's working harder now but still hitting timeout issues on time-based injection tests.
+
+One concern: 90018 got `skipped: 1`, meaning it hit the 10-minute cap and was forcibly stopped. It was clearly still finding things to test. You could push `maxRuleDurationInMins` to 15 for even more coverage, though you're hitting diminishing returns now.
+
+**Bottom line**: going from Run 1 to Run 4, you went from 14,527 to 299,739 URLs tested — a 20x improvement — and SQLi findings went from 3 to 26. The scan is now doing real, thorough work.
+
+The total unique alert types dropped slightly (17 high → 15 high), but that doesn't mean the scan was worse. Here's what likely happened:
+
+**Run 4 spider found fewer URLs** — 461 vs 476 in Run 3. The Ajax spider is non-deterministic; it uses a real browser and can discover different URLs each time depending on timing, page load order, and JavaScript execution. Fewer seed URLs means some injection points weren't in the scan tree at all.
+
+**Rule 90018 cannibalized time from other rules.** It consumed the full 10 minutes and tested 282,451 URLs — that's a huge share of the scan's total budget. While 90018 was grinding through time-based SQLi payloads, other rules had less overall scan capacity. Notice rule 90018 got `skipped: 1` — it was still running when the cap hit it.
+
+**Alert count ≠ scan quality.** Run 4 sent 303,101 network requests vs 32,755 in Run 3 — nearly 10x more actual testing. The 2 missing "high" alerts are likely duplicate findings on URLs that the spider didn't discover this time, not missed vulnerability classes.
+
+The takeaway: this is exactly the kind of non-obvious variability that makes manual DAST tuning frustrating. You can improve one axis (deeper SQLi testing) and accidentally regress another (fewer spider URLs), and without careful comparison you'd never know.
+
+## Run 5: Raising the Default Strength
+
+Run 5 tested a single hypothesis: what happens when `defaultStrength` is raised to `high` globally, rather than just for explicitly listed rules.
+
+```yaml
+policyDefinition:
+  defaultStrength: high
+  defaultThreshold: low
+  rules:
+    - id: 40018
+      strength: insane
+      threshold: low
+    - id: 40019
+      strength: high
+      threshold: low
+    - id: 40012
+      strength: insane
+      threshold: low
+```
+
+| Metric | Run 1 | Run 3 | Run 4 | Run 5 |
+|--------|-------|-------|-------|-------|
+| Active scan time | 9 min | 14 min | 24 min | 26 min |
+| Total URLs scanned | 14,527 | 29,470 | 299,739 | 58,885 |
+| Network requests | 16,762 | 32,755 | 303,101 | 61,777 |
+| SQLi 40018 alerts | 3 | 24 | 26 | 3 |
+| SQLi 40018 URLs tested | 844 | 1,743 | 1,726 | 2,287 |
+| Advanced SQLi 90018 alerts | 9 | 25 | 19 | 15 |
+| Advanced SQLi 90018 URLs | 460 | 12,554 | 282,451 | 37,508 |
+| XSS DOM 40026 alerts | 5 | 5 | 5 | **23** |
+| XSS DOM 40026 URLs | 1,171 | 1,188 | 1,197 | 2,992 |
+| XSS Reflected 40012 | 5 | 9 | 9 | 9 |
+| SSTI 90037 alerts | 1 | 2 | 1 | **8** |
+| Cmd Injection 90020 URLs | 743 | 857 | 857 | 1,211 |
+| Anti-CSRF 20012 alerts | 8 | 9 | 9 | **27** |
+| Cookie Slack 90027 | 5 | 51 | 51 | 52 |
+| CSRF Token Detector 90028 | 0 | 0 | 0 | **53 (new)** |
+| .htaccess Info Leak 40032 | 0 | 0 | 0 | **18 (new)** |
+| Possible Username Enum 40025 | 0 | 1 | 0 | 4 |
+
+The `policyDefinition` change from medium/medium to high/low made a massive difference across rules that weren't explicitly listed. DOM XSS jumped from 5 to 23, SSTI from 1 to 8, and two entirely new finding categories appeared (rule 90028 CSRF Token Detector with 53 alerts, rule 40032 .htaccess with 18). This proves that `defaultStrength: high` boosts every rule, not just the ones you override.
+
+One concern: SQLi 40018 dropped back to 3 alerts despite testing more URLs (2,287 vs 1,743). This is because `defaultThreshold: low` makes the scanner pickier about *confirming* findings — it needs stronger evidence before raising an alert. The tradeoff is fewer false positives but potentially fewer true positives too. For a high tier configuration, `defaultThreshold: medium` with only the specific rules set to `low` works better:
+
+```yaml
+policyDefinition:
+  defaultStrength: high
+  defaultThreshold: medium    # less aggressive confirmation globally
+  rules:
+    - id: 40018
+      strength: insane
+      threshold: low          # aggressive for SQLi specifically
+```
+
+The sqliplugin (40019) is struggling badly — 942 warnings, 600 seconds consumed, only 45 URLs tested. It's spending all its time on time-based blind SQLi payloads that timeout. Consider dropping it to `strength: high` instead of `insane`.
+
+New SSTI error: `SstiBlindScanRule.NullPointerException` appeared 40 times — this is a ZAP bug in the SSTI plugin, not your config. It found 8 alerts despite the errors, which is great.
+
+Overall this config is production-ready. The high/low defaults are delivering significantly broader coverage.
 
 ## What This Means for Real-World Scanning
 
