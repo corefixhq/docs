@@ -499,6 +499,72 @@
   font-size: 1rem;
 }
 
+/* ── Load More ───────────────────────────────────────────────────────────── */
+
+.blog-load-more {
+  display: flex;
+  justify-content: center;
+  margin-top: 64px;
+  margin-bottom: 80px;
+}
+
+.blog-load-more-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 50px;
+  padding: 0 36px;
+  border-radius: 9999px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  color: #111827;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: inherit;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 1px 4px rgba(0, 0, 0, 0.03);
+  transition: transform 200ms ease, border-color 200ms ease,
+    box-shadow 200ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.blog-load-more-btn:hover {
+  transform: translateY(-2px);
+  border-color: #c4c8cf;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.blog-load-more-btn:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+/* Dark mode — keep the button light against a dark background */
+.dark .blog-load-more-btn {
+  background: #1a1d23;
+  color: #f0f2f5;
+  border-color: #2e333d;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+.dark .blog-load-more-btn:hover {
+  border-color: #4a5060;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.35), 0 1px 3px rgba(0, 0, 0, 0.25);
+}
+
+@media (max-width: 400px) {
+  .blog-load-more {
+    padding: 0 1.25rem;
+  }
+
+  .blog-load-more-btn {
+    width: 100%;
+    max-width: 320px;
+  }
+}
+
 /* ══════════════════════════════════════════════════════════════════════════
    BLOG CARD
    ══════════════════════════════════════════════════════════════════════════ */

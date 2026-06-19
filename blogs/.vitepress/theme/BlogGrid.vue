@@ -1,11 +1,14 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import { data as posts } from "./posts.data.js";
 import type { Post } from "./posts.data.js";
 import CategoryFilter from "./CategoryFilter.vue";
 import BlogCard from "./BlogCard.vue";
 
+const PAGE_SIZE = 6;
+
 const selectedCategory = ref<string | null>(null);
+const visibleCount = ref(PAGE_SIZE);
 
 const allCategories = computed<string[]>(() =>
   [...new Set(posts.map((p) => p.category).filter(Boolean))].sort()
@@ -16,6 +19,18 @@ const filtered = computed<Post[]>(() =>
     ? posts.filter((p) => p.category === selectedCategory.value)
     : posts
 );
+
+const visible = computed<Post[]>(() => filtered.value.slice(0, visibleCount.value));
+
+const hasMore = computed(() => visibleCount.value < filtered.value.length);
+
+watch(selectedCategory, () => {
+  visibleCount.value = PAGE_SIZE;
+});
+
+function loadMore() {
+  visibleCount.value += PAGE_SIZE;
+}
 </script>
 
 <template>
@@ -33,7 +48,7 @@ const filtered = computed<Post[]>(() =>
 
       <div v-if="filtered.length > 0" class="blog-grid">
         <BlogCard
-          v-for="post in filtered"
+          v-for="post in visible"
           :key="post.url"
           :post="post"
         />
@@ -43,6 +58,13 @@ const filtered = computed<Post[]>(() =>
         <p>No articles in <strong>{{ selectedCategory }}</strong> yet.</p>
         <button class="cat-btn active" @click="selectedCategory = null">
           View all posts
+        </button>
+      </div>
+
+      <!-- Load more -->
+      <div v-if="hasMore" class="blog-load-more">
+        <button class="blog-load-more-btn" @click="loadMore">
+          Explore More Research
         </button>
       </div>
     </div>
