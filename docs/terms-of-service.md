@@ -33,6 +33,9 @@ You agree to use the Service only for lawful purposes and in compliance with the
 - Use the Service to generate spam, phishing content, or social engineering attacks
 - Share or transfer your account, API keys, or credits to unauthorized users
 
+> * Use the Browser Extension to record, intercept, or capture network traffic from any website or application that you do not own or do not have explicit written authorization to assess.
+
+
 ## 4. Code Scanning
 
 When you connect a repository to CoreFix via the GitHub App or CLI agent, we scan the repository contents using open source security scanners. For cloud-hosted (SaaS) scans, your code is temporarily processed in our infrastructure in the us-east-1 region and is not retained after the scan completes. Only the resulting findings (not your source code) are stored.
@@ -46,6 +49,90 @@ We retain the results of the last 7 builds per project. Older scan results are a
 Web application scanning sends real security test payloads (including but not limited to SQL injection, XSS, SSRF, and authentication bypass attempts) to the target URL you specify. By initiating a web scan, you represent and warrant that you have explicit authorization to perform security testing against the target. See our [Disclaimer](/docs/disclaimer) for full details on liability.
 
 Web application scanning requires credits and is not included in the free Open Source plan.
+
+
+### **5A. Browser Extension (Website Recorder)**
+
+The CoreFix Browser Extension ("Extension") is an optional component of the Service that assists authorized users in recording web application traffic (HAR data) for the purpose of performing security assessments through the CoreFix platform.
+
+#### Authorized Use Only
+
+The Extension may only be used to record web applications that:
+
+* are owned by your organization; or
+* you have explicit authorization to test.
+
+The Extension is designed to support authorized security testing only and must not be used to capture traffic from websites or applications for which you do not have permission.
+
+#### Workspace and Project Verification
+
+To prevent unauthorized recording, the Extension requires you to authenticate using your email address and organization (workspace) identifier.
+
+Recording is permitted only when **all** of the following conditions are satisfied:
+
+* you are a member of the specified CoreFix workspace;
+* an administrator or collaborator has created a project for the target website;
+* the project has been explicitly shared with your user account;
+* the URL of the currently active browser tab exactly matches the URL configured for the project; and
+* you have permission to record traffic for that project.
+
+If any of these conditions are not met, recording will not begin.
+
+The Extension is restricted to the authorized website associated with the project. If you navigate to another website or switch to a different tab whose URL does not match the authorized project, recording is automatically prevented.
+
+#### Data Collected
+
+While recording is active, the Extension captures HTTP and HTTPS network traffic required to generate a HAR (HTTP Archive) file. Depending on the application being tested, the recorded traffic may include:
+
+* request and response headers;
+* request and response bodies;
+* cookies;
+* authentication tokens;
+* session identifiers;
+* usernames and email addresses;
+* passwords submitted through forms;
+* uploaded form data;
+* API requests and responses; and
+* other information transmitted between your browser and the authorized web application.
+
+Because HAR files reflect actual network traffic, they may contain personally identifiable information (PII), credentials, confidential business information, or other sensitive data entered during the recorded session.
+
+#### Purpose of Collection
+
+Recorded HAR files are used solely for security testing and vulnerability assessment through the CoreFix platform, including but not limited to:
+
+* reproducing authenticated user sessions;
+* launching authorized web application security scans;
+* vulnerability validation;
+* AI-assisted security analysis; and
+* generation of security reports.
+
+HAR recordings are **not** used for advertising, profiling, analytics unrelated to security testing, or sold to third parties.
+
+#### Storage and Security
+
+Recorded HAR files are encrypted during transmission and while stored in our infrastructure.
+
+HAR recordings are securely stored within Cloudflare R2 object storage and are accessible only to authorized users within the applicable CoreFix workspace who have permission to the associated project.
+
+#### User Responsibility
+
+Because HAR recordings may contain passwords, authentication tokens, personal information, and other sensitive data, we strongly recommend performing recordings only against:
+
+* development environments;
+* staging environments;
+* testing environments (UAT); or
+* other non-production systems whenever reasonably possible.
+
+You are solely responsible for ensuring that you have appropriate authorization to record the application and any personal or sensitive data transmitted during the recording session.
+
+#### Deletion
+
+You may permanently delete HAR recordings associated with your projects at any time through the CoreFix platform. Once deleted, the recordings cannot be recovered except where retention is required by applicable law.
+
+
+> **The Browser Extension records network traffic only after you explicitly initiate a recording session. It does not continuously monitor your browsing activity or collect browsing history outside authorized recording sessions.**
+
 
 ## 6. Open Source Plan
 
