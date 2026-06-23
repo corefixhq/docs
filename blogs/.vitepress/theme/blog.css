@@ -635,6 +635,11 @@
   padding: 20px 22px 22px;
   flex: 1;
   gap: 10px;
+  border-top: 1px solid #c8c8c8;
+}
+
+.dark .blog-card-body {
+  border-top-color: #3a4555;
 }
 
 .blog-card-badge {
