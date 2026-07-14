@@ -14,7 +14,7 @@ tags:
   - Vulnerability Management
 featured: false
 readingTime: 6
-cover: /covers/llm-benchmark.png
+cover: /covers/llm-light.png
 ---
 
 **Not all LLMs are equal when it comes to security analysis. We ran the numbers.**

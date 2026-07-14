@@ -14,7 +14,7 @@ tags:
   - Security Testing
 featured: false
 readingTime: 12
-cover: /covers/beyond-yaml.png
+cover: /covers/beyond-yaml-light.png
 ---
 
 **We fixed ZAP's scan policy. Then we discovered five more problems.**

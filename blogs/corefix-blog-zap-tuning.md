@@ -14,7 +14,7 @@ tags:
   - Security Testing
 featured: true
 readingTime: 12
-cover: /covers/zap-tuning.png
+cover: /covers/zap-tuning-light.png
 ---
 
 **How a simple DVWA scan exposed the hidden complexity of DAST and why we built Corefix to eliminate it.**

@@ -14,7 +14,7 @@ tags:
   - Web Scanning
 featured: false
 readingTime: 10
-cover: /covers/smart-zap-context.png
+cover: /covers/smart-zap-context-light.png
 ---
 
 **Most security scanners are blunt instruments. We built the layer that makes them intelligent.**

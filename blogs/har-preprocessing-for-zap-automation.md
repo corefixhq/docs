@@ -15,7 +15,7 @@ tags:
   - Engineering
 featured: false
 readingTime: 12
-cover: /covers/preprocessing_har.png
+cover: /covers/preprocessing_har-light.png
 ---
 
 **TL;DR** — HAR files captured from browser traffic can easily exceed 25 MB, but ZAP's HAR import only reads `log.entries[].request` and `log.entries[].response`. Everything else — pages, initiator stacks, timings, custom fields — is ignored. By stripping what ZAP doesn't use, you can reduce a 25 MB HAR to ~500 KB with zero loss of scan coverage.

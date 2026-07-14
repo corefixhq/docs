@@ -15,7 +15,7 @@ tags:
   - Security Testing
 featured: false
 readingTime: 10
-cover: /covers/har-zap.png
+cover: /covers/har-zap-light.png
 ---
 
 **How recording real browser traffic with the Corefix Extension and feeding it into ZAP's automation framework transforms DAST coverage from surface-level to deep.**

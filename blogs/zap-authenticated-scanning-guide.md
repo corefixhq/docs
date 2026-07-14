@@ -15,7 +15,7 @@ tags:
   - OWASP
 featured: false
 readingTime: 18
-cover: /covers/zap-auth.png
+cover: /covers/zap-auth-light.png
 ---
 
 *How we went from broken session tokens and missed vulnerabilities to a fully authenticated, optimized DAST pipeline — and every lesson learned along the way.*
