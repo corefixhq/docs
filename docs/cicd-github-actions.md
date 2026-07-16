@@ -12,6 +12,7 @@ Set up automated code scanning in your GitHub repository using GitHub Actions. T
 ## Prerequisites
 
 - A CoreFix account — [sign up with GitHub](https://app.corefix.dev/signup) for the fastest setup.
+- The CoreFix Security GitHub App installed on your repository — [![GitHub](https://img.shields.io/badge/GitHub-View%20App-181717?style=flat&logo=github&logoColor=white)](https://github.com/apps/corefix-security)
 
 ---
 

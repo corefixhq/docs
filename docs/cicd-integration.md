@@ -411,3 +411,13 @@ Support for the following platforms is in progress:
 - **Travis CI**
 - **Bitbucket Pipelines**
 - **Azure DevOps Pipelines**
+
+---
+
+## Related
+
+- [Code Scanner CLI Options](/docs/code-agent-usage.md#cli-options)
+- [Available Code Scanners](/docs/code-agent-usage.md#scanners)
+- [Docker / Local CLI — Code Scanner Options](/docs/docker-cli#cli-options-—-code-scanner-corefixhq-cfix)
+- [Container Scanning](/docs/code-agent-usage.md#container-scanning-with-container)
+

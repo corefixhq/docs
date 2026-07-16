@@ -96,7 +96,11 @@ export default defineConfig({
           { text: "Chrome Extension", link: "/docs/chrome-extension-guide" },
           {
             text: "Web Scan Config Reference",
-            link: "/docs/web-scan-config-reference",
+            collapsed: true,
+            items: [
+              { text: "Full Reference", link: "/docs/web-scan-config-reference" },
+              { text: "Complex Auth (OAuth/MFA)", link: "/docs/web-scan-complex-auth" },
+            ],
           },
         ],
       },
@@ -134,6 +138,13 @@ export default defineConfig({
         collapsed: false,
         items: [
           { text: "Overview", link: "/docs/release-logs" },
+          { text: "v1.7.0", link: "/docs/release-v1.7.0" },
+          { text: "v1.6.0", link: "/docs/release-v1.6.0" },
+          { text: "v1.5.0", link: "/docs/release-v1.5.0" },
+          { text: "v1.4.0", link: "/docs/release-v1.4.0" },
+          { text: "v1.3.0", link: "/docs/release-v1.3.0" },
+          { text: "v1.2.0", link: "/docs/release-v1.2.0" },
+          { text: "v1.1.0", link: "/docs/release-v1.1.0" },
           { text: "v1.0.0", link: "/docs/release-v1.0.0" },
         ],
       },

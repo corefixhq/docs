@@ -56,6 +56,53 @@ NSA-CISA hardening guidelines, MITRE ATT&CK, and CIS benchmarks.
 
 ---
 
+### SonarQube Community Edition
+**Purpose:** Code quality and security analysis. Scans your codebase for
+security hotspots, bugs, code smells, and vulnerability patterns using
+SonarSource's rule engine.
+**License:** LGPL-3.0
+**Repository:** [github.com/SonarSource/sonarqube](https://github.com/SonarSource/sonarqube) ·
+[sonarsource.com/open-source-editions/sonarqube-community-edition](https://www.sonarsource.com/open-source-editions/sonarqube-community-edition/)
+
+---
+
+### Grype
+**Purpose:** Container image vulnerability scanning. Scans container images
+and filesystems for known vulnerabilities across OS packages and
+language-specific dependencies.
+**License:** Apache-2.0
+**Repository:** [github.com/anchore/grype](https://github.com/anchore/grype)
+
+---
+
+### Dockle
+**Purpose:** Container image best practices and CIS benchmarking. Lints
+Dockerfiles and built images against CIS Docker Benchmarks and container
+security best practices.
+**License:** Apache-2.0
+**Repository:** [github.com/goodwithtech/dockle](https://github.com/goodwithtech/dockle)
+
+---
+
+### Syft
+**Purpose:** Software Bill of Materials (SBOM) generation. Generates a
+complete inventory of packages and dependencies within container images and
+filesystems, in SPDX and CycloneDX formats.
+**License:** Apache-2.0
+**Repository:** [github.com/anchore/syft](https://github.com/anchore/syft)
+
+---
+
+### GuardDog
+**Purpose:** Malicious package detection. Identifies malicious PyPI, npm,
+Go, and Ruby packages, GitHub Actions, and VS Code extensions using
+heuristic and Semgrep-based static analysis, catching supply chain threats
+like typosquatting and credential exfiltration.
+**License:** Apache-2.0
+**Repository:** [github.com/DataDog/guarddog](https://github.com/DataDog/guarddog)
+
+---
+
 ## Web Application Scanning
 
 These tools run during web scans against your running application.
@@ -111,18 +158,6 @@ with programmatic output for automated analysis.
 
 ---
 
-## Coming Soon
-
-The following tools are integrated and will be available in upcoming releases.
-
-| Tool | Purpose | License |
-|---|---|---|
-| Grype | Container image vulnerability scanning | Apache-2.0 |
-| Dockle | Container image best practices linting | Apache-2.0 |
-| SonarQube (OSS) | Code quality and security analysis | LGPL-3.0 |
-
----
-
 ## License Summary
 
 | Tool | Category | License |
@@ -132,6 +167,11 @@ The following tools are integrated and will be available in upcoming releases.
 | OSV-Scanner | SCA | Apache-2.0 |
 | KICS | IaC | Apache-2.0 |
 | Kubescape | Kubernetes | Apache-2.0 |
+| SonarQube Community Edition | Code Quality & Security | LGPL-3.0 |
+| Grype | Container Vulnerability Scanning | Apache-2.0 |
+| Dockle | Container Best Practices / CIS | Apache-2.0 |
+| Syft | SBOM Generation | Apache-2.0 |
+| GuardDog | Malicious Package Detection | Apache-2.0 |
 | OWASP ZAP | DAST | Apache-2.0 |
 | Nuclei | CVE Scanning | MIT |
 | Nmap | Recon | NPSL/GPLv2 |

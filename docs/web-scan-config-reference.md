@@ -19,8 +19,8 @@ Place this file in the directory you mount into the `corefixhq/cfix-web` Docker 
 
 | Mode | When It Applies | `scope` | `headers` | `authentication` | `openapi` |
 |---|---|---|---|---|---|
-| **Web App Scanning** | No `openapi` block, or `openapi` + `authentication` together | Required | Required (except `browser` type) | Required | Optional |
-| **API Scanning** | Planned for `openapi` present + no `authentication` block. Currently unavailable | Not required | `Authorization` required | Not required | Required, but currently has no effect |
+| **Web App Scanning** | No `openapi` block, or `openapi` + `authentication` together | Required | Business headers only | Required | Optional |
+| **API Scanning** | Planned for `openapi` block present. Currently unavailable | Required | Business headers, plus `Authorization`/`Cookie` if your spec needs them | Optional, but recommended (`pollUrl` only) | Required, but currently has no effect |
 
 ---
 
@@ -29,7 +29,7 @@ Place this file in the directory you mount into the `corefixhq/cfix-web` Docker 
 ```yaml
 developer: true                         # Always true
 
-scope:                                  # Required for web app scanning. Not required for API scanning.
+scope:                                  # Required for both Web App and API scanning
   entryUrls:                            # Required — URLs where spidering starts
     - "https://example.com"
   includePaths:                         # Optional — regex patterns for in-scope URLs
@@ -37,22 +37,17 @@ scope:                                  # Required for web app scanning. Not req
   excludePaths:                         # Optional — regex patterns for URLs to skip
     - "https://example.com/logout.*"
 
-headers:                                # Required for json/form types and API scanning. Optional for browser type.
-  Authorization: "Bearer {%json:token%}" # Use Authorization OR Cookie, not both
+headers:                                # Business headers only. Add Authorization/Cookie only if the openapi block is present and your spec needs them.
+  tenant-id: "1"
 
-authentication:                         # Required for web app scanning. Omit for pure API scanning.
-  type: "json"                          # Required — json | form | browser
-  loginPageUrl: "..."                   # Required (all types)
-  loginBackendUrl: "..."                # Required for json and form. Optional for browser.
-  bodyTemplate: "..."                   # Required for json and form. Optional for browser.
-  pollUrl: "..."                        # Optional — recommended for session verification
-  loggedInRegex: "..."                  # Required (all types)
-  loggedOutRegex: "..."                 # Optional
+authentication:                         # Required for Web App Scanning. Optional (but recommended) for API Scanning.
+  type: "browser"                       # Always "browser". Omit entirely for API scanning.
+  loginPageUrl: "..."                   # Required for Web App Scanning. Not needed for API scanning.
+  pollUrl: "..."                        # Required — session verification endpoint
+  loggedInRegex: "..."                  # Recommended
+  loggedOutRegex: "..."                 # Recommended — combine multiple failure conditions with OR
 
-csrf:                                   # Optional — only needed for cookie/session-based apps with CSRF protection
-  httpHeader: "X-CSRF-TOKEN"
-
-openapi:                                # Optional — for API endpoint discovery
+openapi:                                # Planned for API Scanning — endpoint discovery from a spec. Not currently available.
   targetUrl: "..."                      # Required if openapi block is present
   apiUrl: "..."                         # Optional — URL where spec is served
 ```
@@ -63,33 +58,24 @@ openapi:                                # Optional — for API endpoint discover
 
 ### Top-Level Blocks
 
-| Block | Web App (`json`/`form`) | Web App (`browser`) | API Scanning |
-|---|---|---|---|
-| `scope.entryUrls` | Required | Required | Not required |
-| `headers` | Required | Optional | Required |
-| `authentication` | Required | Required | Not required |
-| `csrf` | Optional | Optional | Not required |
-| `openapi` | Optional | Optional | Required |
-
-### `headers`
-
-| Field | `json` / `form` | `browser` | API Scanning |
-|---|---|---|---|
-| `Authorization` or `Cookie` | Required (one of them) | Optional | `Authorization` required |
+| Block | Web App Scanning | API Scanning (planned, not currently available) |
+|---|---|---|
+| `scope.entryUrls` | Required | Required |
+| `headers` | Business headers only | Business headers, plus `Authorization`/`Cookie` if the spec needs them |
+| `authentication` | Required | Optional, but recommended |
+| `openapi` | Optional | Required, but currently has no effect |
 
 ### `authentication` Fields
 
-| Field | `json` | `form` | `browser` |
-|---|---|---|---|
-| `type` | Required | Required | Required |
-| `loginPageUrl` | Required | Required | Required |
-| `loggedInRegex` | Required | Required | Required |
-| `loginBackendUrl` | Required | Required | Optional |
-| `bodyTemplate` | Required | Required | Optional |
-| `pollUrl` | Optional | Optional | Optional |
-| `loggedOutRegex` | Optional | Optional | Optional |
+| Field | Web App Scanning | API Scanning (planned, not currently available) |
+|---|---|---|
+| `type` | Required — always `browser` | Omit |
+| `loginPageUrl` | Required | Omit |
+| `pollUrl` | Required | Required (this is the only field needed) |
+| `loggedInRegex` | Recommended | Not applicable |
+| `loggedOutRegex` | Recommended | Not applicable |
 
-> `pollUrl` is optional but recommended. If omitted, the scanner warns that session polling will be skipped and relies solely on `loggedInRegex` matched against the login response.
+> For API Scanning, the `authentication` block is optional, but it's always recommended to include one with just `pollUrl` set — this lets the scanner verify that requests it sends against the spec are actually authenticated. **API Scanning is planned and not currently available**, so this has no effect today.
 
 ---
 
@@ -107,7 +93,7 @@ developer: true
 
 ### `scope`
 
-Controls which URLs the scanner crawls and which it skips. Required for all web app scanning modes.
+Controls which URLs the scanner crawls and which it skips. Required for both Web App and API Scanning — this block does not change between modes.
 
 ```yaml
 scope:
@@ -152,189 +138,78 @@ includePaths:
 
 ### `headers`
 
-Headers injected on every scan, spider, and poll request after login. These are **not** sent on the login request itself — for login-specific headers, use `authentication.headers`.
+Headers injected on every scan, spider, and poll request after login.
+
+**Only list static, business-specific headers here** — tenant IDs, client IDs, role names, feature flags, and the like. Do **not** put `Authorization` or `Cookie` here for Web App Scanning: the `browser` authentication type captures and replays the session itself, so it doesn't need them.
 
 ```yaml
 headers:
-  Authorization: "Bearer {%json:token%}"
   tenant-id: "1"
   login-id: "iV5356"
+  customer-name: "SBIBANK"
+  X-Client-ID: "web"
 ```
 
-> **Check your browser DevTools → Network tab → any authenticated request → Request Headers** to see all headers your app sends to the backend. Missing even one required header causes ZAP requests to be silently rejected — the scan runs as unauthenticated with no obvious error.
-
-#### Dynamic Headers
-
-Values that change every login — tokens, session IDs. Use `{%json:...%}` placeholders to extract from the login response body. ZAP can only extract values that look like JWT/Bearer tokens. Short strings and numbers **cannot** be extracted dynamically.
+The one exception is planned **API Scanning** (not currently available): when the `openapi` block is present, include `Authorization` and/or `Cookie` alongside your business headers if the spec requires them. Some APIs authenticate with both together — a bearer token *and* a session cookie — so add whichever your spec actually needs.
 
 ```yaml
-# Login response: {"token": "eyJ..."}
-Authorization: "Bearer {%json:token%}"
-
-# Login response: {"accessToken": "eyJ..."}
-Authorization: "Bearer {%json:accessToken%}"
-
-# Login response: {"data": {"token": "eyJ..."}}
-Authorization: "Bearer {%json:data.token%}"
-
-# Login response: {"Authorization": "eyJ..."}
-Authorization: "{%json:Authorization%}"
+headers:
+  Authorization: "Bearer <token>"
+  Cookie: "SESSIONID=<session-id>"
+  tenant-id: "1"
 ```
 
-For cookie-based auth (Django, Rails, PHP) instead of Bearer tokens:
-
-```yaml
-Cookie: "SESSIONID={%cookie:SESSIONID%}"
-```
-
-Use **either** `Authorization` or `Cookie` — not both.
-
-#### Static Headers
-
-Values fixed per user or tenant — IDs, codes, role names. Hardcode these directly. ZAP will not extract them from the login response.
-
-```yaml
-tenant-id: "1"
-login-id: "iV5356"
-customer-name: "SBIBANK"
-Role: "admin"
-Version: "1.1.0"
-X-Client-ID: "web"
-```
+> **Check your browser DevTools → Network tab → any authenticated request → Request Headers** to see all headers your app sends to the backend. Missing even one required business header causes requests to be silently rejected — the scan runs as unauthenticated with no obvious error.
 
 > ✅ `tenant-id: "1"` — hardcoded, works
-> ❌ `tenant-id: "{%json:results.tenantId%}"` — short string, will not be extracted
+> ❌ `Authorization: "Bearer <token>"` in a Web App Scanning config with no `openapi` block — unnecessary, `browser` auth handles the session for you
 
 ---
 
 ### `authentication`
 
-Configures how the scanner logs into your application.
+Configures how the scanner logs into your application. `type` is always `browser` — it launches a real headless browser to perform login, so it handles most JavaScript-driven forms, redirects, SSO, OAuth, and MFA without any extra configuration.
+
+> If your login flow can't be driven this way (e.g. an OAuth/MFA flow with no scriptable form), see [Scanning Complex Apps (OAuth, MFA) — Token & Cookie Injection](./web-scan-complex-auth) for bypassing login entirely with a pre-authenticated `--token`.
 
 ```yaml
 authentication:
-  type: "json"
+  type: browser
   loginPageUrl: "https://example.com/login"
-  loginBackendUrl: "https://api.example.com/auth/login"
-  bodyTemplate: |
-    {
-      "username": "{identifier}",
-      "password": "{password}"
-    }
-  pollUrl: "https://api.example.com/user/profile"
-  pollFrequency: 10
-  loggedInRegex: "success|profile|dashboard"
-  loggedOutRegex: "Unauthorized|Invalid"
+  pollUrl: "https://api.example.com/v2/user/profile"
+  loggedOutRegex: >-
+    (Invalid credentials)|(token expired)|(HTTP/1\.1 401 Unauthorized)|(HTTP/1\.1 401)|(401 Unauthorized)|(name="password")|(Location:\s*.*\/login)
+  loggedInRegex: (HTTP/1\.1 200)|(HTTP/2(\.0)? 200)|(HTTP/3(\.0)? 200)
 ```
 
 #### `type`
 
-Choose based on how your application handles login:
-
-| Type | How It Works | Best For |
-|---|---|---|
-| `json` | POSTs credentials to a backend API endpoint, receives a token (JWT/Bearer) in the response body | React, Angular, Vue SPAs with REST APIs, mobile backends |
-| `form` | Submits login via a traditional HTML `<form>`, server responds with a session cookie | Django, Rails, PHP, older Java apps |
-| `browser` | Launches a real headless browser to perform login. Handles JavaScript-driven forms, redirects, SSO, OAuth, MFA. Captures more URLs than `json` because the browser executes JavaScript and records all network traffic during login | Complex auth flows, anything that breaks with `json` or `form` |
+Always `browser`. Required for Web App Scanning; omit the whole `authentication` block's `type`/`loginPageUrl` pair for planned API Scanning (see below — not currently available).
 
 #### `loginPageUrl`
 
-The URL a user visits in their browser to see the login page. Required for all types.
+The URL a user visits in their browser to see the login page. ZAP opens this URL in the headless browser to start the login flow. **Required for Web App Scanning.**
 
-- `form` — ZAP fetches this page to find the HTML form fields.
-- `browser` — ZAP opens this URL in the headless browser to start the login flow.
-- `json` — Not used during the actual login request, but required for context.
+> For SPA apps, the login URL may contain a `#` fragment (e.g. `/#/auth/login`) — this is fine, since `browser` auth executes JavaScript and follows client-side routing.
 
-> For SPA apps, the login URL may contain a `#` fragment (e.g. `/#/auth/login`). This is fine for `browser` auth but has no meaning for `json` or `form` since everything after `#` never reaches the server.
+#### `pollUrl`
 
-#### `loginBackendUrl`
-
-The actual API endpoint that receives login credentials as an HTTP POST. Required for `json` and `form` types.
+A backend API endpoint that requires authentication. ZAP periodically GETs this URL after login and checks the response against `loggedInRegex`/`loggedOutRegex` to confirm the session is still valid. **Required** for Web App Scanning, and recommended for planned API Scanning (not currently available).
 
 ```yaml
-loginBackendUrl: "https://api.example.com/auth/login"
-```
-
-#### `bodyTemplate`
-
-The request payload sent to `loginBackendUrl`. Required for `json` and `form` types. Modify the **JSON key names** to match your application's login payload — do not change `{identifier}` or `{password}`, they are internal placeholders replaced with real credentials at scan time.
-
-```yaml
-bodyTemplate: |
-  {
-    "username": "{identifier}",
-    "password": "{password}"
-  }
-```
-
-Check your browser DevTools → Network tab → login request → Request Payload to see the exact keys your server expects. Some apps require extra fields — if these are missing, login will silently fail even if credentials are correct:
-
-```yaml
-bodyTemplate: |
-  {
-    "email": "{identifier}",
-    "password": "{password}",
-    "clientId": "web",
-    "isAdmin": false
-  }
-```
-
-#### `authentication.headers` (Optional)
-
-Headers required on the **login request itself** (not on subsequent scan requests — those go in the top-level `headers` block).
-
-```yaml
-authentication:
-  type: "json"
-  loginBackendUrl: "https://api.example.com/auth/login"
-  headers:
-    tenant-id: "1"
-```
-
-#### Post-Login Verification
-
-After login, ZAP needs to confirm authentication succeeded. Three options:
-
-**Option 1 — Verify against the login response directly (simplest, best for `json`)**
-
-Leave `pollUrl` empty. Set `loggedInRegex` to a keyword in the login endpoint's own response body.
-
-```yaml
-authentication:
-  type: "json"
-  loginBackendUrl: "https://api.example.com/auth/login"
-  bodyTemplate: |
-    { "username": "{identifier}", "password": "{password}" }
-  loggedInRegex: "token|success"
-  loggedOutRegex: "Unauthorized|Invalid"
-```
-
-**Option 2 — Poll a protected endpoint (recommended)**
-
-Set `pollUrl` to a backend API endpoint that requires authentication. ZAP periodically GETs this URL and checks the response against `loggedInRegex`.
-
-```yaml
-pollUrl: "https://api.example.com/user/profile"
-pollFrequency: 10
-loggedInRegex: "success|profile|dashboard"
-loggedOutRegex: "Unauthorized|Invalid"
+pollUrl: "https://api.example.com/v2/user/vessel"
 ```
 
 > **Never use SPA frontend URLs for `pollUrl`:**
 > - ❌ `https://example.com/#/dashboard` — returns an empty HTML shell, JavaScript never executes
 > - ❌ `https://example.com/app/home` — SPA client-side route
-> - ✅ `https://api.example.com/user/profile` — actual backend endpoint
-> - ✅ `https://api.example.com/dashboard/data` — actual backend endpoint
+> - ✅ `https://api.example.com/v2/user/profile` — actual backend endpoint
 >
 > `pollUrl` must be a **GET** endpoint — ZAP poll always sends a GET request.
 
-**Option 3 — Auto-detect**
-
-Remove `pollUrl`, `loggedInRegex`, and `loggedOutRegex` entirely. ZAP automatically identifies login/logout indicators from traffic. Works best with `browser` and `form` auth. Unreliable with `json` — prefer Option 1.
-
-> **Tip:** If using `pollUrl`, test the endpoint manually first with curl to confirm your regex appears in the response:
+> **Tip:** Test the endpoint manually first with curl to confirm your regex appears in the response:
 > ```bash
-> curl -X GET https://api.example.com/user/profile \
+> curl -X GET https://api.example.com/v2/user/profile \
 >   -H "Authorization: Bearer <token>"
 > ```
 
@@ -342,76 +217,19 @@ Remove `pollUrl`, `loggedInRegex`, and `loggedOutRegex` entirely. ZAP automatica
 
 | Field | Description |
 |---|---|
-| `loggedInRegex` | Keyword or regex that only appears in a successful authenticated response. Use something specific like an email, role name, or status message rather than generic words like "success" that might appear in error responses. |
-| `loggedOutRegex` | Keyword or regex that appears when credentials are wrong or the session has expired. Check your app by intentionally using wrong credentials and noting the response. |
+| `loggedInRegex` | Keyword or regex that only appears in a successful authenticated response — an HTTP status line (`HTTP/1.1 200`), an email, a role name, or a status message. Avoid generic words like "success" that might also appear in error responses. |
+| `loggedOutRegex` | Keyword or regex that appears when the session is no longer valid — wrong credentials **or** an expired token. |
 
----
-
-### `csrf`
-
-Required for HTML-based applications that use cookie/session auth with CSRF protection. **SPA apps using JWT Bearer tokens are not affected by CSRF and can skip this block.**
+**Recommendation:** combine multiple failure conditions into `loggedOutRegex` with `|` alternation — one pattern for a failed login attempt, another for token expiry:
 
 ```yaml
-csrf:
-  httpHeader: "X-CSRF-TOKEN"
+loggedOutRegex: >-
+  (Invalid credentials)|(token expired)|(HTTP/1\.1 401
+  Unauthorized)|(HTTP/1\.1 401)|(401
+  Unauthorized)|(name="password")|(Location:\s*.*\/login)
 ```
 
-How it works: ZAP fetches pages during spidering, the script extracts the CSRF token from the response (header, cookie, or body), and injects it into every subsequent request. Without this, requests return 403 and the scan fails silently.
-
-#### `httpHeader`
-
-The header name to inject on every outgoing request with the extracted CSRF token. Check DevTools → Network → any XHR request → Request Headers to find the exact name.
-
-**Common values by framework:**
-
-| Framework | Header Name |
-|---|---|
-| Spring, Generic | `X-CSRF-TOKEN` |
-| Django | `X-CSRFToken` |
-| Angular, Laravel | `X-XSRF-TOKEN` |
-| ASP.NET | `RequestVerificationToken` |
-
-#### Extraction Method
-
-Choose **one** of the following. If none is provided, built-in patterns auto-detect common frameworks (Spring, Django, Rails, Laravel, Angular, ASP.NET).
-
-**`responseHeader`** — Server sends a CSRF token in a response header:
-
-```yaml
-csrf:
-  httpHeader: "X-CSRF-TOKEN"
-  responseHeader: "x-csrf-token"
-```
-
-**`cookieName`** — Server sets CSRF token as a cookie (Double Submit Cookie pattern):
-
-```yaml
-csrf:
-  httpHeader: "X-CSRFToken"
-  cookieName: "csrftoken"         # Django
-```
-
-```yaml
-csrf:
-  httpHeader: "X-XSRF-TOKEN"
-  cookieName: "XSRF-TOKEN"       # Angular, Laravel
-```
-
-**`extractRegex`** — CSRF token is embedded in HTML response body:
-
-```yaml
-# Meta tag (Spring)
-extractRegex: '<meta[^>]+name="_csrf"[^>]+content="([^"]+)"'
-
-# Meta tag (Rails)
-extractRegex: '<meta[^>]+name="csrf-token"[^>]+content="([^"]+)"'
-
-# Hidden input field
-extractRegex: '<input[^>]+name="_csrf"[^>]+value="([^"]+)"'
-
-# JSON in script tag (Meta/Instagram)
-extractRegex: '"csrf_token"\s*:\s*"([^"]+)"'
-```
+If your app returns `HTTP 401` for both a wrong login and an expired token, the scanner already detects `401 Unauthorized` automatically — the explicit `401` patterns above are a belt-and-suspenders fallback. But if token expiry returns something **other than 401** (a `200` with an error body, a redirect, a custom message like `"token expired"`), you must add that exact message to `loggedOutRegex` yourself, or the scanner won't notice the session died.
 
 ---
 
@@ -449,84 +267,59 @@ Provide either `apiUrl` to fetch the spec from the live application, or drop the
 | Express | `/api-docs` |
 | Laravel | `/api/documentation` |
 
+When `openapi` support ships, remember that `headers` may need `Authorization` and/or `Cookie` in addition to your business headers — some specs authenticate with both at once (see [`headers`](#headers) above).
+
 ---
 
 ## Scenario Examples
 
-### SPA with JWT Auth (React, Angular, Vue)
+### Web App Scanning — Browser Auth
 
 ```yaml
 developer: true
 
 scope:
   entryUrls:
-    - "https://api.example.com"
-    - "https://app.example.com"
+    - https://demo-oq.ishipplus.cloud
   includePaths:
-    - "https://api.example.com.*"
-    - "https://app.example.com.*"
+    - https://demo-oq.ishipplus.cloud.*
+  excludePaths:
+    - https://demo-oq\.ishipplus\.cloud/logout.*
+
+headers: {}
+
+authentication:
+  type: browser
+  loginPageUrl: https://demo-oq.ishipplus.cloud/login
+  pollUrl: https://demo-oq.ishipplus.cloud/v2/user/vessel
+  loggedOutRegex: >-
+    (Invalid credentials)|(token expired)|(HTTP/1\.1 401
+    Unauthorized)|(HTTP/1\.1 401)|(401
+    Unauthorized)|(name="password")|(Location:\s*.*\/login)
+  loggedInRegex: (HTTP/1\.1 200)|(HTTP/2(\.0)? 200)|(HTTP/3(\.0)? 200)
+```
+
+### Web App Scanning — With Business Headers
+
+```yaml
+developer: true
+
+scope:
+  entryUrls:
+    - "https://app.example.com"
   excludePaths:
     - "https://app.example.com/logout.*"
 
 headers:
-  Authorization: "Bearer {%json:token%}"
+  tenant-id: "1"
+  X-Client-ID: "web"
 
 authentication:
-  type: "json"
+  type: browser
   loginPageUrl: "https://app.example.com/login"
-  loginBackendUrl: "https://api.example.com/auth/login"
-  bodyTemplate: |
-    {
-      "email": "{identifier}",
-      "password": "{password}"
-    }
-  loggedInRegex: "token"
   pollUrl: "https://api.example.com/user/profile"
-```
-
-### Traditional HTML App (Django, Rails, PHP)
-
-```yaml
-developer: true
-
-scope:
-  entryUrls:
-    - "https://example.com"
-  excludePaths:
-    - "https://example.com/logout.*"
-
-headers:
-  Cookie: "PHPSESSID={%cookie:PHPSESSID%}; security=low;"
-
-authentication:
-  type: "form"
-  loginPageUrl: "https://example.com/login"
-  loginBackendUrl: "https://example.com/login"
-  loggedInRegex: "dashboard|welcome"
-  loggedOutRegex: "Unauthorized|login"
-  pollUrl: "https://example.com/index.php"
-
-csrf:
-  httpHeader: "X-CSRFToken"
-  cookieName: "csrftoken"
-```
-
-### Complex Auth (SSO, OAuth, MFA)
-
-```yaml
-developer: true
-
-scope:
-  entryUrls:
-    - "https://example.com"
-  excludePaths:
-    - "https://example.com/logout.*"
-
-authentication:
-  type: "browser"
-  loginPageUrl: "https://example.com/login"
-  loggedInRegex: "success"
-  loggedOutRegex: "Invalid"
+  loggedInRegex: "(HTTP/1\\.1 200)|(HTTP/2(\\.0)? 200)"
+  loggedOutRegex: "(Invalid credentials)|(token expired)|(HTTP/1\\.1 401)"
 ```
 
 ### API Scanning with OpenAPI Spec (Not Currently Available)
@@ -534,8 +327,37 @@ authentication:
 ```yaml
 developer: true
 
+scope:
+  entryUrls:
+    - "https://api.example.com"
+
+headers:
+  tenant-id: "1"
+
+authentication:
+  pollUrl: "https://api.example.com/v3/user/profile"
+
+openapi:
+  targetUrl: "https://api.example.com"
+  apiUrl: "https://api.example.com/v3/api-docs"
+```
+
+### API Scanning — Spec Requires Both Authorization and Cookie (Not Currently Available)
+
+```yaml
+developer: true
+
+scope:
+  entryUrls:
+    - "https://api.example.com"
+
 headers:
   Authorization: "Bearer <token>"
+  Cookie: "SESSIONID=<session-id>"
+  tenant-id: "1"
+
+authentication:
+  pollUrl: "https://api.example.com/v3/user/profile"
 
 openapi:
   targetUrl: "https://api.example.com"
@@ -544,7 +366,7 @@ openapi:
 
 ### API Scanning + Web App Scanning Combined (Not Currently Available)
 
-When API testing becomes available, both `openapi` and `authentication` blocks together will run both web app auth scanning and OpenAPI-based endpoint discovery. Today, the `openapi` block has no effect.
+When API testing becomes available, `openapi` and `authentication` (with `type: browser` and `loginPageUrl`) together will run both web app auth scanning and OpenAPI-based endpoint discovery in one pass. Today, the `openapi` block has no effect.
 
 ```yaml
 developer: true
@@ -554,15 +376,14 @@ scope:
     - "https://api.example.com"
 
 headers:
-  Authorization: "Bearer {%json:token%}"
+  tenant-id: "1"
 
 authentication:
-  type: "json"
+  type: browser
   loginPageUrl: "https://app.example.com/login"
-  loginBackendUrl: "https://api.example.com/auth/login"
-  bodyTemplate: |
-    { "email": "{identifier}", "password": "{password}" }
-  loggedInRegex: "token"
+  pollUrl: "https://api.example.com/user/profile"
+  loggedInRegex: "(HTTP/1\\.1 200)"
+  loggedOutRegex: "(Invalid credentials)|(token expired)|(HTTP/1\\.1 401)"
 
 openapi:
   targetUrl: "https://api.example.com"

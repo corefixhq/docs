@@ -32,6 +32,13 @@ By the end of this guide you will:
 
 CoreFix redirects you back to the Projects page. Your connected GitHub repository will appear in the list automatically.
 
+### Direct Install via the GitHub App Page
+
+You can also connect your repository without going through the CoreFix dashboard first. Open the [CoreFix Security GitHub App](https://github.com/apps/corefix-security) page directly and click **Install** (or **Configure**, if it's already installed on your account or organization).
+
+- If you're an **admin/owner** of the target repository or organization, this authorizes and installs the app immediately — no separate sign-up step is needed. CoreFix automatically provisions your account and syncs the connected repository into your Projects page.
+- If you're not an admin, GitHub will send an installation request to an org owner for approval.
+
 ---
 
 ## Run Your First Scan

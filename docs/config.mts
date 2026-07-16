@@ -78,7 +78,14 @@ export default defineConfig({
           },
           { text: "Docker / Local CLI", link: "/docs/docker-cli" },
           { text: "Chrome Extension", link: "/docs/chrome-extension-guide" },
-          { text: "Web Scan Config Reference", link: "/docs/web-cicd-config" },
+          {
+            text: "Web Scan Config Reference",
+            collapsed: true,
+            items: [
+              { text: "Full Reference", link: "/docs/web-scan-config-reference" },
+              { text: "Complex Auth (OAuth/MFA)", link: "/docs/web-scan-complex-auth" },
+            ],
+          },
         ],
       },
       {

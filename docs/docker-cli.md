@@ -12,11 +12,8 @@ CoreFix provides two Docker images for running security scans locally or on any 
 | `corefixhq/cfix` | Code scanning — SAST, secrets, SCA, IaC, Kubernetes | [Code Scanner — Standalone Usage](./code-agent-usage) |
 | `corefixhq/cfix-web` | Web application scanning — DAST, CVEs, port scanning, SSL/TLS | [Web Scanner — Standalone Usage](./web-agent-usage) |
 
-Both images are available on [Docker Hub](https://hub.docker.com/u/corefixhq) and [GitHub Container Registry (GHCR)](https://github.com/orgs/corefixhq/packages).
+Both images are available on [Docker Hub](https://hub.docker.com/u/corefixhq)
 
-::: warning Limitation
-For the web scanner, `--token` is reserved for future API testing and complex web application testing where CoreFix bypasses username/password credentials and asks ZAP to inject the token into every request. This is not available yet, so the flag will not be reflected in scans today.
-:::
 
 ---
 
@@ -76,10 +73,14 @@ See [Supported Models](https://docs.corefix.dev/docs/models) for the full refere
 
 | Flag | Required | Description |
 |---|---|---|
-| `[scanner]` | No | Positional argument. Comma-separated scanner names. Default: `osv,iac,secrets,k8s,sast` |
+| `[scanner]` | No | Positional argument. Comma-separated scanner names. Default: `osv,iac,secrets,k8s,sast,sonar,container,ai,malware` |
 | `--openai-api-key` | No | Your own OpenAI-compatible API key (BYOK) |
 | `--model` | No | AI model to use for enrichment. Required when `--openai-api-key` is provided |
+| `--ignore-ai-analysis` | No | Skip the AI pipeline — deduplication, enrichment, and AI-based prioritization. Raw/normalized findings are still written to `/output` |
 | `--github-token` | No | GitHub PAT for pushing SARIF to GitHub Code Scanning |
+| `--container` | No | Comma-separated container image names to scan (used with the `container` scanner). Defaults to the first 3 images from `docker images` on the host if omitted |
+
+> **Note:** For container scanning, mount the Docker socket with `-v /var/run/docker.sock:/var/run/docker.sock` so the scanner can access your local Docker daemon and pull images directly — no credentials to your container registry are needed.
 
 **Available scanners:**
 
@@ -90,10 +91,20 @@ See [Supported Models](https://docs.corefix.dev/docs/models) for the full refere
 | Dependencies | `osv` | CVEs in open source packages via OSV-Scanner |
 | IaC | `iac` | Terraform, Dockerfile, CloudFormation misconfigs via KICS |
 | Kubernetes | `k8s` | K8s manifests, RBAC, pod security via Kubescape |
+| `sonar` | SonarQube | Security hotspot, bug, code smell, and vulnerability rules |
+| `container` | CoreFix Container Scanner | Container image vulnerabilities and Dockerfile CIS benchmarking |
+| `ai` | AI BOM / AI Governance Scanner | AI Bill of Materials (AI BOM) and AI governance scan across source code |
+| `sbom` | SBOM Generator | Software Bill of Materials for the scanned project |
+| `malware` | CoreFix Malware Scanner | Malware within Python, NPM (JS), Golang, Ruby gems, GitHub Actions, and VS Code extensio
 
 ---
 
 ## CLI Options — Web Scanner (`corefixhq/cfix-web`)
+
+::: warning Limitation
+For the web scanner, `--token` works today for **complex web application authentication** (OAuth, SSO, MFA) — CoreFix bypasses username/password credentials and injects the provided Authorization/Cookie value into every request. It is still reserved and has no effect for **API testing** (the `openapi` block); that remains unavailable.
+:::
+
 
 | Flag | Required | Description |
 |---|---|---|
@@ -101,11 +112,14 @@ See [Supported Models](https://docs.corefix.dev/docs/models) for the full refere
 | `--target` | Yes | Target URL. Accepts `https://app.com`, `http://IP:8080`, or bare domain |
 | `--username` | No | Login username for authenticated scans |
 | `--password` | No | Login password for authenticated scans |
-| `--token` | No | Reserved for future API testing and complex web app token injection. Currently has no effect and will not be reflected in scans |
+| `--token` | No | Bearer token or Cookie value to inject for complex web app auth (OAuth, SSO, MFA) in place of `--username`/`--password`. Still reserved and has no effect for API testing |
 | `--openai-api-key` | No | Your own OpenAI-compatible API key (BYOK) |
 | `--model` | No | AI model to use for enrichment. Required when `--openai-api-key` is provided |
+| `--ignore-ai-analysis` | No | Skip the AI pipeline — deduplication, enrichment, and AI-based prioritization. Raw/normalized findings are still written to `/output` |
 | `--github-token` | No | GitHub PAT for pushing SARIF to GitHub Code Scanning |
 | `--coverage` | No | Controls scan depth and duration |
+| `--scanner-profile` | No | Controls which active scan rules are executed. Choices: `all` (default), `sqli`, `xss`, `injection`, `path_traversal`, `access_control`, `passive_only`, `quick_active` |
+| `--latest-har` | No | Use only the latest Chrome extension HAR recording session. If omitted, all available HAR sessions are used |
 
 **Available scanners:**
 
@@ -133,22 +147,29 @@ Controls scan depth and duration. Affects both **Nuclei vulnerability scanning**
 --coverage moderate
 ```
 
-| Value | Expected Coverage | Scan Duration | Best For |
+| Value | Expected Coverage | Time Impact | Best For |
 |---|---|---|---|
-| `quick` | 10–20% | Up to 5 min | CI/CD gating, smoke tests |
-| `normal` | 60–70% | Up to 15 min | Standard pipeline scans |
-| `moderate` | 60–70% | Up to 30 min | Balanced depth, thorough rules |
-| `high` | 90–95% | Up to 45 min | Pre-release audits |
-| `veryHigh` | 95–99% | Up to 60 min | Full security audits, compliance |
+| `quick` | 10–20% | +15 min | CI/CD gating, smoke tests |
+| `normal` | 60–70% | +30 min | Standard pipeline scans |
+| `moderate` | 60–70% | +45 min | Balanced depth, thorough rules |
+| `high` | 90–95% | +75 min | Pre-release audits |
+| `veryhigh` | 95–99% | +90 min | Full security audits, compliance |
+| `max` | 99–99.9% | +120 min | Maximum crawl depth and rule strength short of exhaustive |
+| `extreme` | 99–99.9% | +240 min | Deep enterprise-scale audits |
+| `exhaustive` | 99.9–100% | +360 min | Exhaustive, compliance-grade full coverage |
 
+> "Time Impact" is the additional time the coverage level adds on top of the base scan, not a total scan duration cap.
 
 | Level | Max Alerts / Rule | Rule Duration Limit |
 |---|---|---|
-| `quick` | 1 | 1 min |
-| `normal` | 3 | 2 min |
-| `moderate` | 5 | 3 min |
-| `high` | 5 | 5 min |
-| `veryHigh` | 10 | 10 min |
+| `quick` | 5 | 2 min |
+| `normal` | 5 | 2 min |
+| `moderate` | 8 | 5 min |
+| `high` | 10 | 5 min |
+| `veryhigh` | 10 | 10 min |
+| `max` | 10 | 15 min |
+| `extreme` | 15 | 20 min |
+| `exhaustive` | 15 | 30 min |
 
 
 Coverage also determines which Nuclei template categories are enabled:
@@ -157,24 +178,8 @@ Coverage also determines which Nuclei template categories are enabled:
 |---|---|
 | `quick` / not set | Misconfig, exposure, CVE, takeover, default-login, tech |
 | `normal` / `moderate` | All of above + SSL, TLS |
-| `high` / `veryHigh` | All of above + HTTP, CORS, XSS, SQLi, SSRF, redirect, LFI, RFI, token, secret, WordPress (core, plugins, themes) |
+| `high` / `veryhigh` / `max` / `extreme` / `exhaustive` | All of above + HTTP, CORS, XSS, SQLi, SSRF, redirect, LFI, RFI, token, secret, WordPress (core, plugins, themes) |
 
-> `veryHigh` with `advanced_security_checks: true` can take 60+ minutes and requires significant memory. Schedule these for nightly or weekly runs.
-
-
-### `advanced_security_checks`
-
-Enabled by default. When set to `true`, the scanner runs ZAP with higher memory allocation (up to 12GB) and installs additional ZAP add-ons for deeper vulnerability detection:
-
-- **Passive scan rules** — Alpha and Beta passive scanning rules, OAST (Out-of-band Application Security Testing)
-- **Active scan rules** — Alpha and Beta active scanning rules, advanced SQL injection plugin
-- **Discovery** — DOM-based XSS detection, parameter discovery (ParamDigger), technology fingerprinting (Wappalyzer), retired JavaScript library detection
-- **Access control** — Access control testing, frontend scanner
-- **Fuzzing** — Built-in ZAP fuzzer
-
-These add-ons significantly increase scan coverage but consume more memory and take longer to complete. Set to `false` if running in memory-constrained environments or when a faster scan is preferred.
-
-> **Note:** `veryHigh` coverage with `advanced_security_checks: true` can take 60+ minutes. Schedule these for nightly or weekly runs rather than on every commit.
 
 
 ----

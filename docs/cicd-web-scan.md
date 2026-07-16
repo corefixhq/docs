@@ -516,34 +516,6 @@ workflows:
 
 ---
 
-## Scan Coverage
-
-Use `--coverage` to control scan depth and duration. If not specified, CoreFix automatically determines the appropriate coverage level based on the complexity of your application. Overrides the `coverage` value in `.cfix.web.yaml` if both are set.
-
-```bash
---coverage moderate
-```
-
-| Value | Expected Coverage | Scan Duration | Best For |
-|---|---|---|---|
-| `quick` | 10–20% | Up to 5 min | CI/CD gating, smoke tests |
-| `normal` | 60–70% | Up to 15 min | Standard pipeline scans |
-| `moderate` | 60–70% | Up to 30 min | Balanced depth, thorough rules |
-| `high` | 90–95% | Up to 45 min | Pre-release audits |
-| `veryHigh` | 95–99% | Up to 60 min | Full security audits, compliance |
-
-To use in your pipeline, add `--coverage <level>` to the `docker run` command:
-
-```bash
-docker run --rm --network host \
-  -e X_CFIX_API_KEY=$X_CFIX_API_KEY \
-  -v $(pwd):/web \
-  -v $(pwd)/scan-results:/output \
-  corefixhq/cfix-web:latest web \
-  --target $SCAN_TARGET \
-  --coverage moderate
-```
-
 See [Web Scan Config Reference](./web-scan-config-reference) for detailed coverage behavior including Nuclei template categories.
 
 ---
@@ -555,3 +527,11 @@ Support for the following platforms is in progress:
 - **Travis CI**
 - **Bitbucket Pipelines**
 - **Azure DevOps Pipelines**
+
+## Related
+
+- [Chrome Extension Guide](./chrome-extension-guide)
+- [Web Scanner CLI Options](/docs/web-agent-usage.md#cli-options)
+- [Scan Coverage Options](/docs/web-agent-usage.md#coverage-optional)
+- [Scanner Profiles](/docs/web-agent-usage.md#scanner-profiles)
+- [Docker / Local CLI — Web Scanner Options](/docs/docker-cli#cli-options-—-web-scanner-corefixhq-cfix-web)

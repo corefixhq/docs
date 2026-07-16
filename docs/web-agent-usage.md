@@ -3,7 +3,7 @@
 Run the CoreFix web security scanner against any live URL. Performs DAST (Dynamic Application Security Testing) — no source code required.
 
 ::: warning Limitation
-`--token` is reserved for upcoming API scanning and complex web application authentication. In that mode, CoreFix will ask ZAP to inject the provided token into every request instead of using username/password credentials. This capability is under development and is not currently available, so passing `--token` or `TOKEN` has no effect today.
+`--token` works today for **complex web application authentication** (OAuth, SSO, MFA) — ZAP injects the provided Authorization/Cookie value into every request instead of using username/password credentials. It is still reserved for upcoming **API scanning** and has no effect there; the `openapi` block remains unavailable.
 :::
 
 **Current version:** `v1.0.0` · **Commit:** `26141d48`
@@ -23,15 +23,6 @@ docker pull corefixhq/cfix-web:26141d48      # specific commit SHA
 
 → [hub.docker.com/r/corefixhq/cfix-web](https://hub.docker.com/r/corefixhq/cfix-web)
 
-### GitHub Container Registry (GHCR)
-
-```bash
-docker pull ghcr.io/corefixhq/cfix-web:latest       # latest
-docker pull ghcr.io/corefixhq/cfix-web:1.0.0        # specific version
-docker pull ghcr.io/corefixhq/cfix-web:26141d48     # specific commit SHA
-```
-
-→ [github.com/orgs/corefixhq/packages/container/package/cfix-web](https://github.com/orgs/corefixhq/packages/container/package/cfix-web)
 
 ---
 
@@ -71,8 +62,11 @@ docker run --rm \
   [--token <bearer-token>] \
   [--openai-api-key <key>] \
   [--model <model-name>] \
-  [--github-token <github-pat>]
-  [--coverage <quick|normal|moderate|high|veryhigh>]
+  [--ignore-ai-analysis] \
+  [--github-token <github-pat>] \
+  [--coverage <quick|normal|moderate|high|veryhigh|max|extreme|exhaustive>] \
+  [--scanner-profile <profile>] \
+  [--latest-har]
 ```
 
 > Add `--network host` only when using `credentials` for authenticated scans and to connect to a browser running on your host machine.
@@ -86,7 +80,7 @@ docker run --rm \
 | `X_CFIX_API_KEY` | **Yes** | Your CoreFix API key. Found in [Account & API Keys](https://app.corefix.dev/settings/api-keys) |
 | `USERNAME` | No | Alternative to `--username` flag |
 | `PASSWORD` | No | Alternative to `--password` flag |
-| `TOKEN` | No | Reserved for planned API scanning and complex web app token injection. Currently has no effect |
+| `TOKEN` | No | Bearer token or Cookie value for complex web app auth (OAuth, SSO, MFA). Still reserved for planned API scanning, where it has no effect |
 | `GITHUB_TOKEN` | No | GitHub PAT for uploading results as SARIF to GitHub Code Scanning |
 
 ---
@@ -111,7 +105,6 @@ Pass a comma-separated list as the first argument. Defaults to `nmap,vuln,web` i
 | `web` | ZAP / testssl | Smart shorthand — auto-selects sub-scanners (see below) |
 | `zap` | OWASP ZAP | Unauthenticated web crawl and active scan |
 | `zap-auth` | OWASP ZAP | Authenticated web scan using credentials |
-| `fuzzer` | openapi-fuzzer | API fuzzing against an OpenAPI/Swagger spec (coming soon) |
 | `zap-fuzzer` | ZAP | ZAP-based API fuzzing (coming soon) |
 | `testssl` | testssl.sh | SSL/TLS configuration and certificate analysis |
 
@@ -119,8 +112,8 @@ Pass a comma-separated list as the first argument. Defaults to `nmap,vuln,web` i
 
 - Target is `https://` → `testssl` is added
 - `.cfix.web.yaml` has an `openapi` key → planned to use `fuzzer` + `zap-fuzzer`; currently the `openapi` block has no effect
-- Credentials provided → uses `zap-auth`
-- No credentials → uses `zap` (unauthenticated)
+- Credentials (`--username`/`--password`) or a `--token` are provided → uses `zap-auth`
+- Neither is provided → uses `zap` (unauthenticated)
 
 ---
 
@@ -149,7 +142,9 @@ Login credentials for authenticated scanning. Can also be passed as `USERNAME` /
 
 ### `--token` (optional)
 
-Reserved for future API scanning and complex web application testing where username/password login is impractical. The planned behavior is to ask ZAP to inject the supplied token into every request. This is under development and not currently available, so `--token` and the `TOKEN` environment variable have no effect today.
+For complex web application authentication (OAuth, SSO, MFA) where username/password login can't be automated. ZAP injects the supplied Authorization or Cookie value into every request instead of performing a credential-based login. See [Scanning Complex Apps (OAuth, MFA) — Token & Cookie Injection](./web-scan-complex-auth) for the full config reference and rules on when to use a Bearer token vs. a Cookie.
+
+`--token` is still reserved and has no effect for planned API scanning (the `openapi` block).
 
 ```bash
 --token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
@@ -168,14 +163,57 @@ Controls scan depth and duration.
 --coverage moderate
 ```
 
-| Value | Expected Coverage | Scan Duration | Best For |
+| Value | Expected Coverage | Time Impact | Best For |
 |---|---|---|---|
-| `quick` | 10–20% | Up to 5 min | CI/CD gating, smoke tests |
-| `normal` | 60–70% | Up to 15 min | Standard pipeline scans |
-| `moderate` | 60–70% | Up to 30 min | Balanced depth, thorough rules |
-| `high` | 90–95% | Up to 45 min | Pre-release audits |
-| `veryHigh` | 95–99% | Up to 60 min | Full security audits, compliance |
+| `quick` | 10–20% | +15 min | CI/CD gating, smoke tests |
+| `normal` | 60–70% | +30 min | Standard pipeline scans |
+| `moderate` | 60–70% | +45 min | Balanced depth, thorough rules |
+| `high` | 90–95% | +75 min | Pre-release audits |
+| `veryhigh` | 95–99% | +90 min | Full security audits, compliance |
+| `max` | 99–99.9% | +120 min | Maximum crawl depth and rule strength short of exhaustive |
+| `extreme` | 99–99.9% | +240 min | Deep enterprise-scale audits |
+| `exhaustive` | 99.9–100% | +360 min | Exhaustive, compliance-grade full coverage |
 
+> "Time Impact" is the additional time the coverage level adds on top of the base scan, not a total scan duration cap.
+
+### `--scanner-profile` (optional)
+
+Controls which active scan rules are executed. See [Scanner Profiles](#scanner-profiles) below for the full list of values.
+
+```bash
+--scanner-profile sqli
+```
+
+### `--latest-har` (optional)
+
+Use only the latest [Chrome extension](./chrome-extension-guide) HAR recording session for the scan. If omitted, all available HAR sessions in the mounted `/web` directory are used. If only one recording exists, this flag has no effect.
+
+```bash
+--latest-har
+```
+
+---
+
+## Scanner Profiles
+
+`--scanner-profile` controls *which active scan rules* run within the `zap` / `zap-auth` scan, independent of the `--coverage` depth setting. Use it to focus a scan on a specific vulnerability class instead of running the full rule set.
+
+```bash
+--scanner-profile sqli
+```
+
+| Value | Profile | What it runs | Duration |
+|---|---|---|---|
+| `all` (default) | All Security Checks | Run all active and passive scan rules | 60–120 min |
+| `sqli` | SQL Injection | SQL Injection, SQLite, MySQL, PostgreSQL, Oracle injection tests | 15–30 min |
+| `xss` | Cross-Site Scripting (XSS) | Reflected, Persistent, and DOM-based XSS detection | 15–25 min |
+| `injection` | Command & Code Injection | OS Command Injection, Server-Side Code Injection, SSTI, Expression Language | 15–25 min |
+| `path_traversal` | Path Traversal & File Inclusion | Local/Remote File Inclusion, Path Traversal, Source Code Disclosure | 10–20 min |
+| `access_control` | Broken Access Control | IDOR, CORS misconfiguration, HTTP method tampering, privilege escalation | 10–15 min |
+| `passive_only` | Passive Scan Only | No active attacks. Headers, cookies, SSL, information disclosure only | 2–5 min |
+| `quick_active` | All Checks (Lightweight) | All scan rules at medium strength, skipping heavy SQL/XSS deep testing | 20–40 min |
+
+> `all_vuln` and `ssl` are also accepted values for `--scanner-profile` but aren't currently surfaced in the profile picker UI.
 
 ---
 
@@ -283,6 +321,18 @@ Same behaviour as the code scanner — see [AI Models](./code-agent-usage#ai-mod
 --openai-api-key sk-proj-xxxxxxxx --model gpt-4o-mini
 ```
 
+**Skip AI analysis entirely:**
+
+Pass `--ignore-ai-analysis` to skip the AI pipeline — this covers deduplication, enrichment of findings, and AI-based prioritization. Raw and normalized findings are still written to `/output`, but no enriched report or AI-based prioritization is generated.
+
+### `--ignore-ai-analysis` (optional)
+
+Skip the AI pipeline — deduplication, enrichment of findings, and AI-based prioritization are all skipped. Useful for faster runs, or when you only need raw/normalized findings without AI enrichment. Cannot be combined meaningfully with `--openai-api-key` / `--model`, since there is no enrichment step to run those against.
+
+```bash
+--ignore-ai-analysis
+```
+
 ### `--github-token` (optional)
 
 Upload scan results as a SARIF file to GitHub Code Scanning. Can also be passed as the `GITHUB_TOKEN` environment variable.
@@ -322,9 +372,9 @@ docker run --rm \
   --password s3cr3t
 ```
 
-### Planned token-based scan (not currently available)
+### Complex auth scan with token/cookie injection
 
-`--token` is documented for future API scanning and complex web app auth. It does not affect scans today.
+For OAuth, SSO, or MFA flows that can't be scripted, obtain a valid Authorization/Cookie value yourself and pass it via `--token` instead of `--username`/`--password`. Requires an `authentication.pollUrl` in `.cfix.web.yaml` — see [Scanning Complex Apps (OAuth, MFA) — Token & Cookie Injection](./web-scan-complex-auth).
 
 ```bash
 docker run --rm \
@@ -392,6 +442,42 @@ docker run --rm \
   --model gpt-4o-mini
 ```
 
+### Skip AI analysis
+
+```bash
+docker run --rm \
+  -e X_CFIX_API_KEY=cfix_live_xxxxxxxx \
+  -v $(pwd):/web \
+  -v ~/scan-results:/output \
+  corefixhq/cfix-web \
+  --target https://your-app.com \
+  --ignore-ai-analysis
+```
+
+### Scan a specific vulnerability class with `--scanner-profile`
+
+```bash
+docker run --rm \
+  -e X_CFIX_API_KEY=cfix_live_xxxxxxxx \
+  -v $(pwd):/web \
+  -v ~/scan-results:/output \
+  corefixhq/cfix-web \
+  --target https://your-app.com \
+  --scanner-profile sqli
+```
+
+### Scan using only the latest Chrome extension HAR recording
+
+```bash
+docker run --rm \
+  -e X_CFIX_API_KEY=cfix_live_xxxxxxxx \
+  -v $(pwd):/web \
+  -v ~/scan-results:/output \
+  corefixhq/cfix-web \
+  --target https://your-app.com \
+  --latest-har
+```
+
 ### Upload results to GitHub Code Scanning
 
 ```bash
@@ -416,11 +502,17 @@ CoreFix derives the full auth flow automatically using Playwright + AI. Requires
 
 ```yaml
 authentication:
+  type: browser
   loginPageUrl: https://your-app.com/login
+  pollUrl: https://your-app.com/v2/session/profile
+  loggedInRegex: Logged In successfully
+  loggedOutRegex: (Wrong Credentials)|(Token expired)
 
 scope:
   entryUrls:
     - https://your-app.com/dashboard
+  includePaths:
+    - https://your-app.com/dashboard.*
 ```
 
 ### OpenAPI / API fuzzing
@@ -432,7 +524,9 @@ openapi:
   url: https://your-app.com/api/openapi.json
 ```
 
+:::
 When API testing becomes available, you will also be able to drop a `.yaml`, `.yml`, or `.json` OpenAPI/Swagger spec file directly into the mounted `/web` directory for CoreFix to detect automatically.
+:::
 
 ---
 
@@ -442,6 +536,8 @@ HAR files recorded from your browser guide authenticated scanning for SPAs and c
 
 - Drop `.har` files into the directory mounted to `/web`
 - Or record them via the [CoreFix Chrome Extension](./chrome-extension-guide) — they are pulled automatically at scan time
+
+By default, if multiple HAR recording sessions are available, all of them are used together for comprehensive scan coverage. Pass `--latest-har` to use only the most recent recording session instead — useful when older recordings are stale or no longer represent the current app flow. If only one recording session exists, `--latest-har` has no effect.
 
 ---
 
@@ -462,6 +558,8 @@ Results are written to your `/output` mount:
 ## Related
 
 - [Code Scanner — Standalone Usage](./code-agent-usage.md)
+- [Web Scan Config Reference](./web-scan-config-reference)
+- [Scanning Complex Apps (OAuth, MFA) — Token & Cookie Injection](./web-scan-complex-auth)
 - [Chrome Extension Guide](./chrome-extension-guide)
 - [CI/CD Integration](./cicd-web-scan)
 - [Supported Models](./models)

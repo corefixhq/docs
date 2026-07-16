@@ -1,8 +1,5 @@
 # CoreFix Chrome Extension - User Guide
 
-::: warning Limitation
-The CoreFix Chrome Extension is currently under Chrome Web Store review and is expected to be available in the upcoming week. Until the listing is approved, Chrome Web Store installation is not available.
-:::
 
 ## Overview
 
@@ -32,21 +29,30 @@ The extension uses the hostname from your active tab to find the matching CoreFi
 
 ## 1. Install the Extension
 
-### Install an unpacked package
+### Chrome Web Store installation (recommended)
 
-Until the Chrome Web Store review is complete, install the extension package manually:
+![Chrome icon](https://www.google.com/chrome/static/images/chrome-logo.svg) **[Corefix Security Recorder](https://chromewebstore.google.com/detail/corefix-security-recorder/chibaoiobkclhiieocggohhofcmcejgi)**
 
-1. Obtain the CoreFix extension package from your CoreFix administrator or release channel.
+The extension is published and available on the Chrome Web Store. Open the link above, then select **Add to Chrome** and confirm **Add Extension**.
+
+### Install an unpacked package (manual)
+
+If you prefer to install manually, or need a specific build:
+
+1. Download the extension package: [Corefix Har Chrome Extension](https://static-assets.corefix.dev/corefix-har-chrome-extension.zip)
 2. Unzip the package to a local folder.
 3. Open Chrome and go to `chrome://extensions`.
 4. Enable **Developer mode** in the top-right corner.
+
+![Chrome Developer mode](./assets/chrome/open-extension.png)
+
 5. Click **Load unpacked**.
 6. Select the unzipped extension folder containing `manifest.json`.
+
+![Chrome Load extension](./assets/chrome/load-unpacked.png)
+
 7. Pin the CoreFix icon from Chrome's extensions menu.
 
-### Chrome Web Store installation
-
-The extension is currently under review. When the extension is published, you will be able to install it from the Chrome Web Store by selecting **Add to Chrome** and then **Add Extension**.
 
 ---
 
