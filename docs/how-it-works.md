@@ -14,7 +14,7 @@ CoreFix integrates directly with GitHub. For every pull request raised, or on a 
 
 ### 2. CLI Agent via Docker (Local / On-Premise)
 
-Pull the CoreFix CLI agent image from Docker Hub or GHCR and run it directly against your source code:
+Pull the CoreFix CLI agent image from Docker Hub and run it directly against your source code:
 
 ```bash
 # Pull the image
