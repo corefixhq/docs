@@ -245,7 +245,9 @@ docker run --rm \
 
 If you prefer to use a local browser for performance or network reasons, install Chromium and its dependencies, then launch it in headless mode before running the scan.
 
-**Install Chromium on Ubuntu:**
+**For Ubuntu 22.04:**
+
+> If you are using a different version of Ubuntu, refer to the official Chromium and Playwright documentation to install the appropriate Chromium package and its required dependencies.
 
 ```bash
 sudo apt update
@@ -253,7 +255,7 @@ sudo apt install -y \
   chromium-browser \
   ca-certificates \
   fonts-liberation \
-  libasound2t64 \
+  libasound2 \
   libatk-bridge2.0-0 \
   libatk1.0-0 \
   libcups2 \
