@@ -2,8 +2,9 @@
 title: "Security Assessment Report: LangChain Repository Analysis"
 description: "An overview of the security posture of the LangChain repository, highlighting key findings, risk distribution, and recommended remediation strategies."
 author:
-  name: Corefix Team
-  role: Security Engineering
+  name: Sandeep Patel
+  # role: Security Engineering
+  avatar: /avatars/sandeep_sqr.png
 date: 2026-07-18
 category: SAST
 tags:
