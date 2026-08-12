@@ -2,7 +2,7 @@
 title: "How We Teach a Security Scanner to Understand Your App Before It Tests It"
 description: "The engineering behind intelligent ZAP context building — from raw HTML to authenticated scans, automatically. No manual setup required."
 author:
-  name: V Sai Mahidhar
+  name: Mahidhar
   # role: Security Engineering
   avatar: /avatars/Mahidhar_img.png
 date: 2026-06-07

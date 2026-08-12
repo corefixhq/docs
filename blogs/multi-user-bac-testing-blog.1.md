@@ -2,7 +2,7 @@
 title: "Part 1 — The Hidden Traps of Multi-User Access-Control Testing (and How a Purpose-Built Scanner Sidesteps Them)"
 description: "Three failure modes in multi-user BAC testing with custom ZAP — crawl loops, non-comparable runs, and capture-time session bleed — and why each one is invisible until you go looking."
 author:
-  name: V Sai Mahidhar
+  name: Mahidhar
   # role: Security Engineering
   avatar: /avatars/Mahidhar_img.png
 date: 2026-08-03
@@ -21,8 +21,6 @@ readingTime: 15
 cover: /covers/multi-user-bac-testing-cover.png
 draft: false
 ---
-
-# Part 1 — The Hidden Traps of Multi-User Access-Control Testing (and How a Purpose-Built Scanner Sidesteps Them)
 
 Broken Access Control has sat at the top of the OWASP Top 10 since 2021, and for good reason: it's the one vulnerability class that automated scanners are structurally bad at finding. A scanner can fuzz an input or diff a header on its own. It cannot, by itself, know that *this* object belongs to *that* user — because ownership is a fact about your data model, not about any single HTTP response.
 

@@ -156,7 +156,7 @@ function toggleSection(title: string) {
         <p class="ft-built">
           Built with <span class="ft-heart">♥</span> in Bangalore, India, for developers everywhere.
         </p>
-        <span class="ft-copy">© 2026 Corefix. All rights reserved.</span>
+        <span class="ft-copy">© 2026 Corefix. All rights reserved. Corefix is a product of VSM Cyber Solutions.</span>
       </div>
     </div>
   </footer>

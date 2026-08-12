@@ -2,7 +2,7 @@
 title: "Why Your ZAP Authenticated Scan Silently Fails (And How Corefix Fixes It Automatically)"
 description: "Same credentials, same login page, same bearer token — yet the scan collapses into a wall of 401s. Here's why authenticated ZAP scanning silently fails on modern apps, and how Corefix fixes it automatically."
 author:
-  name: V Sai Mahidhar
+  name: Mahidhar
   # role: Security Engineering
   avatar: /avatars/Mahidhar_img.png
 date: 2026-06-28
@@ -17,8 +17,6 @@ featured: false
 readingTime: 7
 cover: /covers/corefix-zap.png
 ---
-
-# Why Your ZAP Authenticated Scan Silently Fails (And How Corefix Fixes It Automatically)
 
 If you've ever tried to run an authenticated OWASP ZAP scan against a modern web application, you've probably hit this wall: the login *looks* like it worked, ZAP says "Authentication appeared to work," and yet every meaningful request in your scan comes back as 401 or 403 — and you don't find out until you're staring at a report full of noise instead of real vulnerabilities.
 

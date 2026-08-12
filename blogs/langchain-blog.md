@@ -19,8 +19,6 @@ readingTime: 7
 cover: /covers/Langchain-cover.png
 ---
 
-# Security Assessment Report: LangChain Repository Analysis
-
 ## Executive Summary
 
 As part of our continuous application security testing (SAST) initiative, Corefix.dev performed an automated security assessment of the **LangChain** codebase using multiple industry-standard security scanners.

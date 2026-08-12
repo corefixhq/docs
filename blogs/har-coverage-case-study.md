@@ -2,7 +2,7 @@
 title: "Case Study: Finding the Vulnerabilities Automated Crawling Missed"
 description: "How recorded-session coverage uncovered attack surface that repeated automated scans had never touched — and what that meant for the client's actual risk picture."
 author:
-  name: V Sai Mahidhar
+  name: Mahidhar
   # role: Security Engineering
   avatar: /avatars/Mahidhar_img.png
 date: 2026-07-15
@@ -17,8 +17,6 @@ featured: false
 readingTime: 7
 cover: /covers/har-coverage-case-study-cover.png
 ---
-
-# Case Study: Finding the Vulnerabilities Automated Crawling Missed
 
 *How recorded-session coverage uncovered attack surface that repeated automated scans had never touched — and what that meant for the client's actual risk picture.*
 

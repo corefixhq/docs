@@ -20,8 +20,6 @@ readingTime: 7
 cover: /covers/pocketbase-cover.png
 ---
 
-# Security Assessment Report: PocketBase Repository Analysis
-
 ## Executive Summary
 
 As part of our continuous application security testing (SAST) initiative, **Corefix.dev** performed a comprehensive security assessment of the **PocketBase** codebase using multiple specialized security scanners.

@@ -2,7 +2,7 @@
 title: "Mastering ZAP Authenticated Scanning: Session Management, Scan Optimization, and Framework-Aware Configuration"
 description: "How we went from broken session tokens and missed vulnerabilities to a fully authenticated, optimized DAST pipeline — and every lesson learned along the way."
 author:
-  name: V Sai Mahidhar
+  name: Mahidhar
   # role: Security Engineering
   avatar: /avatars/Mahidhar_img.png
 date: 2026-06-19

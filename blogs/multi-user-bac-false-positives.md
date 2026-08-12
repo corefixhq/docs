@@ -2,7 +2,7 @@
 title: "Part 2 — Hunting Ghosts: Killing False Positives in Multi-User Access-Control Scanning"
 description: "How DeepTraQ went from \"the scanner found 6 critical IDORs!\" to \"the scanner found 6 critical IDORs, and here's cryptographic-grade proof each one is real.\""
 author:
-  name: V Sai Mahidhar
+  name: Mahidhar
   # role: Security Engineering
   avatar: /avatars/Mahidhar_img.png
 date: 2026-08-04
@@ -18,8 +18,6 @@ featured: false
 readingTime: 9
 cover: /covers/multi-user-bac-false-positives-cover.png
 ---
-
-# Part 2 — Hunting Ghosts: Killing False Positives in Multi-User Access-Control Scanning
 
 *How DeepTraQ went from "the scanner found 6 critical IDORs!" to "the scanner found 6 critical IDORs, and here's cryptographic-grade proof each one is real."*
 

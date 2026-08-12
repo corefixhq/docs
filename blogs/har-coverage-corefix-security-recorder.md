@@ -2,7 +2,7 @@
 title: "Why HAR-Driven Scanning Changes the Coverage Equation (And How Corefix Security Recorder Makes It Effortless)"
 description: "A practical breakdown of what actually drives DAST coverage — and why it isn't just 'scan longer.' We ran the same app through four scan configurations and the results changed how we think about coverage entirely."
 author:
-  name: V Sai Mahidhar
+  name: Mahidhar
   # role: Security Engineering
   avatar: /avatars/Mahidhar_img.png
 date: 2026-06-27
@@ -17,8 +17,6 @@ featured: false
 readingTime: 10
 cover: /covers/har-recorder.png
 ---
-
-# Why HAR-Driven Scanning Changes the Coverage Equation (And How Corefix Security Recorder Makes It Effortless)
 
 *A practical breakdown of what actually drives DAST coverage — and why it isn't just "scan longer."*
 

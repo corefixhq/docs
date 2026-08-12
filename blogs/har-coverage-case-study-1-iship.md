@@ -2,7 +2,7 @@
 title: "Case Study: Boosting DAST Coverage on a SPA with Chrome Recorder HAR Imports (No Custom Tooling Required)"
 description: "How a five-minute Chrome Recorder walkthrough surfaced 4.7x more scannable URL-instances and 17.5x more tested injection points than automated crawling alone on a JS-heavy shipping SPA."
 author:
-  name: V Sai Mahidhar
+  name: Mahidhar
   # role: Security Engineering
   avatar: /avatars/Mahidhar_img.png
 date: 2026-07-16
@@ -18,8 +18,6 @@ featured: false
 readingTime: 6
 cover: /covers/har-coverage-case-study-iship-cover.png
 ---
-
-# Case Study: Boosting DAST Coverage on a SPA with Chrome Recorder HAR Imports (No Custom Tooling Required)
 
 ## Background
 

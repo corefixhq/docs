@@ -2,7 +2,7 @@
 title: "Why Your ZAP Authenticated Scan Fails Auth After 90 Minutes (And How to Fix It)"
 description: "A debugging story about JWTs, silent expiry, and a regex that couldn't see the failure it was supposed to catch — and how to fix ZAP's re-authentication so it actually fires mid-scan."
 author:
-  name: V Sai Mahidhar
+  name: Mahidhar
   # role: Security Engineering
   avatar: /avatars/Mahidhar_img.png
 date: 2026-07-14
@@ -17,8 +17,6 @@ featured: false
 readingTime: 14
 cover: /covers/zap-auth-token-expiry.png
 ---
-
-# Why Your ZAP Authenticated Scan Fails Auth After 90 Minutes (And How to Fix It)
 
 *A debugging story about JWTs, silent expiry, and a regex that couldn't see the failure it was supposed to catch.*
 

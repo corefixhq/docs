@@ -2,7 +2,7 @@
 title: "When AI Hallucinates Your Security Pipeline: A Case Study in LLM-Generated ZAP Automation That Doesn't Work"
 description: "An LLM generated ZAP automation YAML that looked perfect and referenced job types that don't exist. A case study in plausible-but-nonexistent APIs, and what it cost to catch it five days late."
 author:
-  name: V Sai Mahidhar
+  name: Mahidhar
   # role: Security Engineering
   avatar: /avatars/Mahidhar_img.png
 date: 2026-08-02
@@ -18,8 +18,6 @@ featured: false
 readingTime: 9
 cover: /covers/llm-hallucination-zap-cover.png
 ---
-
-# When AI Hallucinates Your Security Pipeline: A Case Study in LLM-Generated ZAP Automation That Doesn't Work
 
 *Published: August 2026 | Author: CoreFix Security Team*
 
@@ -288,4 +286,4 @@ But those 50 lines cost us a week.
 
 ---
 
-*This article is part of our series on building automated security pipelines with OWASP ZAP and AI. See our companion article: [ZAP's Hidden Gap: Why Fuzzing, IDOR, and Access Control Testing Break in the Automation Framework — and How We Fixed It](/blog/zap-automation-limitations).*
+*This article is part of our series on building automated security pipelines with OWASP ZAP and AI. See our companion article: [ZAP's Hidden Gap: Why Fuzzing, IDOR, and Access Control Testing Break in the Automation Framework — and How We Fixed It](/blog-zap-automation-limitations).*

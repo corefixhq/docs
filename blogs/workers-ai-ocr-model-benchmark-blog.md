@@ -18,8 +18,6 @@ readingTime: 9
 cover: /covers/workers-ai-ocr-model-benchmark-blog-cover.png
 ---
 
-# Choosing an OCR Model for Browser Click Capture: What 45 Workers AI Runs Taught Us
-
 We tested Llama 4 Scout, Gemma 4, and Kimi K2.7 Code on the same screenshot-to-structured-JSON task. Llama was the only model to pass every schema check—and it also delivered the best latency and observed cost in our test set.
 
 ---

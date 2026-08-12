@@ -2,7 +2,7 @@
 title: "Beyond YAML: The 6 Hidden Layers of DAST Configuration Nobody Talks About"
 description: "We fixed ZAP's scan policy and achieved 700% better SQL injection detection. Then we discovered five more configuration layers silently breaking real-world scans."
 author:
-  name: V Sai Mahidhar
+  name: Mahidhar
   # role: Security Engineering
   avatar: /avatars/Mahidhar_img.png
 date: 2026-06-02

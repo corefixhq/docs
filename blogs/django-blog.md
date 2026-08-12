@@ -20,8 +20,6 @@ readingTime: 10
 cover: /covers/django-cover.png
 ---
 
-# Security Assessment Report: Django DefectDojo Repository Analysis
-
 ## Executive Summary
 
 As part of our continuous application security testing (SAST) initiative, **Corefix.dev** performed a comprehensive security assessment of the **Django DefectDojo** codebase using multiple specialized security scanners.

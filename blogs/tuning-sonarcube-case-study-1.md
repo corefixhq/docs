@@ -2,7 +2,7 @@
 title: "Tuning SonarQube: From 18,000+ Noise to 16 Actionable Findings"
 description: "We ran SonarQube against three deliberately vulnerable codebases and reduced 18,800+ findings to 16 actionable ones — without missing a single real security issue. Here's the quality profile that made it possible."
 author:
-  name: V Sai Mahidhar
+  name: Mahidhar
   # role: Security Engineering
   avatar: /avatars/Mahidhar_img.png
 date: 2026-06-24
@@ -17,8 +17,6 @@ featured: false
 readingTime: 12
 cover: /covers/SonarQube-light.png
 ---
-
-# Tuning SonarQube: From 18,000+ Noise to 16 Actionable Findings
 
 We integrated SonarQube Community Edition into our security scanning pipeline as a stateless container on AWS Fargate. What we found challenged everything we assumed about SonarQube's value — and led us to a quality profile that reduces findings by over 99% while keeping every result actionable.
 

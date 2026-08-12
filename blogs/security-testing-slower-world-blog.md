@@ -2,7 +2,7 @@
 title: "Security Testing Was Built for a World That No Longer Exists"
 description: "A new report confirms what shipping teams already feel: pentests are stale, coverage is invisible, and nobody retests after fixes. Here's what the data says — and what to do about it."
 author:
-  name: V Sai Mahidhar
+  name: Mahidhar
   # role: Security Engineering
   avatar: /avatars/Mahidhar_img.png
 date: 2026-06-25
@@ -17,8 +17,6 @@ featured: false
 readingTime: 8
 cover: /covers/security-test-light.png
 ---
-
-# Security Testing Was Built for a World That No Longer Exists
 
 *A new report confirms what shipping teams already feel: pentests are stale, coverage is invisible, and nobody retests after fixes. Here's what the data says — and what to do about it.*
 

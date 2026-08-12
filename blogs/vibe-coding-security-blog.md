@@ -2,7 +2,7 @@
 title: "You Shipped in a Weekend. You'll Get Sued on Monday."
 description: "The vibe coding era has a security problem — and prompting your AI to 'check for vulnerabilities' isn't fixing it."
 author:
-  name: V Sai Mahidhar
+  name: Mahidhar
   # role: Security Engineering
   avatar: /avatars/Mahidhar_img.png
 date: 2026-06-26
@@ -17,8 +17,6 @@ featured: false
 readingTime: 9
 cover: /covers/vibe-coding-light.png
 ---
-
-# You Shipped in a Weekend. You'll Get Sued on Monday.
 
 *The vibe coding era has a security problem — and prompting your AI to "check for vulnerabilities" isn't fixing it.*
 
