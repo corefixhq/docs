@@ -286,4 +286,4 @@ But those 50 lines cost us a week.
 
 ---
 
-*This article is part of our series on building automated security pipelines with OWASP ZAP and AI. See our companion article: [ZAP's Hidden Gap: Why Fuzzing, IDOR, and Access Control Testing Break in the Automation Framework — and How We Fixed It](/blog-zap-automation-limitations).*
+*This article is part of our series on building automated security pipelines with OWASP ZAP and AI. See our companion article: [ZAP's Hidden Gap: Why Fuzzing, IDOR, and Access Control Testing Break in the Automation Framework — and How We Fixed It](./blog-zap-automation-limitations).*
