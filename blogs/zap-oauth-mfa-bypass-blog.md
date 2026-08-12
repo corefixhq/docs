@@ -2,8 +2,9 @@
 title: "Scanning Behind OAuth and MFA: How to Authenticate ZAP Without Fighting the Login Flow"
 description: "No scanner can click through a push notification or type a TOTP code. Here's how to authenticate the scan — not the scanner — and the hard lessons learned debugging session replay against OAuth and MFA-gated apps."
 author:
-  name: Corefix Team
-  role: Security Engineering
+  name: V Sai Mahidhar
+  # role: Security Engineering
+  avatar: /avatars/Mahidhar_img.png
 date: 2026-06-29
 category: DAST
 tags:

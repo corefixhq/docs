@@ -2,8 +2,9 @@
 title: "When AI Hallucinates Your Security Pipeline: A Case Study in LLM-Generated ZAP Automation That Doesn't Work"
 description: "An LLM generated ZAP automation YAML that looked perfect and referenced job types that don't exist. A case study in plausible-but-nonexistent APIs, and what it cost to catch it five days late."
 author:
-  name: CoreFix Security Team
-  role: Security Engineering
+  name: V Sai Mahidhar
+  # role: Security Engineering
+  avatar: /avatars/Mahidhar_img.png
 date: 2026-08-02
 category: AI & Automation
 tags:

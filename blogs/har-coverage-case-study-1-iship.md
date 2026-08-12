@@ -2,8 +2,9 @@
 title: "Case Study: Boosting DAST Coverage on a SPA with Chrome Recorder HAR Imports (No Custom Tooling Required)"
 description: "How a five-minute Chrome Recorder walkthrough surfaced 4.7x more scannable URL-instances and 17.5x more tested injection points than automated crawling alone on a JS-heavy shipping SPA."
 author:
-  name: Corefix Team
-  role: Security Engineering
+  name: V Sai Mahidhar
+  # role: Security Engineering
+  avatar: /avatars/Mahidhar_img.png
 date: 2026-07-16
 category: DAST
 tags:

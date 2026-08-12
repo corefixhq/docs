@@ -2,8 +2,9 @@
 title: "We Benchmarked 21 LLMs on Security Analysis. Here's What We Found."
 description: "Processing time, task completion, and reliability data from running 247 real-world security findings through 21 LLMs - from Claude and GPT-5 to Bedrock and open-source models."
 author:
-  name: Corefix Team
-  role: AI Research
+  name: V Sai Mahidhar
+  # role: AI Research
+  avatar: /avatars/Mahidhar_img.png
 date: 2026-06-12
 category: AI & Automation
 tags:

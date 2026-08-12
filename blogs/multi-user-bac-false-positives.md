@@ -2,9 +2,10 @@
 title: "Part 2 — Hunting Ghosts: Killing False Positives in Multi-User Access-Control Scanning"
 description: "How DeepTraQ went from \"the scanner found 6 critical IDORs!\" to \"the scanner found 6 critical IDORs, and here's cryptographic-grade proof each one is real.\""
 author:
-  name: Corefix Team
-  role: Security Engineering
-date: 2026-08-06
+  name: V Sai Mahidhar
+  # role: Security Engineering
+  avatar: /avatars/Mahidhar_img.png
+date: 2026-08-04
 category: DAST
 tags:
   - Access Control

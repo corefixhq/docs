@@ -2,8 +2,9 @@
 title: "Why Spider-Based DAST Scanners Miss Most of Your App (And What HAR Import Fixes)"
 description: "A technical breakdown of why crawler-driven scanning structurally can't reach large parts of a modern web app — and what changes when you feed a scanner real, recorded user traffic instead."
 author:
-  name: Corefix Team
-  role: Security Engineering
+  name: V Sai Mahidhar
+  # role: Security Engineering
+  avatar: /avatars/Mahidhar_img.png
 date: 2026-07-15
 category: DAST
 tags:

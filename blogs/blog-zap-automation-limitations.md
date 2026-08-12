@@ -2,8 +2,9 @@
 title: "ZAP's Hidden Gap: Why Fuzzing, IDOR, and Access Control Testing Break in the Automation Framework — and How We Fixed It"
 description: "ZAP's fuzz and accessControl add-ons are GUI-only, so IDOR, input validation, and broken access control testing silently fail in headless pipelines. Here's the standalone-script workaround that fills the gap."
 author:
-  name: CoreFix Security Team
-  role: Security Engineering
+  name: V Sai Mahidhar
+  # role: Security Engineering
+  avatar: /avatars/Mahidhar_img.png
 date: 2026-08-01
 category: DAST
 tags:

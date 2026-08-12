@@ -2,8 +2,9 @@
 title: "Tuning SonarQube: From 18,000+ Noise to 16 Actionable Findings"
 description: "We ran SonarQube against three deliberately vulnerable codebases and reduced 18,800+ findings to 16 actionable ones — without missing a single real security issue. Here's the quality profile that made it possible."
 author:
-  name: Corefix Team
-  role: Security Engineering
+  name: V Sai Mahidhar
+  # role: Security Engineering
+  avatar: /avatars/Mahidhar_img.png
 date: 2026-06-24
 category: SAST
 tags:

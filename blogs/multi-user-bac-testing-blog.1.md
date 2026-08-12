@@ -2,9 +2,10 @@
 title: "Part 1 — The Hidden Traps of Multi-User Access-Control Testing (and How a Purpose-Built Scanner Sidesteps Them)"
 description: "Three failure modes in multi-user BAC testing with custom ZAP — crawl loops, non-comparable runs, and capture-time session bleed — and why each one is invisible until you go looking."
 author:
-  name: Corefix Team
-  role: Security Engineering
-date: 2026-08-05
+  name: V Sai Mahidhar
+  # role: Security Engineering
+  avatar: /avatars/Mahidhar_img.png
+date: 2026-08-03
 category: DAST
 tags:
   - Security

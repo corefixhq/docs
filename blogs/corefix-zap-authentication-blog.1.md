@@ -2,8 +2,9 @@
 title: "Why Your ZAP Authenticated Scan Silently Fails (And How Corefix Fixes It Automatically)"
 description: "Same credentials, same login page, same bearer token — yet the scan collapses into a wall of 401s. Here's why authenticated ZAP scanning silently fails on modern apps, and how Corefix fixes it automatically."
 author:
-  name: Corefix Team
-  role: Security Engineering
+  name: V Sai Mahidhar
+  # role: Security Engineering
+  avatar: /avatars/Mahidhar_img.png
 date: 2026-06-28
 category: DAST
 tags:

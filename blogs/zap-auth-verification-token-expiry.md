@@ -2,8 +2,9 @@
 title: "Why Your ZAP Authenticated Scan Fails Auth After 90 Minutes (And How to Fix It)"
 description: "A debugging story about JWTs, silent expiry, and a regex that couldn't see the failure it was supposed to catch — and how to fix ZAP's re-authentication so it actually fires mid-scan."
 author:
-  name: Corefix Team
-  role: Security Engineering
+  name: V Sai Mahidhar
+  # role: Security Engineering
+  avatar: /avatars/Mahidhar_img.png
 date: 2026-07-14
 category: DAST
 tags:
