@@ -2,8 +2,9 @@
 title: "Supercharging OWASP ZAP with HAR Traffic Replay: A 215× Coverage Increase"
 description: "How recording real browser traffic with the Corefix Extension and feeding it into ZAP's automation framework transforms DAST coverage from surface-level to deep."
 author:
-  name: Corefix Team
-  role: Security Engineering
+  name: Mahidhar
+  # role: Security Engineering
+  avatar: /avatars/Mahidhar_img.png
 date: 2026-06-16
 category: DAST
 tags:

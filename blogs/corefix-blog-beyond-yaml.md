@@ -2,8 +2,9 @@
 title: "Beyond YAML: The 6 Hidden Layers of DAST Configuration Nobody Talks About"
 description: "We fixed ZAP's scan policy and achieved 700% better SQL injection detection. Then we discovered five more configuration layers silently breaking real-world scans."
 author:
-  name: Corefix Team
-  role: Security Engineering
+  name: Mahidhar
+  # role: Security Engineering
+  avatar: /avatars/Mahidhar_img.png
 date: 2026-06-02
 category: DAST
 tags:

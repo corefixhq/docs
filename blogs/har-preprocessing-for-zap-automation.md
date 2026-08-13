@@ -2,8 +2,9 @@
 title: "Preprocessing HAR Files for OWASP ZAP Automation: A Practical Guide"
 description: "HAR files captured from browser traffic can easily exceed 25 MB, but ZAP only reads request and response fields. By stripping everything else, you can reduce a 25 MB HAR to ~500 KB with zero loss of scan coverage."
 author:
-  name: Corefix Team
-  role: Security Engineering
+  name: Mahidhar
+  # role: Security Engineering
+  avatar: /avatars/Mahidhar_img.png
 date: 2026-06-18
 category: DAST
 tags:

@@ -593,22 +593,19 @@
 }
 
 /* Cover — direct child of card */
+/* No fixed ratio: covers ship in both 16:9 (1672×941) and 3:2 (1536×1024).
+   Letting the image set its own height makes every cover fill the card
+   edge-to-edge — no cropping, no letterbox bars. */
 .blog-card-cover {
   width: 100%;
-  position: relative;
-  padding-top: 56.25%; /* 16:9 ratio matching the 1672×941 cover images */
   overflow: hidden;
   background: var(--bl-surface);
   flex-shrink: 0;
 }
 
 .blog-card-cover img {
-  position: absolute;
-  inset: 0;
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: top center;
+  height: auto;
   display: block;
   transition: transform 0.4s ease;
 }
@@ -871,11 +868,9 @@
   margin-bottom: 2.5rem;
 }
 
-/* Full-bleed cover image — 16:9 ratio matches the 1672×941 cover PNGs exactly */
+/* Full-bleed cover image — height follows the image's own ratio */
 .post-meta-cover {
   width: 100%;
-  position: relative;
-  padding-top: 56.25%; /* 16:9 — no cropping */
   overflow: hidden;
   margin-bottom: 2.5rem;
   background: var(--bl-surface);
@@ -883,12 +878,8 @@
 }
 
 .post-meta-cover img {
-  position: absolute;
-  inset: 0;
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: top center;
+  height: auto;
   display: block;
 }
 
@@ -960,8 +951,8 @@
 }
 
 .post-meta-avatar {
-  width: 40px;
-  height: 40px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
@@ -971,12 +962,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   background: var(--bl-text);
   color: var(--bl-bg);
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 700;
   user-select: none;
   flex-shrink: 0;
@@ -990,7 +981,7 @@
 }
 
 .post-meta-author-name {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
   color: var(--bl-text);
   line-height: 1.3;
@@ -1129,20 +1120,14 @@
 
 .related-card-cover {
   width: 100%;
-  position: relative;
-  padding-top: 56.25%; /* 16:9 ratio — matches 1672×941 cover images */
   overflow: hidden;
   background: var(--bl-surface);
   flex-shrink: 0;
 }
 
 .related-card-cover img {
-  position: absolute;
-  inset: 0;
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: top center;
+  height: auto;
   display: block;
   transition: transform 0.3s ease;
 }

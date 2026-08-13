@@ -2,8 +2,9 @@
 title: "We Spent 3 Days Tuning OWASP ZAP So You Don't Have To"
 description: "How a controlled DVWA experiment exposed DAST configuration complexity, and how policy tuning alone produced a 700% improvement in SQL injection detection."
 author:
-  name: Corefix Team
-  role: Security Engineering
+  name: Mahidhar
+  # role: Security Engineering
+  avatar: /avatars/Mahidhar_img.png
 date: 2026-05-27
 category: DAST
 tags:

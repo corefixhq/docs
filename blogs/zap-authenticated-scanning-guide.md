@@ -2,8 +2,9 @@
 title: "Mastering ZAP Authenticated Scanning: Session Management, Scan Optimization, and Framework-Aware Configuration"
 description: "How we went from broken session tokens and missed vulnerabilities to a fully authenticated, optimized DAST pipeline — and every lesson learned along the way."
 author:
-  name: Corefix Team
-  role: Security Engineering
+  name: Mahidhar
+  # role: Security Engineering
+  avatar: /avatars/Mahidhar_img.png
 date: 2026-06-19
 category: DAST
 tags:
