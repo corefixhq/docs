@@ -58,6 +58,7 @@ export default defineConfig({
         collapsed: false,
         items: [
           { text: "Sign Up & Setup", link: "/docs/sign-up-and-sign-in" },
+          { text: "Install the CLI", link: "/docs/install-cli" },
           { text: "Web Scan in 2 Minutes", link: "/docs/web-scan-quickstart" },
           { text: "Connect GitHub for Code Scanning", link: "/docs/github-integration" },
         ],
@@ -78,6 +79,7 @@ export default defineConfig({
           },
           { text: "Docker / Local CLI", link: "/docs/docker-cli" },
           { text: "Chrome Extension", link: "/docs/chrome-extension-guide" },
+          { text: "Multi-User Scanning", link: "/docs/web-scan-multi-user" },
           {
             text: "Web Scan Config Reference",
             collapsed: true,
