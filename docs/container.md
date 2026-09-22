@@ -124,7 +124,7 @@ jobs:
         run: docker push myapp:${{ github.sha }}
 ```
 
-The scan step runs after `docker build`, so `myapp:${{ github.sha }}` exists locally on the runner for `corefix` to read via the Docker socket. Gate the push step on the scan step's success, as shown above, to stop a vulnerable image from being published.
+The scan step runs after `docker build`, so <code v-pre>myapp:${{ github.sha }}</code> exists locally on the runner for `corefix` to read via the Docker socket. Gate the push step on the scan step's success, as shown above, to stop a vulnerable image from being published.
 
 See [Code Scanning CI/CD Integration](./cicd-integration) for secrets setup and the rest of the pipeline.
 

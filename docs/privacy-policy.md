@@ -150,7 +150,7 @@ We do **not** use your information for:
 
 - Advertising or ad targeting
 - Selling to third parties
-- Training AI or machine learning models (see our [AI Usage Policy](/docs/ai-usage-policy))
+- Training AI or machine learning models (see our [AI Usage Policy](/docs/ai-usage-policy.html))
 
 ## 3. Cookies and Local Storage
 

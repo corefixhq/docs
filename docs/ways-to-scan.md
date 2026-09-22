@@ -27,10 +27,10 @@ The simplest way to scan. No installations, no configuration files, no infrastru
 Create a project from the dashboard, enter your target URL or connect your repository, and hit **Run**. CoreFix launches all applicable scanners immediately.
 
 - **Code scan** — connect your repository, select a branch, and run.
-- **Web scan** — enter a URL, optionally provide credentials, and run. For deeper authenticated scans, install the optional [Chrome Extension](/docs/chrome-extension-guide) to record network traffic and capture complex login flows.
+- **Web scan** — enter a URL, optionally provide credentials, and run. For deeper authenticated scans, install the optional [Chrome Extension](/docs/chrome-extension-guide.html) to record network traffic and capture complex login flows.
 - **Scheduled scans** — set a recurring schedule from Project Settings (daily, weekly, biweekly, monthly, or a custom cron expression) so scans run automatically on your cadence.
 
-**→** [Web Scan in 2 Minutes](/docs/web-scan-quickstart) · [Managing Projects](/docs/managing-projects)
+**→** [Web Scan in 2 Minutes](/docs/web-scan-quickstart.html) · [Managing Projects](/docs/managing-projects.html)
 
 ---
 
@@ -40,7 +40,7 @@ Zero configuration. One click connects your GitHub repository and CoreFix handle
 
 Once installed, CoreFix can automatically trigger a full code scan on every pull request or push to a configured branch — no CI/CD pipeline needed. The GitHub App is the fastest way to get continuous security coverage on a codebase.
 
-**→** [Connect GitHub for Code Scanning](/docs/github-integration)
+**→** [Connect GitHub for Code Scanning](/docs/github-integration.html)
 
 ---
 
@@ -59,7 +59,7 @@ Your source code never leaves your environment. Only findings are sent to CoreFi
 
 Good for evaluating CoreFix on an existing codebase, scanning before pushing to remote, or running in environments without a GitHub App or CI/CD integration.
 
-**→** [Installing the CLI](/docs/install-cli) · [CoreFix CLI — Overview](/docs/docker-cli) · [Code Scanning](/docs/code-agent-usage) · [Web Scanning](/docs/web-agent-usage)
+**→** [Installing the CLI](/docs/install-cli.html) · [CoreFix CLI — Overview](/docs/docker-cli.html) · [Code Scanning](/docs/code-agent-usage.html) · [Web Scanning](/docs/web-agent-usage.html)
 
 ---
 
@@ -72,14 +72,14 @@ Drop the CoreFix CLI into any existing pipeline as a step or standalone job. Sup
 
 Results from every pipeline run appear in the CoreFix dashboard under your project automatically.
 
-**→** [Code Scanning CI/CD](/docs/cicd-integration) · [Web Scanning CI/CD](/docs/cicd-web-scan)
+**→** [Code Scanning CI/CD](/docs/cicd-integration.html) · [Web Scanning CI/CD](/docs/cicd-web-scan.html)
 
 ---
 
 ## Not Sure Which to Use?
 
-- **Just want to try CoreFix quickly** → [Web Scan in 2 Minutes](/docs/web-scan-quickstart)
-- **Want code scanning with no CI/CD setup** → [GitHub App](/docs/github-integration)
-- **Want to scan locally before pushing** → [CoreFix CLI](/docs/docker-cli)
-- **Want scanning baked into your pipeline** → [CI/CD Integration](/docs/cicd-integration)
+- **Just want to try CoreFix quickly** → [Web Scan in 2 Minutes](/docs/web-scan-quickstart.html)
+- **Want code scanning with no CI/CD setup** → [GitHub App](/docs/github-integration.html)
+- **Want to scan locally before pushing** → [CoreFix CLI](/docs/docker-cli.html)
+- **Want scanning baked into your pipeline** → [CI/CD Integration](/docs/cicd-integration.html)
 - **Want deep authenticated or API web scanning** → [Web Scan Config Reference](./web-scan-config-reference.md)

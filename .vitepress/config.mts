@@ -123,6 +123,7 @@ export default defineConfig({
         text: "AI Models & Usage",
         collapsed: false,
         items: [
+          { text: "AI Enrichment", link: "/docs/ai-enrichment" },
           { text: "Supported Models", link: "/docs/models" },
           { text: "AI Billing", link: "/docs/models-pricing" },
           { text: "Model Selection", link: "/docs/models-matrix" },
@@ -140,7 +141,7 @@ export default defineConfig({
         text: "About Us",
         collapsed: false,
         items: [
-          { text: "What is CoreFix?", link: "/docs/what-is-corefix" },
+          { text: "What is CoreFix?", link: "/docs/introduction" },
           { text: "How It Works", link: "/docs/how-it-works" },
         ],
       },
@@ -157,6 +158,19 @@ export default defineConfig({
           { text: "v1.2.0", link: "/docs/release-v1.2.0" },
           { text: "v1.1.0", link: "/docs/release-v1.1.0" },
           { text: "v1.0.0", link: "/docs/release-v1.0.0" },
+        ],
+      },
+      {
+        text: "Legal & Policies",
+        collapsed: false,
+        items: [
+          { text: "Terms of Service", link: "/docs/terms-of-service" },
+          { text: "Privacy Policy", link: "/docs/privacy-policy" },
+          { text: "Cookie Policy", link: "/docs/cookie-policy" },
+          { text: "Refund Policy", link: "/docs/refund-policy" },
+          { text: "Security Policy", link: "/docs/security-policy" },
+          { text: "AI Usage Policy", link: "/docs/ai-usage-policy" },
+          { text: "Disclaimer", link: "/docs/disclaimer" },
         ],
       },
       {

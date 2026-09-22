@@ -8,10 +8,10 @@ sidebar_label: Code Scan — CI/CD
 Add CoreFix code scanning to your existing pipeline with a single step. The step installs the `corefix` CLI and runs `corefix code`, which runs the CoreFix scanner container (`corefixhq/cfix`) for you. It can be dropped into any job that already checks out your code.
 
 ::: tip `--patch` is not used in CI/CD
-`--patch` (CodeFix) is not usually used in CI/CD pipelines, because nobody applies patches inside a pipeline run. In a pipeline, `corefix code` scans your code and reports the findings; apply fixes from your own machine with `corefix code --patch`. See [CodeFix — Automated Remediation](/docs/code-agent-usage#codefix--automated-remediation).
+`--patch` (CodeFix) is not usually used in CI/CD pipelines, because nobody applies patches inside a pipeline run. In a pipeline, `corefix code` scans your code and reports the findings; apply fixes from your own machine with `corefix code --patch`. See [CodeFix — Automated Remediation](/docs/code-agent-usage.html#codefix--automated-remediation).
 :::
 
-For detailed CLI options, scanner flags, and BYOK model configuration, refer to [CoreFix CLI](/docs/docker-cli).
+For detailed CLI options, scanner flags, and BYOK model configuration, refer to [CoreFix CLI](/docs/docker-cli.html).
 
 ---
 
@@ -414,7 +414,7 @@ Support for the following platforms is in progress:
 
 ## Related
 
-- [Code Scanner CLI Options](/docs/code-agent-usage.md#cli-options)
-- [Available Code Scanners](/docs/code-agent-usage.md#scanners)
-- [CoreFix CLI — Code Scanner Options](/docs/docker-cli#code-scanner-options)
-- [Container Scanning](/docs/code-agent-usage.md#container-scanning-with-container)
+- [Code Scanner CLI Options](/docs/code-agent-usage.html#cli-options)
+- [Available Code Scanners](/docs/code-agent-usage.html#scanners)
+- [CoreFix CLI — Code Scanner Options](/docs/docker-cli.html#code-scanner-options)
+- [Container Scanning](/docs/code-agent-usage.html#container-scanning-with-container)

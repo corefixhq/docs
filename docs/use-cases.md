@@ -17,7 +17,7 @@ CoreFix fits into different workflows depending on your team size, security matu
 
 **Setup time:** Under 5 minutes. One secret, one YAML file.
 
-→ [Code Scan via GitHub Actions](/docs/cicd-github-actions)
+→ [Code Scan via GitHub Actions](/docs/cicd-github-actions.html)
 
 ---
 
@@ -29,7 +29,7 @@ CoreFix fits into different workflows depending on your team size, security matu
 
 **Setup time:** Under 2 minutes. Enter a URL, hit Run.
 
-→ [Web Scan in 2 Minutes](/docs/web-scan-quickstart)
+→ [Web Scan in 2 Minutes](/docs/web-scan-quickstart.html)
 
 ---
 
@@ -41,7 +41,7 @@ CoreFix fits into different workflows depending on your team size, security matu
 
 **Setup time:** One click.
 
-→ [Connect GitHub for Code Scanning](/docs/github-integration)
+→ [Connect GitHub for Code Scanning](/docs/github-integration.html)
 
 ---
 
@@ -53,7 +53,7 @@ CoreFix fits into different workflows depending on your team size, security matu
 
 **Setup time:** One `docker run` command.
 
-→ [Docker / Local CLI](/docs/docker-cli)
+→ [Docker / Local CLI](/docs/docker-cli.html)
 
 ---
 
@@ -65,7 +65,7 @@ CoreFix fits into different workflows depending on your team size, security matu
 
 **Setup time:** Drop your spec file in the scan directory and run.
 
-→ [Web Scan Config Reference](/docs/web-scan-config-reference)
+→ [Web Scan Config Reference](/docs/web-scan-config-reference.html)
 
 ---
 
@@ -75,7 +75,7 @@ CoreFix fits into different workflows depending on your team size, security matu
 
 **How CoreFix helps:** Every scan generates an HTML report with an executive brief, severity breakdown, attack chains, and compliance mapping. Share the password-protected project link with anyone — no account required. A time-limited public link is also sent via email for quick access.
 
-→ [Managing Projects](/docs/managing-projects)
+→ [Managing Projects](/docs/managing-projects.html)
 
 ---
 
@@ -85,7 +85,7 @@ CoreFix fits into different workflows depending on your team size, security matu
 
 **How CoreFix helps:** CoreFix is free for open source — all scanners, AI enrichment, unlimited scans, no credit card. The SaaS model rotation pool handles AI processing at no cost. Push results to GitHub Code Scanning as SARIF for visibility directly in your repository's Security tab.
 
-→ [Supported Models](/docs/models)
+→ [Supported Models](/docs/models.html)
 
 ---
 
@@ -95,7 +95,7 @@ CoreFix fits into different workflows depending on your team size, security matu
 
 **How CoreFix helps:** CoreFix runs all scanners in parallel and passes findings through an AI pipeline that deduplicates across tools, correlates related vulnerabilities into attack chains, and ranks everything by composite priority. Instead of 400 raw alerts, you see the 50 that matter — sorted by urgency.
 
-→ [How It Works](/docs/how-it-works)
+→ [How It Works](/docs/how-it-works.html)
 
 ---
 
@@ -105,4 +105,4 @@ CoreFix fits into different workflows depending on your team size, security matu
 
 **How CoreFix helps:** CoreFix supports three authentication modes — JSON API login, HTML form login, and headless browser login for complex flows. The browser mode handles JavaScript-driven forms, redirects, and multi-step auth automatically. For even simpler setup, pass a bearer token via CLI and skip the login flow entirely.
 
-→ [Web Scan Config Reference](/docs/web-scan-config-reference)
+→ [Web Scan Config Reference](/docs/web-scan-config-reference.html)

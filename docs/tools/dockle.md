@@ -34,6 +34,6 @@ Dockle checks Dockerfiles and built images for security misconfigurations before
 
 ## Related Documentation
 
-- [Security Tools](/docs/tools)
-- [Docker / Local CLI](/docs/docker-cli)
-- [Open Source Acknowledgements](/docs/acknowledgements)
+- [Security Tools](/docs/tools.html)
+- [Docker / Local CLI](/docs/docker-cli.html)
+- [Open Source Acknowledgements](/docs/acknowledgements.html)

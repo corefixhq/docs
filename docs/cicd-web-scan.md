@@ -11,7 +11,7 @@ Add CoreFix DAST (Dynamic Application Security Testing) to your pipeline with a 
 Token-based authentication for CI/CD web scans is reserved for upcoming API scanning and complex web applications. The planned behavior is for CoreFix to ask ZAP to inject the provided token into every request, bypassing username/password credentials. This is under development and not currently available, so `--token` and `TOKEN` have no effect today.
 :::
 
-For detailed CLI options and BYOK model configuration, refer to [Docker / Local CLI](/docs/docker-cli).
+For detailed CLI options and BYOK model configuration, refer to [Docker / Local CLI](/docs/docker-cli.html).
 
 For advanced scan configuration (authentication, coverage), refer to [Web Scan Config Reference](./web-scan-config-reference.md).
 
@@ -531,7 +531,7 @@ Support for the following platforms is in progress:
 ## Related
 
 - [Chrome Extension Guide](./chrome-extension-guide)
-- [Web Scanner CLI Options](/docs/web-agent-usage.md#cli-options)
-- [Scan Coverage Options](/docs/web-agent-usage.md#coverage-optional)
-- [Scanner Profiles](/docs/web-agent-usage.md#scanner-profiles)
-- [Docker / Local CLI — Web Scanner Options](/docs/docker-cli#web-scanner-options)
+- [Web Scanner CLI Options](/docs/web-agent-usage.html#cli-options)
+- [Scan Coverage Options](/docs/web-agent-usage.html#coverage-optional)
+- [Scanner Profiles](/docs/web-agent-usage.html#scanner-profiles)
+- [Docker / Local CLI — Web Scanner Options](/docs/docker-cli.html#web-scanner-options)

@@ -138,7 +138,7 @@ CoreFix can patch the vulnerabilities it finds instead of just reporting them. `
 CodeFix uses the **OpenCode** coding agent, which ships by default inside the CoreFix Docker image — there is nothing to install or configure. In the future, you will also be able to use your own Claude or Codex as the coding agent.
 :::
 
-## Patch options
+### Patch options
 
 | Flag | Description |
 |---|---|
