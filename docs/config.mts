@@ -60,7 +60,8 @@ export default defineConfig({
           { text: "Sign Up & Setup", link: "/docs/sign-up-and-sign-in" },
           { text: "Install the CLI", link: "/docs/install-cli" },
           { text: "Web Scan in 2 Minutes", link: "/docs/web-scan-quickstart" },
-          { text: "Connect GitHub for Code Scanning", link: "/docs/github-integration" },
+          { text: "Connect GitHub for Code Scanning", link: "/docs/github-integration" },          
+
         ],
       },
       {
@@ -68,6 +69,7 @@ export default defineConfig({
         collapsed: false,
         items: [
           { text: "Code Scanning", link: "/docs/code-agent-usage" },
+          { text: "Container Scanning", link: "/docs/container" },
           { text: "Web Scanning", link: "/docs/web-agent-usagee" },
           {
             text: "CI/CD Integration",
@@ -113,8 +115,8 @@ export default defineConfig({
         text: "Account",
         collapsed: false,
         items: [
-          { text: "Usage & Credits", link: "/docs/account-usage" },
-          { text: "Pricing", link: "/docs/pricing-and-usage" },
+          { text: "Credit Metering", link: "/docs/account-usage" },
+          { text: "Credit Components", link: "/docs/pricing-and-usage" },
         ],
       },
       {
