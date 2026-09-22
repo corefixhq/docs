@@ -45,7 +45,7 @@ Store sensitive values as **secrets** in your CI/CD platform.
 | `GITHUB_TOKEN` | **Secret** | GitHub token for pushing SARIF to GitHub Code Scanning (see below) |
 | `OPENAI_API_KEY` | **Secret** | Only if bringing your own AI model |
 
-> A secret can have any name you like — the examples call it `CFIX_API_KEY` to match the environment variable the CLI reads. If you already have a secret named `X_CFIX_API_KEY`, keep it and map it in the step, for example `export CFIX_API_KEY=${{ secrets.X_CFIX_API_KEY }}`.
+> A secret can have any name you like — the examples call it `CFIX_API_KEY` to match the environment variable the CLI reads. If you already have a secret named `X_CFIX_API_KEY`, keep it and map it in the step, for example <code v-pre>export CFIX_API_KEY=${{ secrets.X_CFIX_API_KEY }}</code>.
 
 ### GitHub Token for SARIF Upload
 

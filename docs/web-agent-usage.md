@@ -545,4 +545,4 @@ Results are written to `~/.corefix/scan-results`:
 - [Chrome Extension Guide](./chrome-extension-guide)
 - [CI/CD Integration](./cicd-web-scan)
 - [Supported Models](./models)
-- [Pricing & Usage](./pricing-and-usage)
+- [Credit Components](./pricing-and-usage)
