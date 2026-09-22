@@ -19,7 +19,11 @@ The installer does three things:
 
 1. **Installs the `corefix` binary** at `/usr/local/bin`, so it's on your `PATH` straight away.
 2. **Installs Docker automatically** if it isn't already installed on the machine.
-3. **Pulls the scanner images** from Docker Hub — `corefixhq/cfix` and `corefixhq/cfix-web-chromium` (see [Scanner Images](#scanner-images)).
+3. **Pre-pulls the scanner images** from Docker Hub — `corefixhq/cfix` and `corefixhq/cfix-web-chromium` (see [Scanner Images](#scanner-images)) — so your first scan doesn't wait on a pull. Set `COREFIX_SKIP_PULL=1` before installing to skip this and pull the images on first scan instead.
+
+::: tip Docker is installed for you
+You don't need Docker installed beforehand. If the installer doesn't find Docker on the machine, it installs Docker automatically as part of this same command — there's nothing extra to set up first.
+:::
 
 Verify the install:
 
@@ -38,29 +42,23 @@ corefix --version
 | [`corefixhq/cfix`](https://hub.docker.com/r/corefixhq/cfix) | `corefix code` | The code scanners, plus the **OpenCode** coding agent that CodeFix uses to apply fixes |
 | [`corefixhq/cfix-web-chromium`](https://hub.docker.com/r/corefixhq/cfix-web-chromium) | `corefix web` | The web scanners, plus **Chromium**, which the scanner uses for authenticated scans |
 
+
+::: tip NOTE:
 The OpenCode agent ships as part of the `cfix` code scanner image, and Chromium ships inside `cfix-web-chromium` as part of the web scanner — there is nothing extra to install for either.
+:::
+
+
 
 All CoreFix images are listed at [hub.docker.com/u/corefixhq](https://hub.docker.com/u/corefixhq).
 
 ### Update the images
 
-To pull the latest scanner images, run:
+By default, `corefix code` and `corefix web` check for a newer image before each scan and pull it automatically — you don't need to update manually.
+
+To pull the latest scanner images ahead of time, run:
 
 ```bash
 corefix update
-```
-
-### Skip pulling images
-
-To skip pulling images when running code and web scans, set `COREFIX_SKIP_PULL=1`:
-
-```bash
-# For a single run
-COREFIX_SKIP_PULL=1 corefix code
-COREFIX_SKIP_PULL=1 corefix web --target https://your-app.com
-
-# Or for every run in the current shell
-export COREFIX_SKIP_PULL=1
 ```
 
 ---

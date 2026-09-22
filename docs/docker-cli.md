@@ -29,9 +29,12 @@ Both images are published on [Docker Hub](https://hub.docker.com/u/corefixhq). `
 
 ## Prerequisites
 
-- [Docker](https://docs.docker.com/get-docker/) installed and running — `corefix` uses it to run the scanners
 - A CoreFix account — sign up at [app.corefix.dev](https://app.corefix.dev)
 - The `corefix` binary on your `PATH` — see below
+
+::: tip Docker isn't a prerequisite
+You don't need to install [Docker](https://docs.docker.com/get-docker/) yourself — `corefix` uses it to run the scanners, and installs it automatically if it's missing when you run the install command below.
+:::
 
 ### Install
 
@@ -279,6 +282,7 @@ For pipelines, the [Code Scanning CI/CD Integration](./cicd-integration) guide i
 ## Next Steps
 
 - [Code Scanner — Standalone Usage](./code-agent-usage) — full reference for `corefix code`
+- [Container Scanning](./container) — scan container images with `--container`
 - [Web Scanner — Standalone Usage](./web-agent-usage) — full reference for `corefix web`
 - [Multi-User Scanning](./web-scan-multi-user) — test for BOLA, IDOR and broken access control
 - [Code Scanning CI/CD Integration](./cicd-integration) — add code scanning to your pipeline
