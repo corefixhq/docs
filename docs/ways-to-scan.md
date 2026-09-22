@@ -15,7 +15,7 @@ CoreFix offers multiple ways to run security scans depending on your workflow, e
 |---|---|---|
 | [Dashboard — Manual Run](#dashboard-manual-run) | None | Quick one-off scans, evaluating CoreFix |
 | [GitHub App](#github-app) | One click | Continuous code scanning on every PR and push |
-| [Docker / Local CLI](#docker-local-cli) | Docker installed | Local scans, pre-push checks, air-gapped environments |
+| [CoreFix CLI](#corefix-cli) | One install command | Local scans, pre-push checks, air-gapped environments |
 | [CI/CD Pipeline](#cicd-pipeline) | Pipeline config | Automated scanning baked into existing workflows |
 
 ---
@@ -44,24 +44,28 @@ Once installed, CoreFix can automatically trigger a full code scan on every pull
 
 ---
 
-## Docker / Local CLI
+## CoreFix CLI
 
-Run the CoreFix scanner as a Docker container on your local machine or any server. Two images are available:
+Run the CoreFix scanner locally with `corefix`, a single binary that installs with one command:
 
-- `corefixhq/cfix` — code scanning (SAST, secrets, SCA, IaC, Kubernetes)
-- `corefixhq/cfix-web` — web application scanning (DAST, CVEs, port scanning, SSL/TLS)
+```bash
+curl -fsSL https://get.corefix.dev/corefix | sudo sh
+```
+
+- `corefix code` — code scanning (SAST, secrets, SCA, IaC, Kubernetes, containers, malware, AI BOM)
+- `corefix web` — web application scanning (DAST, CVEs, port scanning, SSL/TLS)
 
 Your source code never leaves your environment. Only findings are sent to CoreFix for enrichment and reporting.
 
 Good for evaluating CoreFix on an existing codebase, scanning before pushing to remote, or running in environments without a GitHub App or CI/CD integration.
 
-**→** [Docker / Local CLI](/docs/docker-cli) · [Code Scanning](/docs/code-agent-usage) · [Web Scanning](/docs/web-agent-usage)
+**→** [Installing the CLI](/docs/install-cli) · [CoreFix CLI — Overview](/docs/docker-cli) · [Code Scanning](/docs/code-agent-usage) · [Web Scanning](/docs/web-agent-usage)
 
 ---
 
 ## CI/CD Pipeline
 
-Drop the CoreFix Docker agent into any existing pipeline as a step or standalone job. Supports GitHub Actions, GitLab CI, Jenkins, and CircleCI.
+Drop the CoreFix CLI into any existing pipeline as a step or standalone job. Supports GitHub Actions, GitLab CI, Jenkins, and CircleCI.
 
 - **Code scanning** — runs after checkout, scans the repository, pushes results to CoreFix.
 - **Web scanning** — runs after deploy, targets the live staging URL, pushes results to CoreFix.
@@ -76,6 +80,6 @@ Results from every pipeline run appear in the CoreFix dashboard under your proje
 
 - **Just want to try CoreFix quickly** → [Web Scan in 2 Minutes](/docs/web-scan-quickstart)
 - **Want code scanning with no CI/CD setup** → [GitHub App](/docs/github-integration)
-- **Want to scan locally before pushing** → [Docker / Local CLI](/docs/docker-cli)
+- **Want to scan locally before pushing** → [CoreFix CLI](/docs/docker-cli)
 - **Want scanning baked into your pipeline** → [CI/CD Integration](/docs/cicd-integration)
 - **Want deep authenticated or API web scanning** → [Web Scan Config Reference](./web-scan-config-reference.md)

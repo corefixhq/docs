@@ -73,6 +73,7 @@ export default defineConfig({
             link: "/docs/github-integration",
           },
           { text: "Code Scan via GitHub Actions", link: "/docs/cicd-github-actions" },
+          { text: "Install the CLI", link: "/docs/install-cli" },
           { text: "Use Cases", link: "/docs/use-cases" },
 
         ],
@@ -83,6 +84,7 @@ export default defineConfig({
         items: [
           { text: "Ways to Scan", link: "/docs/ways-to-scan" },
           { text: "Code Scanning", link: "/docs/code-agent-usage" },
+          { text: "Remediation / Autofixes", link: "/docs/auto-remediation" },
           { text: "Web Scanning", link: "/docs/web-agent-usage" },
           {
             text: "CI/CD Integration",
@@ -92,8 +94,12 @@ export default defineConfig({
               { text: "Web Scanning", link: "/docs/cicd-web-scan" },
             ],
           },
-          { text: "Docker / Local CLI", link: "/docs/docker-cli" },
+          { text: "Container Scanning", link: "/docs/container" },
+
+          { text: "CoreFix CLI", link: "/docs/docker-cli" },
           { text: "Chrome Extension", link: "/docs/chrome-extension-guide" },
+          { text: "Multi-User Scanning", link: "/docs/web-scan-multi-user" },
+
           {
             text: "Web Scan Config Reference",
             collapsed: true,
@@ -113,16 +119,21 @@ export default defineConfig({
           { text: "Viewing Results", link: "/docs/reports" },
         ],
       },
-      {
-        text: "AI & Models",
-        link: "/docs/models",
-      },
-      {
-        text: "Account",
+       {
+        text: "AI Models & Usage",
         collapsed: false,
         items: [
-          { text: "Usage & Credits", link: "/docs/account-usage" },
-          { text: "Pricing", link: "/docs/pricing-and-usage" },
+          { text: "Supported Models", link: "/docs/models" },
+          { text: "AI Billing", link: "/docs/models-pricing" },
+          { text: "Model Selection", link: "/docs/models-matrix" },
+        ],
+      },
+      {
+        text: "Usage & Billing",
+        collapsed: false,
+        items: [
+          { text: "Credit Metering", link: "/docs/account-usage" },
+          { text: "Billing Components", link: "/docs/pricing-and-usage" },
         ],
       },
       {
