@@ -534,4 +534,4 @@ Support for the following platforms is in progress:
 - [Web Scanner CLI Options](/docs/web-agent-usage.md#cli-options)
 - [Scan Coverage Options](/docs/web-agent-usage.md#coverage-optional)
 - [Scanner Profiles](/docs/web-agent-usage.md#scanner-profiles)
-- [Docker / Local CLI — Web Scanner Options](/docs/docker-cli#cli-options-—-web-scanner-corefixhq-cfix-web)
+- [Docker / Local CLI — Web Scanner Options](/docs/docker-cli#web-scanner-options)
