@@ -46,7 +46,7 @@ We retain the results of the last 7 builds per project. Older scan results are a
 
 ## 5. Web Application Scanning
 
-Web application scanning sends real security test payloads (including but not limited to SQL injection, XSS, SSRF, and authentication bypass attempts) to the target URL you specify. By initiating a web scan, you represent and warrant that you have explicit authorization to perform security testing against the target. See our [Disclaimer](/docs/disclaimer) for full details on liability.
+Web application scanning sends real security test payloads (including but not limited to SQL injection, XSS, SSRF, and authentication bypass attempts) to the target URL you specify. By initiating a web scan, you represent and warrant that you have explicit authorization to perform security testing against the target. See our [Disclaimer](/docs/disclaimer.html) for full details on liability.
 
 Web application scanning requires credits and is not included in the free Open Source plan.
 
@@ -146,7 +146,7 @@ CoreFix uses a pay-as-you-go credits model for private repositories and web scan
 
 Credits are purchased in advance and deducted as scans are executed. Credits do not expire. When your balance reaches zero, scans will pause — you will not be charged overage fees.
 
-All purchases are final. See our [Refund Policy](/docs/refund-policy) for details on exceptions.
+All purchases are final. See our [Refund Policy](/docs/refund-policy.html) for details on exceptions.
 
 ## 8. Bring Your Own Key (BYOK)
 
@@ -160,7 +160,7 @@ By providing your API key, you acknowledge that CoreFix will route requests thro
 
 CoreFix uses large language models (LLMs) to enrich, prioritize, and generate remediation suggestions for security findings. AI-generated outputs, including fix suggestions, risk scores, and code patches, are provided on an as-is basis.
 
-CoreFix is AI-powered and can make mistakes. You are responsible for reviewing, validating, and testing any AI-generated output before applying it to your codebase. See our [AI Usage Policy](/docs/ai-usage-policy) for full details.
+CoreFix is AI-powered and can make mistakes. You are responsible for reviewing, validating, and testing any AI-generated output before applying it to your codebase. See our [AI Usage Policy](/docs/ai-usage-policy.html) for full details.
 
 ## 10. Intellectual Property
 
@@ -170,7 +170,7 @@ The CoreFix platform, including its software, design, documentation, and brandin
 
 ## 11. Data and Privacy
 
-Our collection and use of your personal information is governed by our [Privacy Policy](/docs/privacy-policy). By using the Service, you consent to our data practices as described therein.
+Our collection and use of your personal information is governed by our [Privacy Policy](/docs/privacy-policy.html). By using the Service, you consent to our data practices as described therein.
 
 ## 12. Service Availability
 

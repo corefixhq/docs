@@ -5,19 +5,33 @@ sidebar_label: Code Scan — CI/CD
 
 ## Code Scanning — CI/CD Integration
 
-Add CoreFix code scanning to your existing pipeline with a single step. The scanner runs as a Docker container (`corefixhq/cfix`) and can be dropped into any job that already checks out your code.
+Add CoreFix code scanning to your existing pipeline with a single step. The step installs the `corefix` CLI and runs `corefix code`, which runs the CoreFix scanner container (`corefixhq/cfix`) for you. It can be dropped into any job that already checks out your code.
 
-For detailed CLI options, scanner flags, and BYOK model configuration, refer to [Docker / Local CLI](/docs/docker-cli).
+::: tip `--patch` is not used in CI/CD
+`--patch` (CodeFix) is not usually used in CI/CD pipelines, because nobody applies patches inside a pipeline run. In a pipeline, `corefix code` scans your code and reports the findings; apply fixes from your own machine with `corefix code --patch`. See [CodeFix — Automated Remediation](/docs/code-agent-usage.html#codefix--automated-remediation).
+:::
+
+For detailed CLI options, scanner flags, and BYOK model configuration, refer to [CoreFix CLI](/docs/docker-cli.html).
 
 ---
 
 ## How It Works
 
 1. Your pipeline checks out the repository as it normally does.
-2. Add the CoreFix scan step — it pulls the `corefixhq/cfix` Docker image, mounts the workspace, and runs the scanner.
-3. Results are written to an output directory, pushed to the CoreFix dashboard, and optionally emailed.
+2. The CoreFix scan step sets `CFIX_API_KEY`, installs the `corefix` CLI, and runs `corefix code`. The CLI pulls the `corefixhq/cfix` Docker image and scans the checked-out workspace.
+3. Results are written to `~/.corefix/scan-results` on the runner, pushed to the CoreFix dashboard, and optionally emailed.
 
 You can add the CoreFix scan as a **standalone workflow file** or as a **step in an existing job**.
+
+Every example on this page uses the same three commands:
+
+```bash
+export CFIX_API_KEY=<your-api-key>
+curl -fsSL https://get.corefix.dev/corefix | sudo sh
+corefix code
+```
+
+Your runner needs Docker available and permission to run `sudo` for the install. Use `CFIX_API_KEY` for authentication in pipelines — `corefix login` opens a browser and isn't suitable for CI.
 
 ---
 
@@ -27,9 +41,11 @@ Store sensitive values as **secrets** in your CI/CD platform.
 
 | Variable | Storage | Description |
 |---|---|---|
-| `X_CFIX_API_KEY` | **Secret** (required) | Your CoreFix API key |
+| `CFIX_API_KEY` | **Secret** (required) | Your CoreFix API key, from [Account & API Keys](https://app.corefix.dev/settings/api-keys) |
 | `GITHUB_TOKEN` | **Secret** | GitHub token for pushing SARIF to GitHub Code Scanning (see below) |
 | `OPENAI_API_KEY` | **Secret** | Only if bringing your own AI model |
+
+> A secret can have any name you like — the examples call it `CFIX_API_KEY` to match the environment variable the CLI reads. If you already have a secret named `X_CFIX_API_KEY`, keep it and map it in the step, for example <code v-pre>export CFIX_API_KEY=${{ secrets.X_CFIX_API_KEY }}</code>.
 
 ### GitHub Token for SARIF Upload
 
@@ -48,7 +64,7 @@ permissions:
 
 **Option 2 — Use a Personal Access Token (PAT)**
 
-If you are not using GitHub Actions, or prefer a PAT, create one with **Code Scanning — Read and Write** access under the token's repository permissions. Store it as a secret in your CI/CD platform.
+If you are not using GitHub Actions, or prefer a PAT, create one with **Code Scanning — Read and Write** access under the token's repository permissions. Store it as a secret in your CI/CD platform and pass it with `--github-token`.
 
 
 ---
@@ -96,22 +112,19 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run CoreFix Code Scanner
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          mkdir -p ${{ github.workspace }}/scan-results
-          docker run --rm \
-            -e X_CFIX_API_KEY=${{ secrets.X_CFIX_API_KEY }} \
-            -e GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} \
-            -v ${{ github.workspace }}:/code \
-            -v ${{ github.workspace }}/scan-results:/output \
-            corefixhq/cfix:latest \
-            --model gpt-4o-mini
+          export CFIX_API_KEY=${{ secrets.CFIX_API_KEY }}
+          curl -fsSL https://get.corefix.dev/corefix | sudo sh
+          corefix code --github-token "$GITHUB_TOKEN"
 
       - name: Upload scan results
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: corefix-scan-results
-          path: scan-results/
+          path: /home/runner/.corefix/scan-results/
 ```
 
 == Add as Step
@@ -120,22 +133,19 @@ Add the following step to any existing job in your workflow after the `checkout`
 
 ```yaml
       - name: Run CoreFix Code Scanner
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          mkdir -p ${{ github.workspace }}/scan-results
-          docker run --rm \
-            -e X_CFIX_API_KEY=${{ secrets.X_CFIX_API_KEY }} \
-            -e GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} \
-            -v ${{ github.workspace }}:/code \
-            -v ${{ github.workspace }}/scan-results:/output \
-            corefixhq/cfix:latest \
-            --model gpt-4o-mini
+          export CFIX_API_KEY=${{ secrets.CFIX_API_KEY }}
+          curl -fsSL https://get.corefix.dev/corefix | sudo sh
+          corefix code --github-token "$GITHUB_TOKEN"
 
       - name: Upload scan results
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: corefix-scan-results
-          path: scan-results/
+          path: /home/runner/.corefix/scan-results/
 ```
 
 Ensure your workflow has `permissions: security-events: write` if pushing SARIF to GitHub Code Scanning.
@@ -146,7 +156,9 @@ Ensure your workflow has `permissions: security-events: write` if pushing SARIF 
 
 ## GitLab CI
 
-Add variables in your project under **Settings → CI/CD → Variables**. Mark `X_CFIX_API_KEY` as **Masked** and **Protected**. See [GitLab CI/CD variables](https://docs.gitlab.com/ee/ci/variables/) for details.
+Add variables in your project under **Settings → CI/CD → Variables**. Create `CFIX_API_KEY` and mark it as **Masked** and **Protected**. See [GitLab CI/CD variables](https://docs.gitlab.com/ee/ci/variables/) for details.
+
+GitLab exposes CI/CD variables as environment variables, so `CFIX_API_KEY` is already set inside the job. The `docker:24` image is Alpine-based, so `curl` and `sudo` are installed first.
 
 :::tabs
 == Standalone Pipeline File
@@ -165,15 +177,13 @@ corefix-code-scan:
   variables:
     DOCKER_TLS_CERTDIR: "/certs"
   before_script:
-    - mkdir -p scan-results
+    - apk add --no-cache curl sudo
+    - curl -fsSL https://get.corefix.dev/corefix | sudo sh
   script:
-    - |
-      docker run --rm \
-        -e X_CFIX_API_KEY=$X_CFIX_API_KEY \
-        -v $CI_PROJECT_DIR:/code \
-        -v $CI_PROJECT_DIR/scan-results:/output \
-        corefixhq/cfix:latest \
-        --model gpt-4o-mini
+    - corefix code
+  after_script:
+    - mkdir -p scan-results
+    - cp -r ~/.corefix/scan-results/. scan-results/ || true
   artifacts:
     when: always
     paths:
@@ -201,15 +211,13 @@ corefix-code-scan:
   variables:
     DOCKER_TLS_CERTDIR: "/certs"
   before_script:
-    - mkdir -p scan-results
+    - apk add --no-cache curl sudo
+    - curl -fsSL https://get.corefix.dev/corefix | sudo sh
   script:
-    - |
-      docker run --rm \
-        -e X_CFIX_API_KEY=$X_CFIX_API_KEY \
-        -v $CI_PROJECT_DIR:/code \
-        -v $CI_PROJECT_DIR/scan-results:/output \
-        corefixhq/cfix:latest \
-        --model gpt-4o-mini
+    - corefix code
+  after_script:
+    - mkdir -p scan-results
+    - cp -r ~/.corefix/scan-results/. scan-results/ || true
   artifacts:
     when: always
     paths:
@@ -224,6 +232,8 @@ corefix-code-scan:
 ## Jenkins
 
 Add credentials in **Manage Jenkins → Credentials → System → Global credentials** as **Secret text** entries. See [Jenkins credentials](https://www.jenkins.io/doc/book/using/using-credentials/) for details.
+
+`withCredentials` exposes the secret as the `CFIX_API_KEY` environment variable for the commands inside it.
 
 :::tabs
 == Standalone Jenkinsfile
@@ -244,21 +254,20 @@ pipeline {
         stage('CoreFix Code Scan') {
             steps {
                 withCredentials([
-                    string(credentialsId: 'corefix-api-key', variable: 'X_CFIX_API_KEY')
+                    string(credentialsId: 'corefix-api-key', variable: 'CFIX_API_KEY')
                 ]) {
                     sh '''
-                        mkdir -p scan-results
-                        docker run --rm \
-                          -e X_CFIX_API_KEY=${X_CFIX_API_KEY} \
-                          -v ${WORKSPACE}:/code \
-                          -v ${WORKSPACE}/scan-results:/output \
-                          corefixhq/cfix:latest \
-                          --model gpt-4o-mini
+                        curl -fsSL https://get.corefix.dev/corefix | sudo sh
+                        corefix code
                     '''
                 }
             }
             post {
                 always {
+                    sh '''
+                        mkdir -p scan-results
+                        cp -r ~/.corefix/scan-results/. scan-results/ || true
+                    '''
                     archiveArtifacts artifacts: 'scan-results/**', allowEmptyArchive: true
                 }
             }
@@ -275,21 +284,20 @@ Add the following stage to your existing `Jenkinsfile`:
         stage('CoreFix Code Scan') {
             steps {
                 withCredentials([
-                    string(credentialsId: 'corefix-api-key', variable: 'X_CFIX_API_KEY')
+                    string(credentialsId: 'corefix-api-key', variable: 'CFIX_API_KEY')
                 ]) {
                     sh '''
-                        mkdir -p scan-results
-                        docker run --rm \
-                          -e X_CFIX_API_KEY=${X_CFIX_API_KEY} \
-                          -v ${WORKSPACE}:/code \
-                          -v ${WORKSPACE}/scan-results:/output \
-                          corefixhq/cfix:latest \
-                          --model gpt-4o-mini
+                        curl -fsSL https://get.corefix.dev/corefix | sudo sh
+                        corefix code
                     '''
                 }
             }
             post {
                 always {
+                    sh '''
+                        mkdir -p scan-results
+                        cp -r ~/.corefix/scan-results/. scan-results/ || true
+                    '''
                     archiveArtifacts artifacts: 'scan-results/**', allowEmptyArchive: true
                 }
             }
@@ -302,7 +310,7 @@ Add the following stage to your existing `Jenkinsfile`:
 
 ## CircleCI
 
-Add environment variables in your project under **Project Settings → Environment Variables**. See [CircleCI environment variables](https://circleci.com/docs/env-vars/) for details.
+Add environment variables in your project under **Project Settings → Environment Variables**. Create `CFIX_API_KEY` — CircleCI exposes it to every step as an environment variable. See [CircleCI environment variables](https://circleci.com/docs/env-vars/) for details.
 
 :::tabs
 == Standalone Config File
@@ -321,15 +329,10 @@ jobs:
       - run:
           name: Run CoreFix Code Scanner
           command: |
-            mkdir -p scan-results
-            docker run --rm \
-              -e X_CFIX_API_KEY=$X_CFIX_API_KEY \
-              -v $PWD:/code \
-              -v $PWD/scan-results:/output \
-              corefixhq/cfix:latest \
-              --model gpt-4o-mini
+            curl -fsSL https://get.corefix.dev/corefix | sudo sh
+            corefix code
       - store_artifacts:
-          path: scan-results
+          path: /home/circleci/.corefix/scan-results
           destination: corefix-scan-results
 
 workflows:
@@ -338,7 +341,7 @@ workflows:
       - corefix-code-scan
 ```
 
-> Use the `machine` executor (not `docker`) so that Docker-in-Docker is available.
+> Use the `machine` executor (not `docker`) so that Docker is available to the CLI.
 
 == Add as Job
 
@@ -356,15 +359,10 @@ jobs:
       - run:
           name: Run CoreFix Code Scanner
           command: |
-            mkdir -p scan-results
-            docker run --rm \
-              -e X_CFIX_API_KEY=$X_CFIX_API_KEY \
-              -v $PWD:/code \
-              -v $PWD/scan-results:/output \
-              corefixhq/cfix:latest \
-              --model gpt-4o-mini
+            curl -fsSL https://get.corefix.dev/corefix | sudo sh
+            corefix code
       - store_artifacts:
-          path: scan-results
+          path: /home/circleci/.corefix/scan-results
           destination: corefix-scan-results
 
 workflows:
@@ -383,23 +381,23 @@ workflows:
 
 ## Choosing Scanners
 
-Run specific scanners to keep pipeline time down, or run all for a full audit:
+Run specific scanners to keep pipeline time down, or run all for a full audit. Use these in place of `corefix code` in the examples above:
 
 ```bash
 # All scanners (default — omit positional argument)
-corefixhq/cfix:latest
+corefix code
 
 # Dependencies only
-corefixhq/cfix:latest osv
+corefix code osv
 
 # Secrets detection + SAST
-corefixhq/cfix:latest secrets,sast
+corefix code secrets,sast
 
 # IaC + Kubernetes
-corefixhq/cfix:latest iac,k8s
+corefix code iac,k8s
 
 # Full scan, explicit
-corefixhq/cfix:latest osv,iac,secrets,k8s,sast
+corefix code osv,iac,secrets,k8s,sast
 ```
 
 ---
@@ -416,8 +414,7 @@ Support for the following platforms is in progress:
 
 ## Related
 
-- [Code Scanner CLI Options](/docs/code-agent-usage.md#cli-options)
-- [Available Code Scanners](/docs/code-agent-usage.md#scanners)
-- [Docker / Local CLI — Code Scanner Options](/docs/docker-cli#cli-options-—-code-scanner-corefixhq-cfix)
-- [Container Scanning](/docs/code-agent-usage.md#container-scanning-with-container)
-
+- [Code Scanner CLI Options](/docs/code-agent-usage.html#cli-options)
+- [Available Code Scanners](/docs/code-agent-usage.html#scanners)
+- [CoreFix CLI — Code Scanner Options](/docs/docker-cli.html#code-scanner-options)
+- [Container Scanning](/docs/code-agent-usage.html#container-scanning-with-container)

@@ -47,6 +47,6 @@ Once complete, findings appear in your **CoreFix dashboard** under the project. 
 
 ## What's Next
 
-- [Web Scan Config Reference](/docs/web-scan-config-reference) — configure authenticated scans, API scanning, and coverage
-- [Web Scanning CI/CD](/docs/cicd-web-scan) — add web scanning to your pipeline
-- [Chrome Extension](/docs/chrome-extension-guide) — record network traffic for deep authenticated scans
+- [Web Scan Config Reference](/docs/web-scan-config-reference.html) — configure authenticated scans, API scanning, and coverage
+- [Web Scanning CI/CD](/docs/cicd-web-scan.html) — add web scanning to your pipeline
+- [Chrome Extension](/docs/chrome-extension-guide.html) — record network traffic for deep authenticated scans

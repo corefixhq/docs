@@ -91,6 +91,6 @@ Push the workflow file to your repository. CoreFix will scan your code on every 
 
 ## What's Next
 
-- [Code Scanning CI/CD — Full Reference](/docs/cicd-integration) — scanner flags, BYOK models, and other platforms
-- [Docker / Local CLI](/docs/docker-cli) — run scans locally without a pipeline
-- [Supported Models](/docs/models) — choose an AI model for enrichment
+- [Code Scanning CI/CD — Full Reference](/docs/cicd-integration.html) — scanner flags, BYOK models, and other platforms
+- [Docker / Local CLI](/docs/docker-cli.html) — run scans locally without a pipeline
+- [Supported Models](/docs/models.html) — choose an AI model for enrichment

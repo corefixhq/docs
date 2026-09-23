@@ -42,13 +42,13 @@ CoreFix v1.7.0 builds on the unified scanning platform with a new malicious pack
 
 | Version | Release Date | Key Highlights |
 |---|---:|---|
-| [v1.7.0](/docs/release-v1.7.0) | July 17, 2026 | Malicious package scanner, Slack/Teams integration, AI fallback detection, OpenAPI baseline backup to R2, and bug fixes |
-| [v1.0.0](/docs/release-v1.0.0) | June 2, 2026 | First public CoreFix release with code scanning, web scanning, AI enrichment, reports, and Chrome Extension support |
+| [v1.7.0](/docs/release-v1.7.0.html) | July 17, 2026 | Malicious package scanner, Slack/Teams integration, AI fallback detection, OpenAPI baseline backup to R2, and bug fixes |
+| [v1.0.0](/docs/release-v1.0.0.html) | June 2, 2026 | First public CoreFix release with code scanning, web scanning, AI enrichment, reports, and Chrome Extension support |
 
 ## Related Documentation Updates
 
-- [Docker / Local CLI](/docs/docker-cli)
-- [GitHub Integration](/docs/github-integration)
-- [Chrome Extension Guide](/docs/chrome-extension-guide)
-- [Web Application Scanning](/docs/web-agent-usage.md)
-- [Code Scanning](/docs/code-agent-usage.md)
+- [Docker / Local CLI](/docs/docker-cli.html)
+- [GitHub Integration](/docs/github-integration.html)
+- [Chrome Extension Guide](/docs/chrome-extension-guide.html)
+- [Web Application Scanning](/docs/web-agent-usage.html)
+- [Code Scanning](/docs/code-agent-usage.html)

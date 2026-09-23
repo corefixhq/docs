@@ -73,6 +73,7 @@ export default defineConfig({
             link: "/docs/github-integration",
           },
           { text: "Code Scan via GitHub Actions", link: "/docs/cicd-github-actions" },
+          { text: "Install the CLI", link: "/docs/install-cli" },
           { text: "Use Cases", link: "/docs/use-cases" },
 
         ],
@@ -83,6 +84,7 @@ export default defineConfig({
         items: [
           { text: "Ways to Scan", link: "/docs/ways-to-scan" },
           { text: "Code Scanning", link: "/docs/code-agent-usage" },
+          { text: "Remediation / Autofixes", link: "/docs/auto-remediation" },
           { text: "Web Scanning", link: "/docs/web-agent-usage" },
           {
             text: "CI/CD Integration",
@@ -92,8 +94,12 @@ export default defineConfig({
               { text: "Web Scanning", link: "/docs/cicd-web-scan" },
             ],
           },
-          { text: "Docker / Local CLI", link: "/docs/docker-cli" },
+          { text: "Container Scanning", link: "/docs/container" },
+
+          { text: "CoreFix CLI", link: "/docs/docker-cli" },
           { text: "Chrome Extension", link: "/docs/chrome-extension-guide" },
+          { text: "Multi-User Scanning", link: "/docs/web-scan-multi-user" },
+
           {
             text: "Web Scan Config Reference",
             collapsed: true,
@@ -113,23 +119,29 @@ export default defineConfig({
           { text: "Viewing Results", link: "/docs/reports" },
         ],
       },
-      {
-        text: "AI & Models",
-        link: "/docs/models",
-      },
-      {
-        text: "Account",
+       {
+        text: "AI Models & Usage",
         collapsed: false,
         items: [
-          { text: "Usage & Credits", link: "/docs/account-usage" },
-          { text: "Pricing", link: "/docs/pricing-and-usage" },
+          { text: "AI Enrichment", link: "/docs/ai-enrichment" },
+          { text: "Supported Models", link: "/docs/models" },
+          { text: "AI Billing", link: "/docs/models-pricing" },
+          { text: "Model Selection", link: "/docs/models-matrix" },
+        ],
+      },
+      {
+        text: "Usage & Billing",
+        collapsed: false,
+        items: [
+          { text: "Credit Metering", link: "/docs/account-usage" },
+          { text: "Billing Components", link: "/docs/pricing-and-usage" },
         ],
       },
       {
         text: "About Us",
         collapsed: false,
         items: [
-          { text: "What is CoreFix?", link: "/docs/what-is-corefix" },
+          { text: "What is CoreFix?", link: "/docs/introduction" },
           { text: "How It Works", link: "/docs/how-it-works" },
         ],
       },
@@ -146,6 +158,19 @@ export default defineConfig({
           { text: "v1.2.0", link: "/docs/release-v1.2.0" },
           { text: "v1.1.0", link: "/docs/release-v1.1.0" },
           { text: "v1.0.0", link: "/docs/release-v1.0.0" },
+        ],
+      },
+      {
+        text: "Legal & Policies",
+        collapsed: false,
+        items: [
+          { text: "Terms of Service", link: "/docs/terms-of-service" },
+          { text: "Privacy Policy", link: "/docs/privacy-policy" },
+          { text: "Cookie Policy", link: "/docs/cookie-policy" },
+          { text: "Refund Policy", link: "/docs/refund-policy" },
+          { text: "Security Policy", link: "/docs/security-policy" },
+          { text: "AI Usage Policy", link: "/docs/ai-usage-policy" },
+          { text: "Disclaimer", link: "/docs/disclaimer" },
         ],
       },
       {

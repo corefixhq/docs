@@ -1,42 +1,49 @@
 # Web Scanner — Standalone Usage
 
-Run the CoreFix web security scanner against any live URL. Performs DAST (Dynamic Application Security Testing) — no source code required.
+Run the CoreFix web security scanner against any live URL using the `corefix` CLI. Performs DAST (Dynamic Application Security Testing) — no source code required. `corefix web` runs the `corefixhq/cfix-web` image for you — no `docker run` commands, volume mounts or environment variables to manage.
 
 ::: warning Limitation
 `--token` works today for **complex web application authentication** (OAuth, SSO, MFA) — ZAP injects the provided Authorization/Cookie value into every request instead of using username/password credentials. It is still reserved for upcoming **API scanning** and has no effect there; the `openapi` block remains unavailable.
 :::
 
-**Current version:** `v1.0.0` · **Commit:** `26141d48`
+Check your installed version with `corefix --version`, and pull the latest scanner images with `corefix update`.
 
 ---
 
-## Pull the Image
+## Setup
 
-### Docker Hub
+You need [Docker](https://docs.docker.com/get-docker/) running and the `corefix` binary on your `PATH`. See [CoreFix CLI — Overview](./docker-cli) for installation.
+
+### Log in
 
 ```bash
-docker pull corefixhq/cfix-web               # latest
-docker pull corefixhq/cfix-web:latest        # latest (explicit)
-docker pull corefixhq/cfix-web:1.0.0         # specific version
-docker pull corefixhq/cfix-web:26141d48      # specific commit SHA
+corefix login
 ```
 
-→ [hub.docker.com/r/corefixhq/cfix-web](https://hub.docker.com/r/corefixhq/cfix-web)
+This opens your browser, signs you in to CoreFix, and saves your session to `~/.corefix/session.json`. One login covers both code and web scanning, and you only do it once per machine.
 
+Alternatively, skip the login and export an API key from [Account & API Keys](https://app.corefix.dev/settings/api-keys):
+
+```bash
+export CFIX_API_KEY=<your-api-key>
+```
+
+`corefix` reads `~/.corefix/session.json` first and falls back to `$CFIX_API_KEY`.
+
+### Update the scanner images
+
+```bash
+corefix update
+```
+
+Docker Hub: [hub.docker.com/r/corefixhq/cfix-web](https://hub.docker.com/r/corefixhq/cfix-web)
 
 ---
 
 ## Quick Start
 
-`X_CFIX_API_KEY` are required. Get them from your [Account & API Keys](https://app.corefix.dev/settings/api-keys) page.
-
 ```bash
-docker run --rm \
-  -e X_CFIX_API_KEY=<your-api-key> \
-  -v $(pwd):/web \
-  -v ~/scan-results:/output \
-  corefixhq/cfix-web \
-  --target https://your-app.com
+corefix web --target https://your-app.com
 ```
 
 `--target` is mandatory. Everything else is optional.
@@ -46,51 +53,34 @@ docker run --rm \
 ## Full Command Reference
 
 ```bash
-docker run --rm \
-  [--network host] \
-  -e X_CFIX_API_KEY=<your-api-key> \
-  [-e USERNAME=<username>] \
-  [-e PASSWORD=<password>] \
-  [-e TOKEN=<bearer-token>] \
-  [-e GITHUB_TOKEN=<github-pat>] \
-  -v $(pwd):/web \
-  -v <output-dir>:/output \
-  corefixhq/cfix-web [scanners] \
+corefix web [<scanner>[,<scanner>...]] \
   --target <url> \
-  [--username <user>] \
-  [--password <pass>] \
-  [--token <bearer-token>] \
+  [--username <user> --password <pass>]... \
+  [--token <bearer-token-or-cookie>] \
   [--openai-api-key <key>] \
   [--model <model-name>] \
   [--ignore-ai-analysis] \
   [--github-token <github-pat>] \
-  [--coverage <quick|normal|moderate|high|veryhigh|max|extreme|exhaustive>] \
+  [--coverage <quick|normal|moderate|high|veryhigh|max|extreme|exhaustive|unlimited>] \
   [--scanner-profile <profile>] \
   [--latest-har]
 ```
 
-> Add `--network host` only when using `credentials` for authenticated scans and to connect to a browser running on your host machine.
-
 ---
 
-## Environment Variables
+## Authentication and Output
 
-| Variable | Required | Description |
-|---|---|---|
-| `X_CFIX_API_KEY` | **Yes** | Your CoreFix API key. Found in [Account & API Keys](https://app.corefix.dev/settings/api-keys) |
-| `USERNAME` | No | Alternative to `--username` flag |
-| `PASSWORD` | No | Alternative to `--password` flag |
-| `TOKEN` | No | Bearer token or Cookie value for complex web app auth (OAuth, SSO, MFA). Still reserved for planned API scanning, where it has no effect |
-| `GITHUB_TOKEN` | No | GitHub PAT for uploading results as SARIF to GitHub Code Scanning |
-
----
-
-## Volume Mounts
-
-| Mount | Description |
+| Item | Description |
 |---|---|
-| `-v $(pwd):/web` | Project directory. The scanner reads `.cfix.web.yaml`, `.har`, and OpenAPI spec files from here. Run from your project root. |
-| `-v ~/scan-results:/output` | Local directory where scan reports and results are written |
+| API key | Read from `~/.corefix/session.json` (created by `corefix login`), falling back to the `CFIX_API_KEY` environment variable |
+| Project directory | Run `corefix web` from your project root. The scanner reads `.cfix.web.yaml` and `.har` files from the current directory |
+| Results | Scan reports and results are written to `~/.corefix/scan-results` |
+
+`$HOME/.corefix` is mounted into the scanner automatically, so it is authenticated with your `corefix login` session.
+
+::: warning Working Directory and Networking
+`corefix web` mounts your current directory into the scanner and sets up the Docker networking for you — including `--network host` where it's needed to reach a local browser. You don't need to pass any Docker flags. Run it from your project root.
+:::
 
 ---
 
@@ -104,7 +94,8 @@ Pass a comma-separated list as the first argument. Defaults to `nmap,vuln,web` i
 | `vuln` | Nuclei | CVEs, misconfigurations, exposed admin panels |
 | `web` | ZAP / testssl | Smart shorthand — auto-selects sub-scanners (see below) |
 | `zap` | OWASP ZAP | Unauthenticated web crawl and active scan |
-| `zap-auth` | OWASP ZAP | Authenticated web scan using credentials |
+| `zap-auth` | OWASP ZAP | Authenticated web scan using credentials or a token |
+| `fuzzer` | Fuzzer | API fuzzing against an OpenAPI/Swagger spec (coming soon) |
 | `zap-fuzzer` | ZAP | ZAP-based API fuzzing (coming soon) |
 | `testssl` | testssl.sh | SSL/TLS configuration and certificate analysis |
 
@@ -121,47 +112,46 @@ Pass a comma-separated list as the first argument. Defaults to `nmap,vuln,web` i
 
 ### `--target` **(required)**
 
-The URL to scan. Accepts HTTP and HTTPS, with or without a port.
+The URL to scan. Accepts HTTP and HTTPS, with or without a port, or a bare domain.
 
 ```bash
 --target https://your-app.com
 --target http://192.168.1.100:8080/
 --target http://74.225.252.175:4200/
+--target your-app.com
 ```
 
 ### `--username` / `--password` (optional)
 
-Login credentials for authenticated scanning. Can also be passed as `USERNAME` / `PASSWORD` environment variables.
+Login credentials for authenticated scanning.
 
 ```bash
 --username admin --password s3cr3t
-
-# Or via env
--e USERNAME=admin -e PASSWORD=s3cr3t
 ```
+
+**Repeat both flags up to 3 times** to run a multi-user scan — the first pair is always treated as the admin/privileged user; extra pairs are regular roles used for broken-access-control (BAC) testing. Pass `--password` once per `--username`, in the same order. This is required to detect BOLA/IDOR and access control vulnerabilities that only appear across sessions. See [Multi-User Scanning](./web-scan-multi-user) for the combination test matrix and full examples.
 
 ### `--token` (optional)
 
-For complex web application authentication (OAuth, SSO, MFA) where username/password login can't be automated. ZAP injects the supplied Authorization or Cookie value into every request instead of performing a credential-based login. See [Scanning Complex Apps (OAuth, MFA) — Token & Cookie Injection](./web-scan-complex-auth) for the full config reference and rules on when to use a Bearer token vs. a Cookie.
+A valid bearer token or cookie, for complex web application authentication (OAuth, SSO, MFA) where username/password login can't be automated. ZAP injects the supplied Authorization or Cookie value into every request instead of performing a credential-based login. See [Scanning Complex Apps (OAuth, MFA) — Token & Cookie Injection](./web-scan-complex-auth) for the full config reference and rules on when to use a Bearer token vs. a Cookie.
 
 `--token` is still reserved and has no effect for planned API scanning (the `openapi` block).
 
 ```bash
 --token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-
-# Or via env
--e TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 ```
 
 ### `--coverage` (optional)
 
-Controls scan depth and duration.
+Controls scan depth and duration, for **authenticated scans** and **Nuclei vulnerability scans** (`vuln`).
 
-- For **authenticated scans**, CoreFix automatically determines coverage based on application complexity if not specified. If explicitly set, the specified value is used.
+By default, CoreFix detects the coverage tier automatically from the complexity of the application — the number of unique paths found in HAR files and discovery. Set `--coverage` to force more or less coverage.
 
 ```bash
 --coverage moderate
 ```
+
+Accepted values: `quick`, `normal`, `moderate`, `high`, `veryhigh`, `max`, `extreme`, `exhaustive`, `unlimited`.
 
 | Value | Expected Coverage | Time Impact | Best For |
 |---|---|---|---|
@@ -173,8 +163,31 @@ Controls scan depth and duration.
 | `max` | 99–99.9% | +120 min | Maximum crawl depth and rule strength short of exhaustive |
 | `extreme` | 99–99.9% | +240 min | Deep enterprise-scale audits |
 | `exhaustive` | 99.9–100% | +360 min | Exhaustive, compliance-grade full coverage |
+| `unlimited` | 100% | up to +720 min | Every rule runs to completion — the highest tier, above `exhaustive` |
 
 > "Time Impact" is the additional time the coverage level adds on top of the base scan, not a total scan duration cap.
+
+`unlimited` has no cap on alerts per rule and allows each rule up to 60 minutes. The whole scan is bounded by a 12-hour (720 min) safety limit, which should rarely be reached.
+
+| Level | Max Alerts / Rule | Rule Duration Limit |
+|---|---|---|
+| `quick` | 5 | 2 min |
+| `normal` | 5 | 2 min |
+| `moderate` | 8 | 5 min |
+| `high` | 10 | 5 min |
+| `veryhigh` | 10 | 10 min |
+| `max` | 10 | 15 min |
+| `extreme` | 15 | 20 min |
+| `exhaustive` | 15 | 30 min |
+| `unlimited` | No limit | 60 min |
+
+Coverage also determines which Nuclei template categories are enabled:
+
+| Coverage | Nuclei Template Categories |
+|---|---|
+| `quick` | Misconfig, exposure, CVE, takeover, default-login, tech |
+| `normal` / `moderate` | All of above + SSL, TLS |
+| `high` / `veryhigh` / `max` / `extreme` / `exhaustive` / `unlimited` | All of above + HTTP, CORS, XSS, SQLi, SSRF, redirect, LFI, RFI, token, secret, WordPress (core, plugins, themes) |
 
 ### `--scanner-profile` (optional)
 
@@ -186,7 +199,7 @@ Controls which active scan rules are executed. See [Scanner Profiles](#scanner-p
 
 ### `--latest-har` (optional)
 
-Use only the latest [Chrome extension](./chrome-extension-guide) HAR recording session for the scan. If omitted, all available HAR sessions in the mounted `/web` directory are used. If only one recording exists, this flag has no effect.
+Use only the latest [Chrome extension](./chrome-extension-guide) HAR recording session for the scan. If omitted, all available HAR sessions are used. If only one recording exists, this flag has no effect. Default: `false`.
 
 ```bash
 --latest-har
@@ -231,11 +244,7 @@ The scanner automatically detects the browser setup — no flags needed:
 No installation or configuration needed. If you don't launch Chromium locally, the scanner automatically uses a managed browser on Cloudflare Workers. Just run your scan as normal:
 
 ```bash
-docker run --rm \
-  -e X_CFIX_API_KEY=cfix_live_xxxxxxxx \
-  -v $(pwd):/web \
-  -v ~/scan-results:/output \
-  corefixhq/cfix-web \
+corefix web \
   --target https://your-app.com \
   --username admin \
   --password s3cr3t
@@ -291,22 +300,14 @@ chromium-browser \
   --no-sandbox
 ```
 
-**Run the scanner with `--network host` so it can reach the local browser:**
+**Then run the scan as usual** — the scanner detects the browser on port `9222` and connects to it:
 
 ```bash
-docker run --rm \
-  --network host \
-  -e X_CFIX_API_KEY=cfix_live_xxxxxxxx \
-  -v $(pwd):/web \
-  -v ~/scan-results:/output \
-  corefixhq/cfix-web \
+corefix web \
   --target https://your-app.com \
   --username admin \
   --password s3cr3t
 ```
-
-> **Note:** `--network host` is required when using a local Chromium browser so the container can reach port 9222 on the host.
-
 
 ---
 
@@ -320,16 +321,18 @@ Same behaviour as the code scanner — see [AI Models](./code-agent-usage#ai-mod
 - See [Supported Models →](https://docs.corefix.dev/docs/models)
 
 ```bash
---openai-api-key sk-proj-xxxxxxxx --model gpt-4o-mini
+--openai-api-key sk-proj-xxxxxxxx --model gpt-5-mini
 ```
+
+**Models accepted by `--model` for web scans:** `gpt-5-mini`, `gpt-5.4-mini`, `gpt-5`, `gpt-5.4`, `claude-haiku-4.5`, `claude-sonnet-4.6`
 
 **Skip AI analysis entirely:**
 
-Pass `--ignore-ai-analysis` to skip the AI pipeline — this covers deduplication, enrichment of findings, and AI-based prioritization. Raw and normalized findings are still written to `/output`, but no enriched report or AI-based prioritization is generated.
+Pass `--ignore-ai-analysis` to skip the AI pipeline — this covers deduplication, enrichment of findings, and AI-based prioritization. Raw and normalized findings are still written to `~/.corefix/scan-results`, but no enriched report or AI-based prioritization is generated.
 
 ### `--ignore-ai-analysis` (optional)
 
-Skip the AI pipeline — deduplication, enrichment of findings, and AI-based prioritization are all skipped. Useful for faster runs, or when you only need raw/normalized findings without AI enrichment. Cannot be combined meaningfully with `--openai-api-key` / `--model`, since there is no enrichment step to run those against.
+Skip the AI pipeline — deduplication, enrichment of findings, and AI-based prioritization are all skipped. Useful for faster runs, or when you only need raw/normalized findings without AI enrichment. Cannot be combined meaningfully with `--openai-api-key` / `--model`, since there is no enrichment step to run those against. Default: `false`.
 
 ```bash
 --ignore-ai-analysis
@@ -337,13 +340,13 @@ Skip the AI pipeline — deduplication, enrichment of findings, and AI-based pri
 
 ### `--github-token` (optional)
 
-Upload scan results as a SARIF file to GitHub Code Scanning. Can also be passed as the `GITHUB_TOKEN` environment variable.
+Upload scan results as a SARIF file to GitHub Code Scanning.
 
 ```bash
 --github-token ghp_xxxxxxxxxxxx
 
-# Or via env (preferred for CI)
--e GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
+# In CI, read it from a secret
+--github-token "$GITHUB_TOKEN"
 ```
 
 ---
@@ -353,25 +356,27 @@ Upload scan results as a SARIF file to GitHub Code Scanning. Can also be passed 
 ### Unauthenticated scan
 
 ```bash
-docker run --rm \
-  -e X_CFIX_API_KEY=cfix_live_xxxxxxxx \
-  -v $(pwd):/web \
-  -v ~/scan-results:/output \
-  corefixhq/cfix-web \
-  --target https://your-app.com
+corefix web --target https://your-app.com
 ```
 
-### Authenticated scan with credentials + Cloudflare browser
+### Authenticated scan with credentials
 
 ```bash
-docker run --rm \
-  -e X_CFIX_API_KEY=cfix_live_xxxxxxxx \
-  -v $(pwd):/web \
-  -v ~/scan-results:/output \
-  corefixhq/cfix-web \
+corefix web \
   --target https://your-app.com \
   --username admin \
   --password s3cr3t
+```
+
+### Multi-user scan (BOLA / IDOR / access control)
+
+The first `--username`/`--password` pair is the admin; the rest are regular users. See [Multi-User Scanning](./web-scan-multi-user).
+
+```bash
+corefix web \
+  --target https://your-app.com \
+  --username admin@example.com --password 'admin-pass' \
+  --username jim@example.com --password 'jim-pass'
 ```
 
 ### Complex auth scan with token/cookie injection
@@ -379,16 +384,12 @@ docker run --rm \
 For OAuth, SSO, or MFA flows that can't be scripted, obtain a valid Authorization/Cookie value yourself and pass it via `--token` instead of `--username`/`--password`. Requires an `authentication.pollUrl` in `.cfix.web.yaml` — see [Scanning Complex Apps (OAuth, MFA) — Token & Cookie Injection](./web-scan-complex-auth).
 
 ```bash
-docker run --rm \
-  -e X_CFIX_API_KEY=cfix_live_xxxxxxxx \
-  -v $(pwd):/web \
-  -v ~/scan-results:/output \
-  corefixhq/cfix-web \
+corefix web \
   --target https://your-app.com \
   --token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 ```
 
-### Authenticated scan with remote Chromium on host
+### Authenticated scan with Chromium on the host
 
 ```bash
 # Step 1 — launch Chromium on your host
@@ -398,60 +399,42 @@ chromium-browser \
   --headless \
   --no-sandbox
 
-# Step 2 — run the scanner
-docker run --rm \
-  --network host \
-  -e X_CFIX_API_KEY=cfix_live_xxxxxxxx \
-  -v $(pwd):/web \
-  -v ~/scan-results:/output \
-  corefixhq/cfix-web \
+# Step 2 — run the scanner; it detects the browser on port 9222
+corefix web \
   --target https://your-app.com \
   --username admin \
-  --password s3cr3t \
-  --remote http://host.docker.internal:9222
+  --password s3cr3t
 ```
 
 ### Specific scanners only
 
 ```bash
 # SSL check only
-docker run --rm \
-  -e X_CFIX_API_KEY=cfix_live_xxxxxxxx \
-  -v $(pwd):/web \
-  -v ~/scan-results:/output \
-  corefixhq/cfix-web testssl \
-  --target https://your-app.com
+corefix web testssl --target https://your-app.com
 
 # Port scan + CVEs only
-docker run --rm \
-  -e X_CFIX_API_KEY=cfix_live_xxxxxxxx \
-  -v $(pwd):/web \
-  -v ~/scan-results:/output \
-  corefixhq/cfix-web nmap,vuln \
-  --target https://your-app.com
+corefix web nmap,vuln --target https://your-app.com
 ```
 
-### Scan with email report + BYOK model
+### Set the scan depth with `--coverage`
 
 ```bash
-docker run --rm \
-  -e X_CFIX_API_KEY=cfix_live_xxxxxxxx \
-  -v $(pwd):/web \
-  -v ~/scan-results:/output \
-  corefixhq/cfix-web \
+corefix web vuln --target https://staging.example.com --coverage high
+```
+
+### Bring your own API key
+
+```bash
+corefix web \
   --target https://your-app.com \
   --openai-api-key sk-proj-xxxxxxxx \
-  --model gpt-4o-mini
+  --model gpt-5-mini
 ```
 
 ### Skip AI analysis
 
 ```bash
-docker run --rm \
-  -e X_CFIX_API_KEY=cfix_live_xxxxxxxx \
-  -v $(pwd):/web \
-  -v ~/scan-results:/output \
-  corefixhq/cfix-web \
+corefix web \
   --target https://your-app.com \
   --ignore-ai-analysis
 ```
@@ -459,11 +442,7 @@ docker run --rm \
 ### Scan a specific vulnerability class with `--scanner-profile`
 
 ```bash
-docker run --rm \
-  -e X_CFIX_API_KEY=cfix_live_xxxxxxxx \
-  -v $(pwd):/web \
-  -v ~/scan-results:/output \
-  corefixhq/cfix-web \
+corefix web \
   --target https://your-app.com \
   --scanner-profile sqli
 ```
@@ -471,11 +450,7 @@ docker run --rm \
 ### Scan using only the latest Chrome extension HAR recording
 
 ```bash
-docker run --rm \
-  -e X_CFIX_API_KEY=cfix_live_xxxxxxxx \
-  -v $(pwd):/web \
-  -v ~/scan-results:/output \
-  corefixhq/cfix-web \
+corefix web \
   --target https://your-app.com \
   --latest-har
 ```
@@ -483,20 +458,23 @@ docker run --rm \
 ### Upload results to GitHub Code Scanning
 
 ```bash
-docker run --rm \
-  -e X_CFIX_API_KEY=cfix_live_xxxxxxxx \
-  -e GITHUB_TOKEN=ghp_xxxxxxxxxxxx \
-  -v $(pwd):/web \
-  -v ~/scan-results:/output \
-  corefixhq/cfix-web \
-  --target https://your-app.com
+corefix web \
+  --target https://your-app.com \
+  --github-token ghp_xxxxxxxxxxxx
+```
+
+### Use in scripts and CI
+
+```bash
+export CFIX_API_KEY=<your-api-key>
+corefix web --target https://staging.example.com --coverage normal
 ```
 
 ---
 
 ## Configuration File: `.cfix.web.yaml`
 
-Place this file in the directory mounted to `/web` to configure authentication and scan scope.
+Place this file in the directory you run `corefix web` from to configure authentication and scan scope.
 
 ### Minimal config (recommended)
 
@@ -527,7 +505,7 @@ openapi:
 ```
 
 :::
-When API testing becomes available, you will also be able to drop a `.yaml`, `.yml`, or `.json` OpenAPI/Swagger spec file directly into the mounted `/web` directory for CoreFix to detect automatically.
+When API testing becomes available, you will also be able to drop a `.yaml`, `.yml`, or `.json` OpenAPI/Swagger spec file directly into your project directory for CoreFix to detect automatically.
 :::
 
 ---
@@ -536,7 +514,7 @@ When API testing becomes available, you will also be able to drop a `.yaml`, `.y
 
 HAR files recorded from your browser guide authenticated scanning for SPAs and complex flows.
 
-- Drop `.har` files into the directory mounted to `/web`
+- Drop `.har` files into the directory you run `corefix web` from
 - Or record them via the [CoreFix Chrome Extension](./chrome-extension-guide) — they are pulled automatically at scan time
 
 By default, if multiple HAR recording sessions are available, all of them are used together for comprehensive scan coverage. Pass `--latest-har` to use only the most recent recording session instead — useful when older recordings are stale or no longer represent the current app flow. If only one recording session exists, `--latest-har` has no effect.
@@ -545,7 +523,7 @@ By default, if multiple HAR recording sessions are available, all of them are us
 
 ## Output
 
-Results are written to your `/output` mount:
+Results are written to `~/.corefix/scan-results`:
 
 | File | Contents |
 |---|---|
@@ -559,10 +537,12 @@ Results are written to your `/output` mount:
 
 ## Related
 
+- [CoreFix CLI — Overview](./docker-cli)
 - [Code Scanner — Standalone Usage](./code-agent-usage.md)
+- [Multi-User Scanning](./web-scan-multi-user)
 - [Web Scan Config Reference](./web-scan-config-reference)
 - [Scanning Complex Apps (OAuth, MFA) — Token & Cookie Injection](./web-scan-complex-auth)
 - [Chrome Extension Guide](./chrome-extension-guide)
 - [CI/CD Integration](./cicd-web-scan)
 - [Supported Models](./models)
-- [Pricing & Usage](./pricing-and-usage)
+- [Credit Components](./pricing-and-usage)

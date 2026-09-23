@@ -68,11 +68,11 @@ Full roadmap: [corefix.dev/roadmap](https://corefix.dev/roadmap)
 
 ## What to Read Next
 
-- [Sign Up & Setup](/docs/sign-up-and-sign-in) — create your account and get started
-- [Web Scan in 2 Minutes](/docs/web-scan-quickstart) — run your first web scan
-- [Connect GitHub for Code Scanning](/docs/github-integration) — one-click GitHub integration
-- [Ways to Scan](/docs/ways-to-scan) — choose the right scanning method for your workflow
-- [Use Cases](/docs/use-cases) — see how teams use CoreFix
+- [Sign Up & Setup](/docs/sign-up-and-sign-in.html) — create your account and get started
+- [Web Scan in 2 Minutes](/docs/web-scan-quickstart.html) — run your first web scan
+- [Connect GitHub for Code Scanning](/docs/github-integration.html) — one-click GitHub integration
+- [Ways to Scan](/docs/ways-to-scan.html) — choose the right scanning method for your workflow
+- [Use Cases](/docs/use-cases.html) — see how teams use CoreFix
 
 ---
 
