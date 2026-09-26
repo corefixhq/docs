@@ -31,6 +31,7 @@ Both images are published on [Docker Hub](https://hub.docker.com/u/corefixhq). `
 
 - A CoreFix account — sign up at [app.corefix.dev](https://app.corefix.dev)
 - The `corefix` binary on your `PATH` — see below
+- A CoreFix API key — only if you don't sign in with `corefix login` (for example in CI/CD). See [Creating an API Key](./api_docs)
 
 ::: tip Docker isn't a prerequisite
 You don't need to install [Docker](https://docs.docker.com/get-docker/) yourself — `corefix` uses it to run the scanners, and installs it automatically if it's missing when you run the install command below.
@@ -68,7 +69,7 @@ This opens your browser, signs you in to CoreFix, and saves the session to `~/.c
 
 ### Option 2 — Set `CFIX_API_KEY`
 
-Create an API key in [Account & API Keys](https://app.corefix.dev/settings/api-keys) and export it:
+[Create an API key](./api_docs) and export it:
 
 ```bash
 export CFIX_API_KEY=<your-api-key>

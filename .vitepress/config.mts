@@ -130,9 +130,10 @@ export default defineConfig({
         ],
       },
       {
-        text: "Usage & Billing",
+        text: "Account & Billing",
         collapsed: false,
         items: [
+          { text: "API Keys", link: "/docs/api_docs" },
           { text: "Credit Metering", link: "/docs/account-usage" },
           { text: "Billing Components", link: "/docs/pricing-and-usage" },
         ],
