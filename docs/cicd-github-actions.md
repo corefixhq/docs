@@ -7,6 +7,10 @@ sidebar_label: Code Scan via GitHub Actions
 
 Set up automated code scanning in your GitHub repository using GitHub Actions. This guide takes less than 2 minutes.
 
+::: tip More CI/CD Options
+For more CI/CD pipeline integration options, see [CI/CD Integration → Code Scanning](./cicd-integration).
+:::
+
 ---
 
 ## Prerequisites
@@ -30,7 +34,7 @@ Copy the generated **API key** — you'll need it in the next step.
 
 1. Go to your GitHub repository → **Settings** → **Secrets and variables** → **Actions**.
 2. Click **New repository secret**.
-3. Name: `X_CFIX_API_KEY`
+3. Name: `CFIX_API_KEY`
 4. Value: paste the API key from Step 1.
 5. Click **Add secret**.
 
@@ -62,21 +66,19 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run CoreFix Code Scanner
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          mkdir -p ${{ github.workspace }}/scan-results
-          docker run --rm \
-            -e X_CFIX_API_KEY=${{ secrets.X_CFIX_API_KEY }} \
-            -e GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} \
-            -v ${{ github.workspace }}:/code \
-            -v ${{ github.workspace }}/scan-results:/output \
-            corefixhq/cfix:latest
+          export CFIX_API_KEY=${{ secrets.CFIX_API_KEY }}
+          curl -fsSL https://get.corefix.dev/corefix | sudo sh
+          corefix code --github-token "$GITHUB_TOKEN"
 
       - name: Upload scan results
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: corefix-scan-results
-          path: scan-results/
+          path: /home/runner/.corefix/scan-results/
 ```
 
 > The workflow targets the `main` branch by default. Change it to any branch you want to scan.

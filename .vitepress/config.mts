@@ -66,13 +66,14 @@ export default defineConfig({
         collapsed: false,
         items: [
           { text: "Introduction", link: "/docs/introduction" },
-          { text: "Sign Up & Setup", link: "/docs/sign-up-and-sign-in" },
-          { text: "Web Scan in 2 Minutes", link: "/docs/web-scan-quickstart" },
+          { text: "Sign Up & Setup", link: "/docs/sign-up-and-sign-in" },   
           {
-            text: "Connect GitHub for Code Scanning",
+            text: "GitHub App",
             link: "/docs/github-integration",
           },
-          { text: "Code Scan via GitHub Actions", link: "/docs/cicd-github-actions" },
+          { text: "GitHub Actions", link: "/docs/cicd-github-actions" },
+          { text: "Web Scan in 2 Minutes", link: "/docs/web-scan-quickstart" },
+
           { text: "Install the CLI", link: "/docs/install-cli" },
           { text: "Use Cases", link: "/docs/use-cases" },
 
