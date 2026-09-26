@@ -27,7 +27,7 @@ corefix login
 
 This opens your browser, signs you in to CoreFix, and saves your session to `~/.corefix/session.json`. One login covers both code and web scanning, and you only do it once per machine.
 
-Alternatively, skip the login and export an API key from [Account & API Keys](https://app.corefix.dev/settings/api-keys):
+Alternatively, skip the login and export an API key. See [Creating an API Key](./api_docs):
 
 ```bash
 export CFIX_API_KEY=<your-api-key>

@@ -41,7 +41,7 @@ Store sensitive values as **secrets** in your CI/CD platform.
 
 | Variable | Storage | Description |
 |---|---|---|
-| `CFIX_API_KEY` | **Secret** (required) | Your CoreFix API key, from [Account & API Keys](https://app.corefix.dev/settings/api-keys) |
+| `CFIX_API_KEY` | **Secret** (required) | Your CoreFix API key — see [Creating an API Key](./api_docs) |
 | `GITHUB_TOKEN` | **Secret** | GitHub token for pushing SARIF to GitHub Code Scanning (see below) |
 | `OPENAI_API_KEY` | **Secret** | Only if bringing your own AI model |
 

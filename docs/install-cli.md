@@ -71,7 +71,7 @@ Once installed, sign in with your browser:
 corefix login
 ```
 
-Or skip the login and export an API key from [Account & API Keys](https://app.corefix.dev/settings/api-keys):
+Or skip the login and export an API key. See [Creating an API Key](./api_docs):
 
 ```bash
 export CFIX_API_KEY=<your-api-key>
