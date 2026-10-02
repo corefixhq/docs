@@ -127,7 +127,7 @@ These flags work with both `corefix code` and `corefix web`.
 | `[scanner]` | No | Positional argument. Comma-separated scanner names |
 | `--openai-api-key <key>` | No | Your own OpenAI API key (BYOK) |
 | `--model <name>` | No | Model used for AI analysis. Required when `--openai-api-key` is provided |
-| `--github-token <token>` | No | GitHub Personal Access Token — pushes scan results as SARIF to GitHub Code Scanning, and is required for `--pr` |
+| `--github-token <token>` | No | GitHub Personal Access Token — pushes scan results as SARIF to GitHub Code Scanning |
 | `--ignore-ai-analysis` | No | Skip the AI pipeline — deduplication, enrichment, and AI-based prioritization. Raw/normalized findings are still written to the results directory. Default: `false` |
 
 > **Note:** `--github-token` is available for both commands. For web scans, this allows pushing DAST findings to your GitHub repository's Code Scanning tab as SARIF, giving you a unified view of code and web findings directly in GitHub.
@@ -171,8 +171,7 @@ See [Supported Models](https://docs.corefix.dev/docs/models) for the full refere
 | `--container <names>` | No | Comma-separated container image names to scan. `corefix` mounts the host Docker socket so the scanner can read local images |
 | `--patch` | No | Fix the previous pending scan, or scan and fix when no pending scan exists. Default: `false` |
 | `--rescan` | No | Scan the current checkout again. Add `--patch` to also fix findings. Default: `false` |
-| `--pr` | No | Create a pull request after remediation. Requires `--github-token`. Default: `false` |
-| `--in-place` | No | Apply fixes directly in the current repository instead of an isolated worktree. Default: `false` |
+| `--pr` | No | Create a pull request after remediation, with inline review comments on the vulnerabilities fixed. **Defaults to `true` if the GitHub App is installed**, otherwise defaults to `false` and must be passed explicitly. See [Opening a Pull Request](./auto-remediation#opening-a-pull-request) |
 
 Plus the [common flags](#common-flags) above.
 

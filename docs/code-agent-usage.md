@@ -66,12 +66,11 @@ corefix code [<scanner>[,<scanner>...]] \
   [--openai-api-key <key>] \
   [--model <model-name>] \
   [--ignore-ai-analysis] \
-  [--github-token <github-pat>] \
   [--container <images>] \
   [--patch] \
   [--rescan] \
   [--pr] \
-  [--in-place]
+  [--sarif]
 ```
 
 Other commands:
@@ -138,46 +137,20 @@ CoreFix can patch the vulnerabilities it finds instead of just reporting them. `
 CodeFix uses the **OpenCode** coding agent, which ships by default inside the CoreFix Docker image — there is nothing to install or configure. In the future, you will also be able to use your own Claude or Codex as the coding agent.
 :::
 
-### Patch options
+::: tip How the Pull Request Gets Made
+- **GitHub App installed** — `--pr` defaults to `true`. CoreFix uses a short-lived token issued to the app automatically, so a pull request opens even without passing `--pr` — no flag or secret needed on your end.
+- **No GitHub App installed** — `--pr` defaults to `false` and must be passed explicitly. Passing it falls back to your local GitHub CLI: a `gh auth login` session (for example, one you're already signed into via VS Code), or `~/.config/gh/hosts.yaml` directly if your `gh` version is older than 2.17.0. The first time this fallback applies, CoreFix asks for your consent — answer "always" to stop being asked on every run.
 
-| Flag | Description |
-|---|---|
-| `--patch` | Fix the previous pending scan, or scan and fix when no pending scan exists. Free plan: up to 5 patches at a time — see [Patch limits by plan](#patch-limits-by-plan) |
-| `--rescan` | Scan the current checkout again; add `--patch` to also fix findings |
-| `--pr` | Create a pull request after remediation |
-| `--in-place` | Apply fixes directly in the current repository instead of an isolated worktree |
-
-All four default to `false`. Here is what the common combinations do:
-
-| Command | What it does |
-|---|---|
-| `corefix code` | Scans the current checkout. If a previous scan still has patches pending, it does **not** rescan — it shows the status of that scan instead (see [Scan snapshots and re-runs](#scan-snapshots-and-re-runs)) |
-| `corefix code --patch` | Fixes the previous pending scan. If there is no pending scan, scans the current checkout and fixes it |
-| `corefix code --rescan` | Scans the current checkout again — a security scan only, no fixes |
-| `corefix code --rescan --patch` | Scans the current checkout again and fixes the findings |
-| `corefix code --patch --pr` | Fixes the findings, then opens a pull request |
-| `corefix code --patch --in-place` | Fixes the findings directly in your current repository instead of an isolated worktree |
-| `corefix code status` | Prints the last known scan status (branch, commit and patch state) as JSON |
-
-
+See [Opening a Pull Request](./auto-remediation#opening-a-pull-request) for the full detail.
+:::
 
 ```bash
 # Fix the previous pending scan (or scan and fix if none is pending)
 corefix code --patch
 
-# Scan the current checkout again and fix the findings
-corefix code --rescan --patch
-
 # Apply fixes and open a pull request automatically
-corefix code --patch --pr --github-token ghp_xxxxxxxxxxxx
-
-# Apply fixes directly in the current repository
-corefix code --patch --in-place
-
-# Check the last known scan / patch state
-corefix code status
+corefix code --patch --pr
 ```
-
 
 ---
 
@@ -225,17 +198,6 @@ Override the AI model used for enrichment. See [AI Models](#ai-models) for the a
 
 Skip the AI pipeline — deduplication, enrichment of findings, and AI-based prioritization are all skipped. Useful for faster runs, or when you only need raw/normalized findings without AI enrichment. Cannot be combined meaningfully with `--openai-api-key` / `--model`, since there is no enrichment step to run those against. Default: `false`.
 
-### `--github-token` (optional)
-
-GitHub Personal Access Token for uploading scan results as a SARIF file to GitHub Code Scanning. Also required for `--pr`.
-
-```bash
---github-token ghp_xxxxxxxxxxxx
-
-# In CI, read it from a secret
---github-token "$GITHUB_TOKEN"
-```
-
 ### `--container` (optional)
 
 Comma-separated list of container images to scan. See [Container Scanning](./container) for the full reference, CI/CD example, and the `cfix`-tag opt-in.
@@ -246,7 +208,7 @@ Comma-separated list of container images to scan. See [Container Scanning](./con
 
 ### `--patch` (optional)
 
-Fix the previous pending scan, or scan and fix when no pending scan exists. Fixes are applied in an isolated worktree unless `--in-place` is set. Patches always apply to the snapshot (branch and commit) of the previous scan — see [Scan snapshots and re-runs](#scan-snapshots-and-re-runs). On the Free plan, up to 5 patches (5 commits) are applied at a time; Pro and Teams fix all issues in all files in one go — see [Patch limits by plan](#patch-limits-by-plan). Default: `false`.
+Fix the previous pending scan, or scan and fix when no pending scan exists. Fixes are applied in an isolated worktree. Patches always apply to the snapshot (branch and commit) of the previous scan — see [Scan snapshots and re-runs](#scan-snapshots-and-re-runs). On the Free plan, up to 5 patches (5 commits) are applied at a time; Pro and Teams fix all issues in all files in one go — see [Patch limits by plan](#patch-limits-by-plan). Default: `false`.
 
 ```bash
 --patch
@@ -262,19 +224,23 @@ Scan the current checkout again; add `--patch` to also fix findings. Use it when
 
 ### `--pr` (optional)
 
-Create a pull request after remediation. Requires `--github-token` with write access to the repository. Default: `false`.
+Open a pull request after remediation, with inline review comments added to the code explaining the vulnerabilities that were fixed. No `--github-token` needed. **Defaults to `true` if the GitHub App is installed** — otherwise defaults to `false` and must be passed explicitly. See [Opening a Pull Request](./auto-remediation#opening-a-pull-request) for how CoreFix authenticates to GitHub.
 
 ```bash
 --patch --pr
 ```
 
-### `--in-place` (optional)
+### `--sarif` (optional)
 
-Apply fixes directly in the current repository instead of an isolated worktree. Default: `false`.
+Push the scan results as a SARIF file to your repository's GitHub Code Scanning (Security tab). Authenticates the same way as `--pr` — a GitHub App token automatically if the app is installed, otherwise your local `gh` login — see [Opening a Pull Request](./auto-remediation#opening-a-pull-request). Default: `false`.
 
 ```bash
---patch --in-place
+--sarif
 ```
+
+::: warning
+**Commit must exist on GitHub:** `--sarif` only works if the scanned commit has already been pushed to GitHub. If it hasn't, the push fails with `commit not found`.
+:::
 
 ---
 
@@ -321,7 +287,7 @@ See [Container Scanning](./container) for the `--container` reference, the `cfix
 ### Upload results to GitHub Code Scanning
 
 ```bash
-corefix code --github-token ghp_xxxxxxxxxxxx
+corefix code --sarif
 ```
 
 - Example of Logs showing successful sarif upload.
@@ -341,7 +307,7 @@ corefix code --github-token ghp_xxxxxxxxxxxx
 
 ```bash
 corefix code secrets,sast,osv \
-  --github-token ghp_xxxxxxxxxxxx \
+  --sarif \
   --openai-api-key sk-proj-xxxxxxxx \
   --model gpt-5-mini
 ```
@@ -353,10 +319,10 @@ corefix code secrets,sast,osv \
 corefix code --patch
 
 # Apply fixes and open a pull request
-corefix code --patch --pr --github-token ghp_xxxxxxxxxxxx
+corefix code --patch --pr
 
 # Re-scan the current checkout, then fix and open a PR
-corefix code --rescan --patch --pr --github-token ghp_xxxxxxxxxxxx
+corefix code --rescan --patch --pr
 ```
 
 ### Use in scripts and CI

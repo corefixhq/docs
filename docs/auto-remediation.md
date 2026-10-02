@@ -13,27 +13,25 @@ CodeFix uses the **OpenCode** coding agent, which ships by default inside the Co
 |---|---|
 | `--patch` | Fix the previous pending scan, or scan and fix when no pending scan exists. Free plan: up to 5 patches at a time — see [Patch limits by plan](#patch-limits-by-plan) |
 | `--rescan` | Scan the current checkout again; add `--patch` to also fix findings |
-| `--pr` | Create a pull request after remediation |
-| `--in-place` | Apply fixes directly in the current repository instead of an isolated worktree |
+| `--pr` | Open a pull request after remediation, with inline review comments on the vulnerabilities that were fixed. **On by default if the GitHub App is installed** — otherwise defaults to `false` and must be passed explicitly. See [Opening a Pull Request](#opening-a-pull-request) below |
 
-All four default to `false`. Here is what the common combinations do:
+`--patch` and `--rescan` default to `false`. `--pr` defaults to `false` too, **unless the GitHub App is installed, in which case it defaults to `true`** — see [Opening a Pull Request](#opening-a-pull-request) below. Here is what the common combinations do:
 
 | Command | What it does |
 |---|---|
 | `corefix code` | Scans the current checkout. If a previous scan still has patches pending, it does **not** rescan — it shows the status of that scan instead (see [Scan snapshots and re-runs](#scan-snapshots-and-re-runs)) |
-| `corefix code --patch` | Fixes the previous pending scan. If there is no pending scan, scans the current checkout and fixes it |
+| `corefix code --patch` | Fixes the previous pending scan. If there is no pending scan, scans the current checkout and fixes it. Also opens a pull request automatically if the GitHub App is installed |
 | `corefix code --rescan` | Scans the current checkout again — a security scan only, no fixes |
 | `corefix code --rescan --patch` | Scans the current checkout again and fixes the findings |
-| `corefix code --patch --pr` | Fixes the findings, then opens a pull request |
-| `corefix code --patch --in-place` | Fixes the findings directly in your current repository instead of an isolated worktree |
+| `corefix code --patch --pr` | Fixes the findings, opens a pull request automatically, and adds inline review comments about what was fixed |
 | `corefix code status` | Prints the last known scan status (branch, commit and patch state) as JSON |
 
 ## How it works
 
 1. Every scan takes a **snapshot** of the current branch and commit. Patches are always applied against that snapshot.
 2. `--patch` fixes the previous pending scan. If there is no pending scan, it scans your checkout first and then fixes the findings — so a single command is always enough. Each patch is applied as a commit; how many are applied at a time depends on your [plan](#patch-limits-by-plan).
-3. By default, fixes are applied in an **isolated worktree**, so your working directory and current branch are left untouched. Pass `--in-place` to apply the fixes directly in your current repository instead.
-4. Optionally, `--pr` opens a pull request after remediation.
+3. Fixes are applied in an **isolated worktree**, so your working directory and current branch are left untouched.
+4. `--pr` opens a pull request after remediation, with inline review comments added to the code explaining the vulnerabilities that were fixed. If the GitHub App is installed, this happens automatically — you don't need to pass `--pr` at all. Without the GitHub App, `--pr` must be passed explicitly. See [Opening a Pull Request](#opening-a-pull-request) below for how CoreFix authenticates to GitHub.
 
 ```bash
 # Fix the previous pending scan (or scan and fix if none is pending)
@@ -43,16 +41,28 @@ corefix code --patch
 corefix code --rescan --patch
 
 # Apply fixes and open a pull request automatically
-corefix code --patch --pr --github-token ghp_xxxxxxxxxxxx
-
-# Apply fixes directly in the current repository
-corefix code --patch --in-place
+corefix code --patch --pr
 
 # Check the last known scan / patch state
 corefix code status
 ```
 
-> `--pr` requires `--github-token` with write access to the repository, since it pushes the fix branch and opens a pull request. See [`--github-token`](#--github-token-optional) below.
+## Opening a Pull Request
+
+`--pr` no longer requires `--github-token`. Whether it's on by default depends on whether the GitHub App is installed:
+
+::: tip How CoreFix authenticates to open the PR
+- **GitHub App installed** — `--pr` defaults to `true`. CoreFix uses a short-lived GitHub token issued to the app automatically, so a pull request opens even if you don't pass `--pr` — no flag or local secret needed.
+- **No GitHub App installed** — `--pr` defaults to `false` and you must pass it explicitly. Passing it falls back to your local GitHub CLI credentials: a `gh auth login` session if you're already signed in (for example, via VS Code), or `~/.config/gh/hosts.yaml` directly if your `gh` version is older than 2.17.0. These local credentials are only ever read when you pass `--pr` explicitly — it's the trigger for reading them, not something that happens on a plain scan.
+
+Either way, when the fix branch is pushed and the pull request opened, CoreFix adds inline review comments on the changed code explaining the vulnerabilities each fix addresses.
+
+Local credentials are only read with your explicit consent. The first time this fallback applies, CoreFix asks:
+
+> No GitHub App installed. Use your local `gh` login to open PRs? [y/N/always]
+
+Answering **always** stores the choice (for example as a `pr.use_local_gh = true` config setting), so you aren't prompted on every run.
+:::
 
 ## Patch limits by plan
 
@@ -158,3 +168,18 @@ CoreFix keeps track of patching per scan, so a patch run that is interrupted or 
 ```
 
 The `Patch in progress` line reads `<n> fixed, <n> failed, <n> remaining of <total> files`. If your plan limits how many patches are applied at a time (see [Patch limits by plan](#patch-limits-by-plan)), run `--patch` again to apply fixes to the files that remain.
+
+## Merge Pending
+
+Once every file has been patched (`0 remaining`), the fixes sit on a `codefix@<commit>/<branch>` branch waiting to be merged. If you run `corefix code` again at that point, instead of scanning it tells you the merge is pending and gives you the command to merge it:
+
+```
+[!] Current checkout: main @ e1a349a120
+[!] Previous scan:   main @ e1a349a120
+[+] Patch in progress: 12 fixed, 2 failed, 0 remaining of 14 files.
+[!] Merge pending for fix branch codefix@e1a349a120/main.
+[!] Run: git merge "codefix@e1a349a120/main"
+[+] No merge conflicts detected by dry run.
+```
+
+Merge the branch with the command shown, or use `--rescan` to force a fresh scan of the current checkout instead of waiting on the pending merge.
