@@ -127,10 +127,9 @@ These flags work with both `corefix code` and `corefix web`.
 | `[scanner]` | No | Positional argument. Comma-separated scanner names |
 | `--openai-api-key <key>` | No | Your own OpenAI API key (BYOK) |
 | `--model <name>` | No | Model used for AI analysis. Required when `--openai-api-key` is provided |
-| `--github-token <token>` | No | GitHub Personal Access Token — pushes scan results as SARIF to GitHub Code Scanning |
 | `--ignore-ai-analysis` | No | Skip the AI pipeline — deduplication, enrichment, and AI-based prioritization. Raw/normalized findings are still written to the results directory. Default: `false` |
 
-> **Note:** `--github-token` is available for both commands. For web scans, this allows pushing DAST findings to your GitHub repository's Code Scanning tab as SARIF, giving you a unified view of code and web findings directly in GitHub.
+> **Note:** pushing SARIF results to GitHub Code Scanning works differently per command — `corefix code` uses `--sarif` (see [Code Scanner Options](#code-scanner-options)), `corefix web` uses `--github-token` (see [Web Scanner Options](#web-scanner-options)).
 
 ---
 
@@ -172,6 +171,7 @@ See [Supported Models](https://docs.corefix.dev/docs/models) for the full refere
 | `--patch` | No | Fix the previous pending scan, or scan and fix when no pending scan exists. Default: `false` |
 | `--rescan` | No | Scan the current checkout again. Add `--patch` to also fix findings. Default: `false` |
 | `--pr` | No | Create a pull request after remediation, with inline review comments on the vulnerabilities fixed. **Defaults to `true` if the GitHub App is installed**, otherwise defaults to `false` and must be passed explicitly. See [Opening a Pull Request](./auto-remediation#opening-a-pull-request) |
+| `--sarif` | No | Push scan results as a SARIF file to GitHub Code Scanning. Authenticates the same way as `--pr` (GitHub App token, or local `gh` login). Requires the scanned commit to already exist on GitHub — otherwise fails with `commit not found`. Default: `false` |
 
 Plus the [common flags](#common-flags) above.
 
@@ -215,6 +215,7 @@ For the web scanner, `--token` works today for **complex web application authent
 | `--coverage <tier>` | No | Scan depth: `quick`, `normal`, `moderate`, `high`, `veryhigh`, `max`, `extreme`, `exhaustive`, `unlimited`. Auto-detected by default. See [`--coverage`](./web-agent-usage#coverage-optional) |
 | `--scanner-profile <profile>` | No | Which active scan rules to run: `all` (default), `all_vuln`, `sqli`, `xss`, `injection`, `path_traversal`, `access_control`, `passive_only`, `quick_active`, `ssl`. See [Scanner Profiles](./web-agent-usage#scanner-profiles) |
 | `--latest-har` | No | Use only the latest HAR recording session for scanning. If omitted, all available HAR sessions are used. Default: `false` |
+| `--github-token <token>` | No | GitHub Personal Access Token — pushes DAST findings as SARIF to your repository's Code Scanning tab, for a unified view of code and web findings in GitHub |
 
 Plus the [common flags](#common-flags) above.
 
@@ -253,7 +254,7 @@ After a scan completes, results are available in multiple places:
 
 - **Dashboard** — findings appear automatically at [app.corefix.dev](https://app.corefix.dev) under your project.
 - **Local output** — raw, normalized, and enriched results are written to `~/.corefix/scan-results`.
-- **GitHub Code Scanning** — if `--github-token` was provided, SARIF results are pushed to your repository's Security tab.
+- **GitHub Code Scanning** — SARIF results are pushed to your repository's Security tab if you passed `--sarif` (`corefix code`) or `--github-token` (`corefix web`).
 
 To check where the last code scan and any CodeFix patch stand, run:
 

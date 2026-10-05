@@ -138,10 +138,7 @@ CodeFix uses the **OpenCode** coding agent, which ships by default inside the Co
 :::
 
 ::: tip How the Pull Request Gets Made
-- **GitHub App installed** — `--pr` defaults to `true`. CoreFix uses a short-lived token issued to the app automatically, so a pull request opens even without passing `--pr` — no flag or secret needed on your end.
-- **No GitHub App installed** — `--pr` defaults to `false` and must be passed explicitly. Passing it falls back to your local GitHub CLI: a `gh auth login` session (for example, one you're already signed into via VS Code), or `~/.config/gh/hosts.yaml` directly if your `gh` version is older than 2.17.0. The first time this fallback applies, CoreFix asks for your consent — answer "always" to stop being asked on every run.
-
-See [Opening a Pull Request](./auto-remediation#opening-a-pull-request) for the full detail.
+`--pr` defaults to `true` if the GitHub App is installed, `false` otherwise. See [Opening a Pull Request](./auto-remediation#opening-a-pull-request) for how CoreFix authenticates.
 :::
 
 ```bash

@@ -6,33 +6,25 @@ title: "Release Logs"
 
 ## Current Release
 
-**Version:** v1.7.0  
-**Release Date:** July 17, 2026
+**Version:** v2.0.0  
+**Release Date:** October 6, 2026
 
-CoreFix v1.7.0 builds on the unified scanning platform with a new malicious package scanner, deeper chat integrations, and several reliability fixes across API threat intelligence and OpenAPI spec handling.
+CoreFix v2.0.0 is a major platform release. Scanning now runs through `corefix`, a single Go-based CLI that replaces raw `docker run` commands, CodeFix can autofix vulnerabilities directly in your code, and web application testing gains multi-user, RBAC, and broken access control (BAC) coverage.
 
-[Read the full v1.7.0 release notes](/docs/release-v1.7.0.html)
+[Read the full v2.0.0 release notes](/docs/release-v2.0.0.html)
 
 ## Highlights
 
-- **Malicious Package Scanner** for Python, NPM, Ruby gems, Golang, GitHub Actions, and VSCode extensions.
-- **Slack and Teams integration** for scan notifications and alerts.
-- **AI fallback detection** for `pollUrl` and `loggedInRegex` — when AI detection fails, CoreFix now falls back to comparing response diffs of authenticated URLs.
-- **Baseline OpenAPI spec backup** — a copy of the baseline OpenAPI spec file is now saved to R2 for recovery and comparison.
-- Various bug fixes in API threat intelligence and OpenAPI spec generation/enrichment workflows.
-- Latest version of Chrome extension published at: https://chromewebstore.google.com/detail/corefix-security-recorder/chibaoiobkclhiieocggohhofcmcejgi
-
-## Bug Fixes
-
-- Fixed issues in API threat intelligence detection.
-- Fixed OpenAPI spec file generation.
-- Fixed updating of enriched OpenAPI spec files.
-- Fixed bugs related to Slack and Teams integration.
+- **CoreFix CLI** — a single Go-based binary that abstracts away complex `docker run` commands for both code and web scanning.
+- **Autofixes dashboard** added to the frontend, for reviewing and tracking CodeFix remediation across your projects.
+- **CodeFix agent** that autofixes vulnerabilities in your code. Currently handles secrets, SAST, code hotspots/bugs, IaC, and Kubernetes manifest file fixes.
+- **Multi-user and access control testing** for web apps — RBAC and BAC testing, backed by additional custom ZAP scripts.
 
 ## Release History
 
 | Version | Release Date | Key Highlights |
 |---|---:|---|
+| [v2.0.0](/docs/release-v2.0.0.html) | October 6, 2026 | CoreFix CLI, Autofixes dashboard, CodeFix autofix agent, multi-user/RBAC/BAC web testing |
 | [v1.7.0](/docs/release-v1.7.0.html) | July 17, 2026 | Malicious package scanner, Slack/Teams integration, AI fallback detection, OpenAPI baseline backup to R2, and bug fixes |
 | [v1.6.0](/docs/release-v1.6.0.html) | July 15, 2026 | AI GOV Scanner, AI BOM, auto-populated API threat intelligence dashboard, Vercel sandbox attack API (Labs), deterministic web scan config |
 | [v1.5.0](/docs/release-v1.5.0.html) | July 13th, 2026 | Exploit verification, Python PoC generation, Playwright-based PoC/exploit screenshots to R2 and DB, OAuth complex bypass via header injection, Labs auto-project creation and queuing |
@@ -44,8 +36,8 @@ CoreFix v1.7.0 builds on the unified scanning platform with a new malicious pack
 
 ## Related Documentation Updates
 
-- [Docker / Local CLI](/docs/docker-cli.html)
-- [GitHub Integration](/docs/github-integration.html)
-- [Chrome Extension Guide](/docs/chrome-extension-guide.html)
-- [Web Application Scanning](/docs/web-agent-usage.html)
-- [Code Scanning](/docs/code-agent-usage.html)
+- [CoreFix CLI — Overview](/docs/docker-cli.html)
+- [Installing the CoreFix CLI](/docs/install-cli.html)
+- [CodeFix — Automated Remediation](/docs/auto-remediation.html)
+- [Multi-User Scanning](/docs/web-scan-multi-user.html)
+- [Web Scanner — Standalone Usage](/docs/web-agent-usage.html)
