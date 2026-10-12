@@ -237,6 +237,17 @@ Push the scan results as a SARIF file to your repository's GitHub Code Scanning 
 
 ::: warning
 **Commit must exist on GitHub:** `--sarif` only works if the scanned commit has already been pushed to GitHub. If it hasn't, the push fails with `commit not found`.
+
+**Code Security must be enabled for private repos:** SARIF uploads work out of the box on **public/open-source repositories**. On a **private repository**, GitHub requires Code Security (GitHub Advanced Security) to be enabled before it will accept a SARIF upload — and that's only available on **GitHub Team or Enterprise**; on GitHub **Free or Pro**, Code Security isn't available for private repos at all, so `--sarif` won't work there. If it isn't enabled, the push fails with:
+
+```
+Advanced Security must be enabled for this repository to use code scanning
+```
+
+If you're on a plan that supports it, enable it per repository:
+
+1. Go to **Settings → Security → Code security and analysis** in your GitHub repository.
+2. Find **Code scanning** (or **GitHub Code Security**) and enable it.
 :::
 
 ---

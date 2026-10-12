@@ -171,7 +171,7 @@ See [Supported Models](https://docs.corefix.dev/docs/models) for the full refere
 | `--patch` | No | Fix the previous pending scan, or scan and fix when no pending scan exists. Default: `false` |
 | `--rescan` | No | Scan the current checkout again. Add `--patch` to also fix findings. Default: `false` |
 | `--pr` | No | Create a pull request after remediation, with inline review comments on the vulnerabilities fixed. **Defaults to `true` if the GitHub App is installed**, otherwise defaults to `false` and must be passed explicitly. See [Opening a Pull Request](./auto-remediation#opening-a-pull-request) |
-| `--sarif` | No | Push scan results as a SARIF file to GitHub Code Scanning. Authenticates the same way as `--pr` (GitHub App token, or local `gh` login). Requires the scanned commit to already exist on GitHub — otherwise fails with `commit not found`. Default: `false` |
+| `--sarif` | No | Push scan results as a SARIF file to GitHub Code Scanning. Authenticates the same way as `--pr` (GitHub App token, or local `gh` login). Requires the scanned commit to already exist on GitHub, and on private repos requires Code Security to be enabled (Team/Enterprise only) — see [`--sarif`](./code-agent-usage#--sarif-optional). Default: `false` |
 
 Plus the [common flags](#common-flags) above.
 
