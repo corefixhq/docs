@@ -66,7 +66,7 @@ export default defineConfig({
         collapsed: false,
         items: [
           { text: "Introduction", link: "/docs/introduction" },
-          { text: "Sign Up & Setup", link: "/docs/sign-up-and-sign-in" },   
+          { text: "Sign Up & Setup", link: "/docs/sign-up-and-sign-in" },
           {
             text: "GitHub App",
             link: "/docs/github-integration",
@@ -76,7 +76,7 @@ export default defineConfig({
 
           { text: "Install the CLI", link: "/docs/install-cli" },
           { text: "Use Cases", link: "/docs/use-cases" },
-
+          { text: "VS Code Extension", link: "/docs/vscode-extension" },
         ],
       },
       {
@@ -85,6 +85,10 @@ export default defineConfig({
         items: [
           { text: "Ways to Scan", link: "/docs/ways-to-scan" },
           { text: "Code Scanning", link: "/docs/code-agent-usage" },
+          {
+            text: "VS Code Extension Scanning",
+            link: "/docs/vscode-extension-scanning",
+          },
           { text: "Remediation / Autofixes", link: "/docs/auto-remediation" },
           { text: "Web Scanning", link: "/docs/web-agent-usage" },
           {
@@ -105,8 +109,14 @@ export default defineConfig({
             text: "Web Scan Config Reference",
             collapsed: true,
             items: [
-              { text: "Full Reference", link: "/docs/web-scan-config-reference" },
-              { text: "Complex Auth (OAuth/MFA)", link: "/docs/web-scan-complex-auth" },
+              {
+                text: "Full Reference",
+                link: "/docs/web-scan-config-reference",
+              },
+              {
+                text: "Complex Auth (OAuth/MFA)",
+                link: "/docs/web-scan-complex-auth",
+              },
             ],
           },
         ],
@@ -120,7 +130,7 @@ export default defineConfig({
           { text: "Viewing Results", link: "/docs/reports" },
         ],
       },
-       {
+      {
         text: "AI Models & Usage",
         collapsed: false,
         items: [
