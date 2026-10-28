@@ -12,10 +12,14 @@ Install the CoreFix extension for VS Code and sign in. To run scans, see [Scanni
 | You need               | Details                                                                                                |
 | ---------------------- | ------------------------------------------------------------------------------------------------------ |
 | VS Code                | Version 1.85 or newer                                                                                  |
-| CoreFix CLI and Docker | Follow [Installing the CoreFix CLI](/docs/install-cli). It also installs Docker if you do not have it. |
+| Operating system       | Windows, macOS, or Linux                                                                               |
+| CoreFix CLI            | Follow [Installing the CoreFix CLI](/docs/install-cli), or install it from the extension's setup card. |
+| Docker                 | Docker Desktop on Windows and macOS, Docker on Linux. It must be running, not just installed.          |
+| Git                    | [Download Git](https://git-scm.com/downloads) if you do not have it                                    |
+| CoreFix scanner images | A one-time download of a few GB. The extension can start it for you (`corefix update`).                |
 | A CoreFix account      | [Sign up](https://app.corefix.dev/signup) if you do not have one                                       |
 
-> **Linux and macOS only.** On Windows, use WSL or a Remote-SSH window. Install the extension in that window, and install the CoreFix CLI and Docker on the remote machine, because that is where your code and the scan run.
+> **Remote windows.** If you use WSL or a Remote-SSH window, install the extension in that window, and install the CoreFix CLI, Docker, and Git on the remote machine, because that is where your code and the scan run.
 
 ## Install and sign in
 
@@ -25,13 +29,22 @@ Install the CoreFix extension for VS Code and sign in. To run scans, see [Scanni
 corefix --version
 ```
 
+You can skip this step and let the extension do the setup for you (see step 3).
+
 **2. Install the extension.** In VS Code, open Extensions (`Ctrl+Shift+X`), search for **corefix**, and click **Install**. A CoreFix icon appears in the Activity Bar.
 
 <!-- ![CoreFix extension in the VS Code Extensions view](https://your-host.example/images/corefix-extension.png) -->
 
 ![CoreFix extension in the VS Code Extensions view](/images/corefix-extension.png)
 
-**3. Sign in.** Open the CoreFix view and choose one way:
+**3. Finish the setup.** Open the CoreFix view. A setup card checks Docker, the CoreFix CLI, the scanner images, and Git, and shows what is missing:
+
+- **CoreFix CLI.** Click **Install** to run the official installer in a terminal. On Windows it runs in PowerShell. On Linux and macOS it asks for your `sudo` password. The extension continues on its own once the CLI is installed.
+- **Docker.** If it is missing, the card links to Docker Desktop (Windows and macOS). If it is installed but stopped, start it, then check again.
+- **Scanner images.** Click **Download** to fetch them (a few GB, one time).
+- **Git.** If it is missing, the card links to the Git download page.
+
+**4. Sign in.** Choose one way:
 
 - **Sign in with your browser.** Click **Sign In**, log in on the page that opens, then come back to VS Code. It continues on its own. If no page opened, click **Open in Browser**.
 - **Use an API key.** Click **CoreFix Platform**, create a key ([how to create one](/docs/api_docs)), paste it into the field, and click **Continue**.
@@ -55,51 +68,23 @@ Click **Sign Out** at the bottom of the Home panel, or run **CoreFix: Sign Out**
 ## Troubleshooting
 
 ::: details CoreFix CLI not found
-Install it, run `corefix --version`, then click the retry icon.
+Click **Install** on the setup card, or install it yourself and run `corefix --version`, then click the retry icon. If it is still not found on Windows, restart VS Code.
 :::
 
 ::: details Docker isn't installed or isn't running
-Install or start Docker, then refresh.
+Install or start Docker (Docker Desktop on Windows and macOS), then refresh.
 :::
 
 ::: details The CoreFix image isn't available on this machine
-Run `corefix update` in a terminal, then refresh.
+Click **Download** on the setup card, or run `corefix update` in a terminal, then refresh.
 :::
 
-::: details Checking CoreFix status timed out
-Click the refresh icon on the project card.
-:::
-
-::: details Browser sign-in isn't available
-Use the API key option under the **Sign In** button.
-:::
-
-::: details Couldn't reach CoreFix
-Check your internet connection and try again, or use an API key.
-:::
-
-::: details CoreFix returned an error (HTTP code)
-Wait a moment and try again, or use an API key.
-:::
-
-::: details Could not start sign-in
-Click **Sign In** again. If it keeps failing, use an API key.
-:::
-
-::: details Signed in, but the session couldn't be saved
-Check that your home folder is writable (`~/.corefix`), then sign in again.
-:::
-
-::: details CoreFix couldn't verify your API key
-Sign out, create a new key, and sign in again.
+::: details Couldn't reach CoreFix or sign-in failed
+Check your internet connection and try again, or sign in with an API key.
 :::
 
 ::: details Your CoreFix session has expired
 Click **Sign In**.
-:::
-
-::: details Sign-in timed out
-Click **Sign In** again and finish the sign-in in your browser within 5 minutes.
 :::
 
 ::: details CoreFix couldn't finish loading
