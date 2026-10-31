@@ -152,6 +152,7 @@ export default defineConfig({
         collapsed: false,
         items: [
           { text: "Overview", link: "/docs/release-logs" },
+          { text: "v2.3.0", link: "/docs/release-v2.3.0" },
           { text: "v2.2.0", link: "/docs/release-v2.2.0" },
           { text: "v2.1.0", link: "/docs/release-v2.1.0" },
           { text: "v2.0.0", link: "/docs/release-v2.0.0" },

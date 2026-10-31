@@ -6,28 +6,25 @@ title: "Release Logs"
 
 ## Current Release
 
-**Version:** v2.2.0  
-**Release Date:** October 26, 2026
+**Version:** v2.3.0  
+**Release Date:** October 27, 2026
 
-CoreFix v2.2.0 makes the GitHub App fully zero-config and brings fix review into GitHub. Pull requests are scanned with no agent, CLI or CI setup, you can accept, reject and apply fixes with `@corefixhq` comments, and the dashboard gains PR tracking and a Fix Findings action.
+CoreFix v2.3.0 broadens web app testing with the OWASP Penetration Testing Kit and a browser-based client spider, fixes cases where web scans could hang, and enables the AI-native Opengrep rule set for all code scans.
 
-[Read the full v2.2.0 release notes](/docs/release-v2.2.0.html)
+[Read the full v2.3.0 release notes](/docs/release-v2.3.0.html)
 
 ## Highlights
 
-- **Zero-config PR scanning** — with the GitHub App installed, opening a PR launches a scan, and a fix PR when auto-fix is configured.
-- **`@corefixhq` PR bot commands** — review and apply fixes directly from GitHub, in sync with the dashboard.
-- **Pull request details in the dashboard** — fix PRs are tracked and kept up to date automatically.
-- **Fix Findings action** — projects without auto-fix can fix the findings of a manual scan from the dashboard, without rescanning.
-
+- **OWASP PTK integration** — web scans add client-side SAST and IAST analysis and extra DAST checks to the existing ZAP active scan.
+- **Client spider** — crawls your app in a real browser to discover pages, routes and requests that only appear after JavaScript runs.
+- **More reliable web scans** — fixed cases where a scan could hang and never finish.
+- **AI-native Opengrep rule set** — 600+ rules now enabled for all code scans, covering major languages and AI application security.
 
 ## Release History
 
-
-
-
 | Version | Release Date | Key Highlights |
 |---|---:|---|
+| [v2.3.0](/docs/release-v2.3.0.html) | October 27, 2026 | OWASP ZAP PTK integration, client spider, ZAP hang fixes, AI-native Opengrep rule set (600+ rules) |
 | [v2.2.0](/docs/release-v2.2.0.html) | October 26, 2026 | Zero-config PR scanning, `@corefixhq` PR bot commands, PR tracking in the dashboard, Fix Findings action, webhook loop fix |
 | [v2.1.0](/docs/release-v2.1.0.html) | October 22, 2026 | Automatic PR and push scanning, automatic fix PRs with lifecycle management, Windows CLI support |
 | [v2.0.0](/docs/release-v2.0.0.html) | October 6, 2026 | CoreFix CLI, Autofixes dashboard, CodeFix autofix agent, multi-user/RBAC/BAC web testing |
@@ -42,5 +39,5 @@ CoreFix v2.2.0 makes the GitHub App fully zero-config and brings fix review into
 
 ## Related Documentation Updates
 
-- [GitHub Integration](/docs/github-integration.html)
-- [CodeFix — Automated Remediation](/docs/auto-remediation.html)
+- [Web Scanner — Standalone Usage](/docs/web-agent-usage.html)
+- [Multi-User Scanning](/docs/web-scan-multi-user.html)
