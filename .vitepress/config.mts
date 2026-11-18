@@ -105,7 +105,8 @@ export default defineConfig({
             text: "Web Scan Config Reference",
             collapsed: true,
             items: [
-              { text: "Full Reference", link: "/docs/web-scan-config-reference" },
+              { text: "Web Scan Reference", link: "/docs/web-scan-config-reference" },
+              { text: "API Scan Config", link: "/docs/web-scan-api-config-reference" },
               { text: "Complex Auth (OAuth/MFA)", link: "/docs/web-scan-complex-auth" },
             ],
           },
