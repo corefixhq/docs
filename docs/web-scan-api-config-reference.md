@@ -20,11 +20,11 @@ Place this file in the directory you mount into the `corefixhq/cfix-web` Docker 
 openapi: true                           # Always true for API testing
 
 headers:                                # Static business headers sent with every scan request
-  X-Hospital-Group: medicore
+  X-Tenant-ID: acme
   X-API-Version: v1
 
 authentication:
-  loginBackendUrl: http://localhost:8787/auth/login   # Backend API that returns the token
+  loginBackendUrl: https://api.example.com/auth/login   # Backend API that returns the token
   jsonPath: token                                     # Where the token sits in the login response
   authTokenPrefix: Bearer                             # "Bearer", "JWT", or "" for no prefix
   bodyTemplate: |
@@ -35,11 +35,11 @@ authentication:
 
   # Headers for the login request only (if needed). Not sent with later requests.
   headers:
-    X-Hospital-Group: medicore
+    X-Tenant-ID: acme
     X-API-Version: v1
 
   # Verification of login success (polling the /api/me endpoint for a token in the JSON response).
-  pollUrl: http://localhost:8787/api/me
+  pollUrl: https://api.example.com/api/me
   loggedInRegex: '"token"'
 
 includePaths:                           # Optional — regex patterns for the APIs to scan
@@ -71,7 +71,7 @@ Static headers sent with **every request after login**, such as tenant IDs, clie
 
 ```yaml
 headers:
-  X-Hospital-Group: medicore
+  X-Tenant-ID: acme
   X-API-Version: v1
 ```
 
@@ -186,7 +186,7 @@ Some login endpoints need their own headers, such as a tenant or API version. Pu
 ```yaml
 authentication:
   headers:
-    X-Hospital-Group: medicore
+    X-Tenant-ID: acme
 ```
 
 Headers that every later request needs belong in the top-level `headers` block instead. If both the login request and the scan requests need the same header, list it in both places.
@@ -196,7 +196,7 @@ Headers that every later request needs belong in the top-level `headers` block i
 If you set `pollUrl`, you must also set `loggedInRegex`. The scanner sends a GET request to `pollUrl` and checks the response against `loggedInRegex` to confirm the token is accepted.
 
 ```yaml
-pollUrl: http://localhost:8787/api/me
+pollUrl: https://api.example.com/api/me
 loggedInRegex: '"token"'
 ```
 
@@ -204,11 +204,11 @@ Pick a value that only appears in a successful authenticated response, such as a
 
 > **Tip:** Test both calls with curl first. Confirm the login response contains the token at your `jsonPath`, then confirm `pollUrl` returns your `loggedInRegex` with that token:
 > ```bash
-> curl -X POST http://localhost:8787/auth/login \
+> curl -X POST https://api.example.com/auth/login \
 >   -H "Content-Type: application/json" \
 >   -d '{"username":"alice","password":"secret"}'
 >
-> curl -X GET http://localhost:8787/api/me \
+> curl -X GET https://api.example.com/api/me \
 >   -H "Authorization: Bearer <token>"
 > ```
 
@@ -275,7 +275,7 @@ excludePaths:
 openapi: true
 
 headers:
-  X-Hospital-Group: medicore
+  X-Tenant-ID: acme
   X-API-Version: v1
 
 authentication:
@@ -288,7 +288,7 @@ authentication:
       "password": "{%password%}"
     }
   headers:
-    X-Hospital-Group: medicore
+    X-Tenant-ID: acme
   pollUrl: https://api.example.com/v1/user/profile
   loggedInRegex: '"userId"'
 

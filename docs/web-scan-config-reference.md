@@ -17,18 +17,18 @@ By default, CoreFix scans your application as a web app: a headless Firefox brow
 
 ```yaml
 includePaths:                           # Optional — regex patterns for in-scope URLs
-  - https://demo-oq\.ishipplus\.cloud/*
+  - https://app\.example\.com/.*
 excludePaths:                           # Optional — regex patterns for URLs to skip
-  - https://demo-oq\.ishipplus\.cloud/logout.*
+  - https://app\.example\.com/logout.*
 
 headers:                                # Optional — static business headers
-  X-Hospital-Group: medicore
+  X-Tenant-ID: acme
   X-API-Version: v1
 
 authentication:
-  loginPageUrl: http://localhost:8787/auth/login   # Login page form URL
+  loginPageUrl: https://app.example.com/auth/login   # Login page form URL
   # Verification of login success (polling the /api/me endpoint for a token in the JSON response).
-  pollUrl: http://localhost:8787/api/me
+  pollUrl: https://app.example.com/api/me
   loggedInRegex: '"token"'
 ```
 
@@ -42,9 +42,9 @@ Regex patterns that control which URLs the scanner keeps in scope and which it s
 
 ```yaml
 includePaths:
-  - https://demo-oq\.ishipplus\.cloud/*
+  - https://app\.example\.com/.*
 excludePaths:
-  - https://demo-oq\.ishipplus\.cloud/logout.*
+  - https://app\.example\.com/logout.*
 ```
 
 | Field | Description |
@@ -64,7 +64,7 @@ Static headers sent with every request. If your APIs use custom or business-spec
 
 ```yaml
 headers:
-  X-Hospital-Group: medicore
+  X-Tenant-ID: acme
   X-API-Version: v1
 ```
 
@@ -78,8 +78,8 @@ Configures how the scanner logs into your application. A headless Firefox browse
 
 ```yaml
 authentication:
-  loginPageUrl: http://localhost:8787/auth/login
-  pollUrl: http://localhost:8787/api/me
+  loginPageUrl: https://app.example.com/auth/login
+  pollUrl: https://app.example.com/api/me
   loggedInRegex: '"token"'
 ```
 
@@ -103,11 +103,11 @@ Use a real backend endpoint, not a frontend page:
 
 - ❌ `https://example.com/#/dashboard` returns an empty HTML shell, because JavaScript never runs
 - ❌ `https://example.com/app/home` is a client-side route
-- ✅ `http://localhost:8787/api/me` is a backend endpoint that returns JSON
+- ✅ `https://app.example.com/api/me` is a backend endpoint that returns JSON
 
 > **Tip:** Test the endpoint with curl first to confirm your regex appears in the response:
 > ```bash
-> curl -X GET http://localhost:8787/api/me \
+> curl -X GET https://app.example.com/api/me \
 >   -H "Authorization: Bearer <token>"
 > ```
 
@@ -138,12 +138,12 @@ excludePaths:
   - https://app\.example\.com/logout.*
 
 headers:
-  X-Hospital-Group: medicore
+  X-Tenant-ID: acme
   X-API-Version: v1
 
 authentication:
-  loginPageUrl: http://localhost:8787/auth/login
-  pollUrl: http://localhost:8787/api/me
+  loginPageUrl: https://app.example.com/auth/login
+  pollUrl: https://app.example.com/api/me
   loggedInRegex: '"token"'
 ```
 
